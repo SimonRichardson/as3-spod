@@ -1,0 +1,5 @@
+h1. AS3-UISignals
+
+AS3-UISignals is a attempt to provide a unified interaction model for components.
+
+AS3-UISignals uses the "MIT":http://en.wikipedia.org/wiki/MIT_License license.
