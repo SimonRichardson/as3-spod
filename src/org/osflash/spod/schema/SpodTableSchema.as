@@ -13,7 +13,7 @@ package org.osflash.spod.schema
 		 * @private
 		 */
 		private var _name : String;
-
+				
 		/**
 		 * @private
 		 */
@@ -61,7 +61,7 @@ package org.osflash.spod.schema
 			
 			_columns.push(new SpodTableColumnSchema(name, SpodString));
 		}
-
+		
 		public function get columns() : Vector.<SpodTableColumnSchema> { return _columns; }
 
 		public function get name() : String { return _name; }

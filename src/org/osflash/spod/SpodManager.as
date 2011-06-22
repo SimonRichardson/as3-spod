@@ -1,8 +1,11 @@
 package org.osflash.spod
 {
+	import org.osflash.logger.utils.debug;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.signals.natives.NativeSignal;
+	import org.osflash.spod.support.user.User;
+	import org.osflash.spod.utils.getDatabaseName;
 
 	import flash.data.SQLConnection;
 	import flash.errors.IllegalOperationError;
@@ -59,7 +62,7 @@ package org.osflash.spod
 			_nativeErrorSignal.add(handleNativeErrorSignal);
 		}
 		
-		public function open(resource : File) : void
+		public function open(resource : File, async : Boolean = false) : void
 		{
 			close();
 			
@@ -68,7 +71,13 @@ package org.osflash.spod
 			
 			_nativeOpenSignal.add(handleNativeOpenSignal);
 			
-			_connection.openAsync(_resource);
+			if(async) _connection.openAsync(_resource);
+			else 
+			{	
+				_connection.open(_resource);
+			
+				opened();
+			}
 		}
 		
 		public function close() : void
@@ -89,9 +98,7 @@ package org.osflash.spod
 		{
 			_nativeOpenSignal.remove(handleNativeOpenSignal);
 			
-			_database = new SpodDatabase(this);
-			
-			openSignal.dispatch(_database);
+			opened();
 		}
 		
 		/**
@@ -102,9 +109,19 @@ package org.osflash.spod
 			errorSignal.dispatch(event);
 		}
 		
+		private function opened() : void
+		{
+			_database = new SpodDatabase(getDatabaseName(_resource), this);
+			
+			openSignal.dispatch(_database);
+		}
+		
 		public function get connection() : SQLConnection { return _connection; }
 		
-		public function get isConnected() : Boolean { return null != _database; }
+		public function get isConnected() : Boolean 
+		{ 
+			return _connection.connected && null != _database; 
+		}
 		
 		public function get database() : SpodDatabase { return _database; }
 

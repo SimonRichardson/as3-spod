@@ -15,6 +15,8 @@ package org.osflash.spod.create
 	public class CreateTest
 	{
 		
+		private static const sessionName : String = "session.db"; // " + (Math.random() * 9999) + "
+		
 		[Inject]
 		public var async : IAsync;
 		
@@ -23,7 +25,7 @@ package org.osflash.spod.create
 		[Before]
 		public function setUp() : void
 		{
-			const storage : File = File.desktopDirectory.resolvePath("test.db");
+			const storage : File = File.desktopDirectory.resolvePath(sessionName);
 			resource = storage;			
 		}
 		
@@ -35,6 +37,15 @@ package org.osflash.spod.create
 		
 		[Test]
 		public function make_spod_and_create_db() : void
+		{
+			const manager : SpodManager = new SpodManager();
+			manager.openSignal.add(async.add(handleOpenSignal, 1000));
+			manager.errorSignal.add(handleErrorSignal);
+			manager.open(resource);
+		}
+		
+		[Test]
+		public function make_spod_and_create_again_db() : void
 		{
 			const manager : SpodManager = new SpodManager();
 			manager.openSignal.add(async.add(handleOpenSignal, 1000));
