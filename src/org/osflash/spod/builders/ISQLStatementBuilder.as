@@ -1,12 +1,12 @@
 package org.osflash.spod.builders
 {
-	import org.osflash.spod.schema.ISpodSchema;
+	import flash.data.SQLStatement;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
 	public interface ISQLStatementBuilder
 	{
 		
-		function build(schema : ISpodSchema) : String;
+		function build() : SQLStatement;
 	}
 }

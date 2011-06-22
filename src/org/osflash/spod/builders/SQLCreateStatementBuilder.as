@@ -1,5 +1,6 @@
 package org.osflash.spod.builders
 {
+	import flash.data.SQLStatement;
 	import org.osflash.spod.schema.ISpodSchema;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
@@ -14,25 +15,41 @@ package org.osflash.spod.builders
 	public class SQLCreateStatementBuilder implements ISQLStatementBuilder
 	{
 		
+		/**
+		 * @private
+		 */
+		private var _schema : ISpodSchema;
+		
+		/**
+		 * @private
+		 */
 		private var _buffer : Vector.<String>;
 		
-		public function SQLCreateStatementBuilder()
+		public function SQLCreateStatementBuilder(schema : ISpodSchema)
 		{
+			if(null == schema) throw new ArgumentError('Schema can not be null');
+			_schema = schema;
+			
 			_buffer = new Vector.<String>();
 		}
 		
-		public function build(schema : ISpodSchema) : String
+		/**
+		 * @inheritDoc
+		 */
+		public function build() : SQLStatement
 		{
-			if(schema is SpodTableSchema)
+			if(_schema is SpodTableSchema)
 			{
-				const tableSchema : SpodTableSchema = SpodTableSchema(schema);
-				const columns : Vector.<SpodTableColumnSchema> = tableSchema.columns;
+				const tableSchema : SpodTableSchema = SpodTableSchema(_schema);
+				const columns : Vector.<SpodTableColumnSchema> = tableSchema.columns.reverse();
 				const total : int = columns.length;
 				
 				if(total == 0) throw new IllegalOperationError('Invalid columns length');
 				
-				_buffer.push('CREATE TABLE ');
-				_buffer.push('`' + schema.name + '` ');
+				_buffer.length = 0;
+				
+				_buffer.push('CREATE TABLE IF NOT EXISTS ');
+				_buffer.push('`' + _schema.name + '` ');
 				_buffer.push('(');
 				
 				for(var i : int = 0; i<total; i++)
@@ -59,11 +76,13 @@ package org.osflash.spod.builders
 				_buffer.pop();
 				_buffer.push(')');
 						
-			} else throw new ArgumentError(getQualifiedClassName(schema) + ' is not supported');
-			
-			return sql;
+				const statement : SQLStatement = new SQLStatement();
+				statement.itemClass = tableSchema.type;
+				statement.text = _buffer.join('');
+				
+				return statement;
+				
+			} else throw new ArgumentError(getQualifiedClassName(_schema) + ' is not supported');
 		}
-
-		public function get sql() : String { return _buffer.join(''); }
 	}
 }

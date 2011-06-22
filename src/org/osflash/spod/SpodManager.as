@@ -1,10 +1,8 @@
 package org.osflash.spod
 {
-	import org.osflash.logger.utils.debug;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.signals.natives.NativeSignal;
-	import org.osflash.spod.support.user.User;
 	import org.osflash.spod.utils.getDatabaseName;
 
 	import flash.data.SQLConnection;
@@ -32,6 +30,11 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _database : SpodDatabase;
+		
+		/**
+		 * @private
+		 */
+		private var _isAsync : Boolean;
 		
 		/**
 		 * @private
@@ -71,6 +74,8 @@ package org.osflash.spod
 			
 			_nativeOpenSignal.add(handleNativeOpenSignal);
 			
+			_isAsync = async;
+			
 			if(async) _connection.openAsync(_resource);
 			else 
 			{	
@@ -89,6 +94,8 @@ package org.osflash.spod
 				_connection.close();
 				_resource = null;
 			}
+			
+			_isAsync = false;
 		}
 		
 		/**
@@ -122,6 +129,8 @@ package org.osflash.spod
 		{ 
 			return _connection.connected && null != _database; 
 		}
+		
+		public function get isAsync() : Boolean { return _isAsync; }
 		
 		public function get database() : SpodDatabase { return _database; }
 

@@ -1,12 +1,9 @@
 package org.osflash.spod
 {
-	import avmplus.getQualifiedClassName;
-
-	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.builders.ISQLStatementBuilder;
 	import org.osflash.spod.builders.SQLCreateStatementBuilder;
 	import org.osflash.spod.schema.SpodTableSchema;
-	import org.osflash.spod.utils.getDatabaseNameFromClassName;
+	import org.osflash.spod.utils.getClassNameFromQname;
 
 	import flash.data.SQLStatement;
 	import flash.errors.IllegalOperationError;
@@ -32,7 +29,7 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _tables : Dictionary;
-		
+				
 		public function SpodDatabase(name : String, manager : SpodManager)
 		{
 			if(null == name) throw new ArgumentError('Name can not be null');
@@ -51,58 +48,15 @@ package org.osflash.spod
 			
 			if(!active(type))
 			{
-				
-				
-				
-				if(contains(type))
-				{
-					
-				}
-				else
-				{
-					const schema : SpodTableSchema = buildSchemaFromType(type);
-					const builder : ISQLStatementBuilder = new SQLCreateStatementBuilder();
-					const sql : String = builder.build(schema);
-					
-					// TODO : push into a queue
-					const query : SQLStatement = new SQLStatement();
-					query.sqlConnection = _manager.connection;
-					query.text = sql;
-					query.itemClass = type;
-					query.execute();
-					
-					_tables[type] = new SpodTable(schema);
-				}
-				
-				
+				createTable(type);
 			}
 			else throw new ArgumentError('Table already exists and is active, so you can not ' + 
 																				'create it again');
 		}
-		
-		public function load(type : Class) : void
-		{
-			
-		}
-		
+				
 		public function active(type : Class) : Boolean
 		{
 			return null != _tables[type];
-		}
-		
-		public function contains(type : Class) : Boolean
-		{
-			const tableName : String = getDatabaseNameFromClassName(getQualifiedClassName(type));
-			
-			// TODO : Validate against the current schema if there is one
-			try
-			{
-				_manager.connection.loadSchema();
-				debug(_manager.connection.getSchemaResult());
-			}
-			catch(e : Error) {}
-			
-			return false;
 		}
 		
 		public function buildSchemaFromType(type : Class) : SpodTableSchema
@@ -110,9 +64,9 @@ package org.osflash.spod
 			if(null == type) throw new ArgumentError('Type can not be null');
 			
 			const description : XML = describeType(type);
-			const tableName : String = getDatabaseNameFromClassName(description.@name);
+			const tableName : String = getClassNameFromQname(description.@name);
 			
-			const schema : SpodTableSchema = new SpodTableSchema(tableName);
+			const schema : SpodTableSchema = new SpodTableSchema(type, tableName);
 			
 			for each(var variable : XML in description..variable)
 			{
@@ -125,6 +79,19 @@ package org.osflash.spod
 			if(schema.columns.length == 0) throw new IllegalOperationError('Schema has no columns');
 			
 			return schema;
+		}
+				
+		private function createTable(type : Class) : void
+		{
+			const schema : SpodTableSchema = buildSchemaFromType(type);
+			const builder : ISQLStatementBuilder = new SQLCreateStatementBuilder(schema);
+			const query : SQLStatement = builder.build();
+			
+			// TODO : Push this into the queue
+			query.sqlConnection = _manager.connection;
+			query.execute();
+			
+			_tables[type] = new SpodTable(schema);
 		}
 	}
 }

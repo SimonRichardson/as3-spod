@@ -15,7 +15,7 @@ package org.osflash.spod.create
 	public class CreateTest
 	{
 		
-		private static const sessionName : String = "session.db"; // " + (Math.random() * 9999) + "
+		private static const sessionName : String = "session" + (Math.random() * 9999) + ".db"; 
 		
 		[Inject]
 		public var async : IAsync;
@@ -25,7 +25,7 @@ package org.osflash.spod.create
 		[Before]
 		public function setUp() : void
 		{
-			const storage : File = File.desktopDirectory.resolvePath(sessionName);
+			const storage : File = File.applicationStorageDirectory.resolvePath(sessionName);
 			resource = storage;			
 		}
 		

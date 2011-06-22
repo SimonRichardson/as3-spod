@@ -12,6 +12,11 @@ package org.osflash.spod.schema
 		/**
 		 * @private
 		 */
+		private var _type : Class;
+		
+		/**
+		 * @private
+		 */
 		private var _name : String;
 				
 		/**
@@ -19,12 +24,14 @@ package org.osflash.spod.schema
 		 */
 		private var _columns : Vector.<SpodTableColumnSchema>;
 		
-		public function SpodTableSchema(name : String)
+		public function SpodTableSchema(type : Class, name : String)
 		{
+			if(null == type) throw new ArgumentError('Type can not be null');
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
 			if(!validateString(name)) throw new ArgumentError('Invalid name');
 			
+			_type = type;
 			_name = name;
 			
 			_columns = new Vector.<SpodTableColumnSchema>();
@@ -63,7 +70,9 @@ package org.osflash.spod.schema
 		}
 		
 		public function get columns() : Vector.<SpodTableColumnSchema> { return _columns; }
-
+		
+		public function get type() : Class { return _type; }
+		
 		public function get name() : String { return _name; }
 	}
 }
