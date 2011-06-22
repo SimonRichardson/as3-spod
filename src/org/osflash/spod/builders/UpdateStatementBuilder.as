@@ -1,6 +1,5 @@
 package org.osflash.spod.builders
 {
-	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
@@ -86,8 +85,6 @@ package org.osflash.spod.builders
 				
 				// Make the query
 				statement.query = _buffer.join('');
-				
-				debug(statement.query);
 				
 				return statement;
 				

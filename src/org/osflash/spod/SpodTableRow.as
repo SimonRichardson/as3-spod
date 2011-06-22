@@ -1,12 +1,13 @@
 package org.osflash.spod
 {
-	import org.osflash.logger.utils.debug;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.UpdateStatementBuilder;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
+
+	import flash.errors.IllegalOperationError;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */
@@ -75,7 +76,9 @@ package org.osflash.spod
 			statement.completedSignal.remove(handleUpdateCompletedSignal);
 			statement.errorSignal.remove(handleUpdateErrorSignal);
 			
-			debug("update completed");
+			if(object != statement.object) throw new IllegalOperationError('SpodObject mismatch');
+			
+			updateSignal.dispatch(_object);
 		}
 		
 		/**
