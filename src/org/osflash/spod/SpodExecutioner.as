@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.spod.errors.SpodErrorEvent;
 	import flash.errors.IllegalOperationError;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
@@ -40,7 +41,7 @@ package org.osflash.spod
 			
 			_statements.push(statement);
 			
-			if(!_running) execute();
+			if(!_running) advance();
 		}
 		
 		public function remove(statement : SpodStatement) : void
@@ -56,15 +57,57 @@ package org.osflash.spod
 			statement.connection = null;
 		}
 		
+		/**
+		 * @private
+		 */
 		private function execute() : void
 		{
 			if(_running) return;
+			if(_statements.length == 0)
+			{
+				_running = false;
+				return;
+			}
+			
+			_running = true;
 			
 			const statement : SpodStatement = _statements.shift();
 			if(statement.executing) 
 				throw new IllegalOperationError('SpodStatement is already executing');
 			
+			statement.completedSignal.add(handleCompletedSignal);
+			statement.errorSignal.add(handleErrorSignal);
 			statement.execute();
-		}		
+		}
+		
+		/**
+		 * @private
+		 */
+		private function advance() : void
+		{
+			_running = false;
+			execute();
+		}
+				
+		/**
+		 * @private
+		 */
+		private function handleCompletedSignal(statement : SpodStatement) : void
+		{
+			advance();
+			
+			statement;
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleErrorSignal(statement : SpodStatement, event : SpodErrorEvent) : void
+		{
+			advance();
+			
+			event;
+			statement;
+		}
 	}
 }

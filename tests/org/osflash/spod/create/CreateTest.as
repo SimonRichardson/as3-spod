@@ -55,7 +55,7 @@ package org.osflash.spod.create
 		
 		private function handleOpenSignal(database : SpodDatabase) : void
 		{
-			database.create(User);
+			database.createTable(User);
 		}
 		
 		private function handleErrorSignal(event : SQLErrorEvent) : void

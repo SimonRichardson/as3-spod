@@ -6,8 +6,14 @@ package org.osflash.spod.support.user
 	 */
 	public class User extends SpodObject
 	{
+		
 		public var id : int;
 		
 		public var name : String;
+
+		public function User(name : String)
+		{
+			this.name = name;
+		}	
 	}
 }

@@ -10,14 +10,14 @@ package org.osflash.spod
 	import flash.filesystem.File;
 	
 	[SWF(backgroundColor="#FFFFFF", frameRate="31", width="1280", height="720")]
-	public class CreateDatabaseTest extends Sprite
+	public class InsertDatabaseTest extends Sprite
 	{
 		
 		private static const sessionName : String = "session.db"; 
 		
 		protected var resource : File;
-
-		public function CreateDatabaseTest()
+		
+		public function InsertDatabaseTest()
 		{
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
@@ -31,12 +31,24 @@ package org.osflash.spod
 			manager.open(resource, true);
 		}
 		
-		private function handleOpenSignal(database : SpodDatabase) : void
+		protected function handleOpenSignal(database : SpodDatabase) : void
 		{
+			database.createTableSignal.add(handleCreatedSignal);
 			database.createTable(User);
 		}
+		
+		protected function handleCreatedSignal(table : SpodTable) : void
+		{
+			//table.insertSignal.add(handleInsertSignal);
+			table.insert(new User("Fred" + Math.random()));
+		}
+		
+		protected function handleInsertSignal(obejct : SpodObject) : void
+		{
 			
-		private function handleErrorSignal(event : SpodErrorEvent) : void
+		}
+			
+		protected function handleErrorSignal(event : SpodErrorEvent) : void
 		{
 			error(event.event.error);
 		}

@@ -35,7 +35,7 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private var _createdSignal : ISignal;
+		private var _createTableSignal : ISignal;
 				
 		public function SpodDatabase(name : String, manager : SpodManager)
 		{
@@ -49,13 +49,27 @@ package org.osflash.spod
 			_tables = new Dictionary();
 		}
 		
-		public function create(type : Class) : void
+		public function createTable(type : Class) : void
 		{
 			if(null == type) throw new ArgumentError('Type can not be null');
 			
 			if(!active(type))
 			{
-				createTable(type);
+				const schema : SpodTableSchema = buildSchemaFromType(type);
+				const builder : ISpodStatementBuilder = new CreateStatementBuilder(schema);
+				const statement : SpodStatement = builder.build();
+				
+				if(null == statement) 
+					throw new IllegalOperationError('SpodStatement can not be null');
+				
+				statement.completedSignal.add(handleCreateTableCompleteSignal);
+				statement.errorSignal.add(handleCreateTableErrorSignal);
+				
+				_manager.executioner.add(statement);
+				
+				// TODO : validate the schema of the table and the type.
+				
+				_tables[type] = new SpodTable(schema, _manager);
 			}
 			else throw new ArgumentError('Table already exists and is active, so you can not ' + 
 																				'create it again');
@@ -87,55 +101,38 @@ package org.osflash.spod
 			
 			return schema;
 		}
-			
-		/**
-		 * @private
-		 */	
-		private function createTable(type : Class) : void
-		{
-			const schema : SpodTableSchema = buildSchemaFromType(type);
-			const builder : ISpodStatementBuilder = new CreateStatementBuilder(schema);
-			const statement : SpodStatement = builder.build();
-			
-			statement.completedSignal.add(handleCreatedCompleteSignal);
-			statement.errorSignal.add(handleCreatedErrorSignal);
-			
-			_manager.executioner.add(statement);
-			
-			_tables[type] = new SpodTable(schema);
-		}
 		
 		/**
 		 * @private
 		 */
-		private function handleCreatedCompleteSignal(statement : SpodStatement) : void
+		private function handleCreateTableCompleteSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleCreatedCompleteSignal);
-			statement.errorSignal.remove(handleCreatedErrorSignal);
+			statement.completedSignal.remove(handleCreateTableCompleteSignal);
+			statement.errorSignal.remove(handleCreateTableErrorSignal);
 			
 			const table : SpodTable = _tables[statement.type];
 			if(null == table) throw new IllegalOperationError('SpodTable does not exist');
 			
-			createdSignal.dispatch(table);
+			createTableSignal.dispatch(table);
 		}
 		
 		/**
 		 * @private
 		 */
-		private function handleCreatedErrorSignal(	statement : SpodStatement, 
+		private function handleCreateTableErrorSignal(	statement : SpodStatement, 
 													event : SpodErrorEvent
 													) : void
 		{
-			statement.completedSignal.remove(handleCreatedCompleteSignal);
-			statement.errorSignal.remove(handleCreatedErrorSignal);
+			statement.completedSignal.remove(handleCreateTableCompleteSignal);
+			statement.errorSignal.remove(handleCreateTableErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
 		
-		public function get createdSignal() : ISignal
+		public function get createTableSignal() : ISignal
 		{
-			if(null == _createdSignal) _createdSignal = new Signal(SpodTable);
-			return _createdSignal;
+			if(null == _createTableSignal) _createTableSignal = new Signal(SpodTable);
+			return _createTableSignal;
 		}
 	}
 }
