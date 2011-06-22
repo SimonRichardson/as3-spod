@@ -2,6 +2,7 @@ package org.osflash.spod
 {
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
+	import org.osflash.spod.builders.DeleteStatementBuilder;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.UpdateStatementBuilder;
 	import org.osflash.spod.errors.SpodErrorEvent;
@@ -39,6 +40,11 @@ package org.osflash.spod
 		 */
 		private var _updateSignal : ISignal;
 		
+		/**
+		 * @private
+		 */
+		private var _removeSignal : ISignal;
+		
 		public function SpodTableRow(	table : SpodTable, 
 										type : Class, 
 										object : SpodObject, 
@@ -68,6 +74,18 @@ package org.osflash.spod
 			_manager.executioner.add(statement);
 		}
 		
+		public function remove() : void
+		{
+			const schema : SpodTableSchema = _table.schema;
+			const builder : ISpodStatementBuilder = new DeleteStatementBuilder(schema, object);
+			const statement : SpodStatement = builder.build();
+			
+			statement.completedSignal.add(handleRemoveCompletedSignal);
+			statement.errorSignal.add(handleRemoveErrorSignal);
+			
+			_manager.executioner.add(statement);
+		}
+		
 		/**
 		 * @private
 		 */
@@ -93,6 +111,34 @@ package org.osflash.spod
 			
 			_manager.errorSignal.dispatch(event);
 		}
+		
+		/**
+		 * @private
+		 */
+		private function handleRemoveCompletedSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleRemoveCompletedSignal);
+			statement.errorSignal.remove(handleRemoveErrorSignal);
+			
+			if(object != statement.object) throw new IllegalOperationError('SpodObject mismatch');
+			
+			_table.removeRow(this);
+			
+			removeSignal.dispatch(_object);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleRemoveErrorSignal(	statement : SpodStatement, 
+													event : SpodErrorEvent
+													) : void
+		{
+			statement.completedSignal.remove(handleRemoveCompletedSignal);
+			statement.errorSignal.remove(handleRemoveErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
 
 		public function get object() : SpodObject { return _object; }
 		
@@ -102,6 +148,12 @@ package org.osflash.spod
 		{
 			if(null == _updateSignal) _updateSignal = new Signal(SpodObject);
 			return _updateSignal;
+		}
+		
+		public function get removeSignal() : ISignal
+		{
+			if(null == _removeSignal) _removeSignal = new Signal(SpodObject);
+			return _removeSignal;
 		}
 	}
 }

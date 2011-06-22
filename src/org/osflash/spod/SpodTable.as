@@ -70,6 +70,25 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		internal function removeRow(value : SpodTableRow) : void
+		{
+			for(var id : String in _rows)
+			{
+				if(_rows[id] == value)
+				{
+					_rows[id] = null;
+					delete _rows[id];
+					
+					return;
+				}
+			}
+			
+			throw new Error('SpodTableRow does not exist');
+		}
+		
+		/**
+		 * @private
+		 */
 		private function handleInsertCompletedSignal(statement : SpodStatement) : void
 		{
 			statement.completedSignal.remove(handleInsertCompletedSignal);

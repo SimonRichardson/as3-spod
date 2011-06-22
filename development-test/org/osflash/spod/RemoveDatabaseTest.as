@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.logger.utils.debug;
 	import org.osflash.logger.utils.error;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;
@@ -45,21 +46,25 @@ package org.osflash.spod
 		
 		protected function handleInsertSignal(row : SpodTableRow) : void
 		{
-			row.updateSignal.add(handleUpdateSignal);
-			
 			const user : User = row.object as User;
 			
 		 	user.name = "Jim - " + Math.random();
+		 	user.updateSignal.add(handleUpdateSignal);
 		 	user.update();
 		}
 		
 		protected function handleUpdateSignal(object : SpodObject) : void
 		{
 			const user : User = object as User;
-			
+			user.removeSignal.add(handleRemoveSignal);
 			user.remove();
 		}
-			
+		
+		protected function handleRemoveSignal(object : SpodObject) : void
+		{
+			debug("REMOVED : ", object);
+		}
+		
 		protected function handleErrorSignal(event : SpodErrorEvent) : void
 		{
 			error(event.event.error);
