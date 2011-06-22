@@ -1,6 +1,11 @@
 package org.osflash.spod
 {
+	import flash.errors.IllegalOperationError;
+	import flash.globalization.LastOperationStatus;
+	import flash.utils.Dictionary;
 	import org.osflash.logger.utils.debug;
+	import org.osflash.signals.ISignal;
+	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.InsertStatementBuilder;
 	import org.osflash.spod.errors.SpodErrorEvent;
@@ -29,7 +34,12 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private var _rows : Vector.<SpodTableRow>;
+		private var _rows : Dictionary;
+		
+		/**
+		 * @private
+		 */
+		private var _insertSignal : ISignal;
 		
 		public function SpodTable(schema : SpodTableSchema, manager : SpodManager)
 		{
@@ -41,7 +51,7 @@ package org.osflash.spod
 			
 			_exists = false;
 			
-			_rows = new Vector.<SpodTableRow>();
+			_rows = new Dictionary();
 		}
 		
 		public function insert(object : SpodObject) : void
@@ -66,7 +76,18 @@ package org.osflash.spod
 			statement.completedSignal.remove(handleInsertCompletedSignal);
 			statement.errorSignal.remove(handleInsertErrorSignal);
 			
-			debug("HERE");
+			const rowId : int = statement.result.lastInsertRowID;
+			if(isNaN(rowId)) throw new IllegalOperationError('Invalid row id');
+			
+			const object : SpodObject = statement.object;
+			if(null == object) throw new IllegalOperationError('Invalid statement object');
+			if('id' in object) object['id'] = rowId;
+			
+			const row : SpodTableRow = new SpodTableRow(_schema.type, object, _manager);
+			
+			_rows[rowId] = row;
+			
+			insertSignal.dispatch(row);
 		}
 		
 		/**
@@ -85,9 +106,12 @@ package org.osflash.spod
 		public function get exists() : Boolean { return _exists; }
 		public function set exists(value : Boolean) : void { _exists = value; }
 
-		public function get schema() : SpodTableSchema
+		public function get schema() : SpodTableSchema { return _schema; }
+		
+		public function get insertSignal() : ISignal
 		{
-			return _schema;
+			if(null == _insertSignal) _insertSignal = new Signal(SpodTableRow);
+			return _insertSignal;
 		}
 	}
 }

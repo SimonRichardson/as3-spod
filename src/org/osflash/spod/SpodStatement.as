@@ -25,6 +25,11 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private var _object : SpodObject;
+		
+		/**
+		 * @private
+		 */
 		private var _statement : SQLStatement;
 		
 		/**
@@ -62,10 +67,11 @@ package org.osflash.spod
 		 */
 		private var _nativeErrorSignal : ISignal;
 		
-		public function SpodStatement(type : Class)
+		public function SpodStatement(type : Class, object : SpodObject = null)
 		{
 			if(null == type) throw new ArgumentError('Type can not be null');
 			_type = type;
+			_object = object;
 			
 			_executed = false;
 			
@@ -119,6 +125,8 @@ package org.osflash.spod
 		}
 		
 		public function get type() : Class { return _type; }
+		
+		public function get object() : SpodObject { return _object; }
 		
 		public function get connection() : SQLConnection { return _connection; }
 		public function set connection(value : SQLConnection) : void { _connection = value; }

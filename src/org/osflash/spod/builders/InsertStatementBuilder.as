@@ -76,7 +76,7 @@ package org.osflash.spod.builders
 				
 				_buffer.push(' VALUES ');
 				
-				const statement : SpodStatement = new SpodStatement(tableSchema.type);
+				const statement : SpodStatement = new SpodStatement(tableSchema.type, _object);
 				
 				// Insert the values
 				_buffer.push('(');
@@ -96,9 +96,7 @@ package org.osflash.spod.builders
 				
 				// Make the query
 				statement.query = _buffer.join('');
-				
-				debug(statement.query);
-				
+								
 				return statement;
 				
 			} else throw new ArgumentError(getQualifiedClassName(_schema) + ' is not supported');

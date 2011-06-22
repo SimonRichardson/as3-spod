@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.logger.utils.debug;
 	import org.osflash.logger.utils.error;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;
@@ -39,13 +40,14 @@ package org.osflash.spod
 		
 		protected function handleCreatedSignal(table : SpodTable) : void
 		{
-			//table.insertSignal.add(handleInsertSignal);
+			table.insertSignal.add(handleInsertSignal);
 			table.insert(new User("Fred" + Math.random()));
 		}
 		
-		protected function handleInsertSignal(obejct : SpodObject) : void
+		protected function handleInsertSignal(row : SpodTableRow) : void
 		{
-			
+			const user : User = row.object as User;
+			debug(user.id);
 		}
 			
 		protected function handleErrorSignal(event : SpodErrorEvent) : void
