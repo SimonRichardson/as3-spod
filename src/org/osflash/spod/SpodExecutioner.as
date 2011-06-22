@@ -1,7 +1,6 @@
 package org.osflash.spod
 {
 	import flash.errors.IllegalOperationError;
-	import flash.data.SQLStatement;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */
@@ -11,7 +10,7 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private var _statements : Vector.<SQLStatement>;
+		private var _statements : Vector.<SpodStatement>;
 		
 		/**
 		 * @private
@@ -29,37 +28,42 @@ package org.osflash.spod
 			_manager = manager;
 			
 			_running = false;
-			_statements = new Vector.<SQLStatement>();
+			_statements = new Vector.<SpodStatement>();
 		}
 		
-		public function add(statement : SQLStatement) : void
+		public function add(statement : SpodStatement) : void
 		{
 			if(_statements.indexOf(statement) != -1) 
-				throw new ArgumentError('SQLStatement already exists');
+				throw new ArgumentError('SpodStatement already exists');
+			
+			statement.connection = _manager.connection;
 			
 			_statements.push(statement);
 			
 			if(!_running) execute();
 		}
 		
-		public function remove(statement : SQLStatement) : void
+		public function remove(statement : SpodStatement) : void
 		{
 			const index : int = _statements.indexOf(statement);
 			if(index == -1)
-				throw new ArgumentError('No such SQLStatement');
+				throw new ArgumentError('No such SpodStatement');
 				
-			_statements.splice(index, 1); 
+			const removed : SpodStatement = _statements.splice(index, 1)[0];
+			if(removed != statement)
+				throw new IllegalOperationError('SpodStatement mismatch');
+			
+			statement.connection = null;
 		}
 		
 		private function execute() : void
 		{
 			if(_running) return;
 			
-			const statement : SQLStatement = _statements.shift();
+			const statement : SpodStatement = _statements.shift();
 			if(statement.executing) 
-				throw new IllegalOperationError('SQLStatement is already executing');
+				throw new IllegalOperationError('SpodStatement is already executing');
 			
-			statement.sqlConnection = _manager.connection;
 			statement.execute();
 		}		
 	}

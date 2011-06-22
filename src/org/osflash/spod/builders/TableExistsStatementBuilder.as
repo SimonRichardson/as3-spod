@@ -1,12 +1,13 @@
 package org.osflash.spod.builders
 {
-	import flash.utils.getQualifiedClassName;
+	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.utils.getClassNameFromQname;
-	import flash.data.SQLStatement;
+
+	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */
-	public class SQLTableExistsStatementBuilder implements ISQLStatementBuilder
+	public class TableExistsStatementBuilder implements ISpodStatementBuilder
 	{
 		
 		/**
@@ -19,7 +20,7 @@ package org.osflash.spod.builders
 		 */
 		private var _buffer : String;
 
-		public function SQLTableExistsStatementBuilder(type : Class)
+		public function TableExistsStatementBuilder(type : Class)
 		{
 			if(null == type) throw new ArgumentError('Type can not be null');
 			_type = type;
@@ -30,7 +31,7 @@ package org.osflash.spod.builders
 		/**
 		 * @inheritDoc
 		 */
-		public function build() : SQLStatement
+		public function build() : SpodStatement
 		{
 			_buffer = '';
 			_buffer += 'SELECT name ';
@@ -40,9 +41,8 @@ package org.osflash.spod.builders
 			
 			const qname : String = getQualifiedClassName(_type);
 			
-			const statement : SQLStatement = new SQLStatement();
-			statement.text = _buffer;
-			statement.itemClass = _type;
+			const statement : SpodStatement = new SpodStatement(_type);
+			statement.query = _buffer;
 			statement.parameters[':name'] = getClassNameFromQname(qname);
 			
 			return statement;

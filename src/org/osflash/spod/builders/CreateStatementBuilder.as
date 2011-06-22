@@ -1,6 +1,6 @@
 package org.osflash.spod.builders
 {
-	import flash.data.SQLStatement;
+	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.schema.ISpodSchema;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
@@ -12,7 +12,7 @@ package org.osflash.spod.builders
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class SQLCreateStatementBuilder implements ISQLStatementBuilder
+	public class CreateStatementBuilder implements ISpodStatementBuilder
 	{
 		
 		/**
@@ -25,7 +25,7 @@ package org.osflash.spod.builders
 		 */
 		private var _buffer : Vector.<String>;
 		
-		public function SQLCreateStatementBuilder(schema : ISpodSchema)
+		public function CreateStatementBuilder(schema : ISpodSchema)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
 			_schema = schema;
@@ -36,7 +36,7 @@ package org.osflash.spod.builders
 		/**
 		 * @inheritDoc
 		 */
-		public function build() : SQLStatement
+		public function build() : SpodStatement
 		{
 			if(_schema is SpodTableSchema)
 			{
@@ -76,9 +76,8 @@ package org.osflash.spod.builders
 				_buffer.pop();
 				_buffer.push(')');
 						
-				const statement : SQLStatement = new SQLStatement();
-				statement.itemClass = tableSchema.type;
-				statement.text = _buffer.join('');
+				const statement : SpodStatement = new SpodStatement(tableSchema.type);
+				statement.query = _buffer.join('');
 				
 				return statement;
 				

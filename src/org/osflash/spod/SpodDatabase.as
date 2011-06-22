@@ -1,11 +1,13 @@
 package org.osflash.spod
 {
-	import org.osflash.spod.builders.ISQLStatementBuilder;
-	import org.osflash.spod.builders.SQLCreateStatementBuilder;
+	import org.osflash.signals.ISignal;
+	import org.osflash.signals.Signal;
+	import org.osflash.spod.builders.CreateStatementBuilder;
+	import org.osflash.spod.builders.ISpodStatementBuilder;
+	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.utils.getClassNameFromQname;
 
-	import flash.data.SQLStatement;
 	import flash.errors.IllegalOperationError;
 	import flash.utils.Dictionary;
 	import flash.utils.describeType;
@@ -29,6 +31,11 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _tables : Dictionary;
+		
+		/**
+		 * @private
+		 */
+		private var _createdSignal : ISignal;
 				
 		public function SpodDatabase(name : String, manager : SpodManager)
 		{
@@ -80,16 +87,55 @@ package org.osflash.spod
 			
 			return schema;
 		}
-				
+			
+		/**
+		 * @private
+		 */	
 		private function createTable(type : Class) : void
 		{
 			const schema : SpodTableSchema = buildSchemaFromType(type);
-			const builder : ISQLStatementBuilder = new SQLCreateStatementBuilder(schema);
-			const query : SQLStatement = builder.build();
+			const builder : ISpodStatementBuilder = new CreateStatementBuilder(schema);
+			const statement : SpodStatement = builder.build();
 			
-			_manager.executioner.add(query);
+			statement.completedSignal.add(handleCreatedCompleteSignal);
+			statement.errorSignal.add(handleCreatedErrorSignal);
+			
+			_manager.executioner.add(statement);
 			
 			_tables[type] = new SpodTable(schema);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleCreatedCompleteSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleCreatedCompleteSignal);
+			statement.errorSignal.remove(handleCreatedErrorSignal);
+			
+			const table : SpodTable = _tables[statement.type];
+			if(null == table) throw new IllegalOperationError('SpodTable does not exist');
+			
+			createdSignal.dispatch(table);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleCreatedErrorSignal(	statement : SpodStatement, 
+													event : SpodErrorEvent
+													) : void
+		{
+			statement.completedSignal.remove(handleCreatedCompleteSignal);
+			statement.errorSignal.remove(handleCreatedErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
+		
+		public function get createdSignal() : ISignal
+		{
+			if(null == _createdSignal) _createdSignal = new Signal(SpodTable);
+			return _createdSignal;
 		}
 	}
 }

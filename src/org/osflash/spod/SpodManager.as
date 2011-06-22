@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.signals.natives.NativeSignal;
@@ -34,12 +35,17 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private var _isAsync : Boolean;
+		private var _async : Boolean;
 		
 		/**
 		 * @private
 		 */
 		private var _executioner : SpodExecutioner;
+		
+		/**
+		 * @private
+		 */
+		private var _savepointName : String;
 		
 		/**
 		 * @private
@@ -80,7 +86,7 @@ package org.osflash.spod
 			
 			_nativeOpenSignal.add(handleNativeOpenSignal);
 			
-			_isAsync = async;
+			_async = async;
 			
 			if(async) _connection.openAsync(_resource);
 			else 
@@ -101,7 +107,23 @@ package org.osflash.spod
 				_resource = null;
 			}
 			
-			_isAsync = false;
+			_async = false;
+		}
+		
+		public function addSavepoint() : void
+		{
+			_savepointName = "Savepoint" + new Date().time;
+			_connection.setSavepoint(_savepointName);
+		}
+		
+		public function commitSavepoint() : void
+		{
+			_connection.releaseSavepoint(_savepointName);
+		}
+		
+		public function revertSavepoint() : void
+		{
+			_connection.rollbackToSavepoint(_savepointName);
 		}
 		
 		/**
@@ -119,7 +141,7 @@ package org.osflash.spod
 		 */
 		private function handleNativeErrorSignal(event : SQLErrorEvent) : void
 		{
-			errorSignal.dispatch(event);
+			errorSignal.dispatch(new SpodErrorEvent(event.text, event));
 		}
 		
 		private function opened() : void
@@ -131,12 +153,12 @@ package org.osflash.spod
 		
 		public function get connection() : SQLConnection { return _connection; }
 		
-		public function get isConnected() : Boolean 
+		public function get connected() : Boolean 
 		{ 
 			return _connection.connected && null != _database; 
 		}
 		
-		public function get isAsync() : Boolean { return _isAsync; }
+		public function get async() : Boolean { return _async; }
 		
 		public function get database() : SpodDatabase { return _database; }
 		
@@ -150,7 +172,7 @@ package org.osflash.spod
 
 		public function get errorSignal() : ISignal
 		{
-			if(null == _errorSignal) _errorSignal = new Signal(SQLErrorEvent);
+			if(null == _errorSignal) _errorSignal = new Signal(SpodErrorEvent);
 			return _errorSignal;
 		}
 	}

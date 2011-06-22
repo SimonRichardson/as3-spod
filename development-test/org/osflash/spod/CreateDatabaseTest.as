@@ -1,9 +1,10 @@
 package org.osflash.spod
 {
+	import org.osflash.logger.utils.debug;
+	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;
 
 	import flash.display.Sprite;
-	import flash.events.SQLErrorEvent;
 	import flash.filesystem.File;
 	
 	[SWF(backgroundColor="#FFFFFF", frameRate="31", width="1280", height="720")]
@@ -31,10 +32,16 @@ package org.osflash.spod
 		
 		private function handleOpenSignal(database : SpodDatabase) : void
 		{
+			database.createdSignal.add(handleCreatedSignal);
 			database.create(User);
 		}
 		
-		private function handleErrorSignal(event : SQLErrorEvent) : void
+		private function handleCreatedSignal(table : SpodTable) : void
+		{
+			
+		}
+		
+		private function handleErrorSignal(event : SpodErrorEvent) : void
 		{
 			trace("******* FAILED " + event);
 		}
