@@ -5,11 +5,12 @@ package org.osflash.spod
 	import flash.display.Sprite;
 	import flash.events.SQLErrorEvent;
 	import flash.filesystem.File;
+	
 	[SWF(backgroundColor="#FFFFFF", frameRate="31", width="1280", height="720")]
 	public class CreateDatabaseTest extends Sprite
 	{
 		
-		private static const sessionName : String = "session" + (Math.random() * 9999) + ".db"; 
+		private static const sessionName : String = "session.db"; 
 		
 		protected var resource : File;
 

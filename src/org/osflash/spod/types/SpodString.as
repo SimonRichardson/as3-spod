@@ -6,7 +6,7 @@ package org.osflash.spod.types
 	public class SpodString implements ISpodType
 	{
 		
-		public static const SQL_NAME : String = 'CHAR(255)';
+		public static const SQL_NAME : String = 'TEXT';
 		
 		private var _value : String;
 		

@@ -39,6 +39,11 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private var _executioner : SpodExecutioner;
+		
+		/**
+		 * @private
+		 */
 		private var _nativeOpenSignal : ISignal;
 		
 		/**
@@ -59,6 +64,7 @@ package org.osflash.spod
 		public function SpodManager()
 		{
 			_connection = new SQLConnection();
+			_executioner = new SpodExecutioner(this);
 			
 			_nativeOpenSignal = new NativeSignal(_connection, SQLEvent.OPEN, SQLEvent);
 			_nativeErrorSignal = new NativeSignal(_connection, SQLErrorEvent.ERROR, SQLErrorEvent);
@@ -133,6 +139,8 @@ package org.osflash.spod
 		public function get isAsync() : Boolean { return _isAsync; }
 		
 		public function get database() : SpodDatabase { return _database; }
+		
+		public function get executioner() : SpodExecutioner { return _executioner; }
 
 		public function get openSignal() : ISignal
 		{

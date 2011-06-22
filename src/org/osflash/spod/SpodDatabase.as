@@ -87,9 +87,7 @@ package org.osflash.spod
 			const builder : ISQLStatementBuilder = new SQLCreateStatementBuilder(schema);
 			const query : SQLStatement = builder.build();
 			
-			// TODO : Push this into the queue
-			query.sqlConnection = _manager.connection;
-			query.execute();
+			_manager.executioner.add(query);
 			
 			_tables[type] = new SpodTable(schema);
 		}
