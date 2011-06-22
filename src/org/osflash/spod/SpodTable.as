@@ -1,15 +1,14 @@
 package org.osflash.spod
 {
-	import flash.errors.IllegalOperationError;
-	import flash.globalization.LastOperationStatus;
-	import flash.utils.Dictionary;
-	import org.osflash.logger.utils.debug;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.InsertStatementBuilder;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
+
+	import flash.errors.IllegalOperationError;
+	import flash.utils.Dictionary;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */
@@ -81,10 +80,18 @@ package org.osflash.spod
 			
 			const object : SpodObject = statement.object;
 			if(null == object) throw new IllegalOperationError('Invalid statement object');
+
+			const row : SpodTableRow = new SpodTableRow(this, _schema.type, object, _manager);
+			
+			// Inject the correct id
 			if('id' in object) object['id'] = rowId;
 			
-			const row : SpodTableRow = new SpodTableRow(_schema.type, object, _manager);
+			// Create the correct inject references
+			use namespace spod_namespace;
+			object.table = this;
+			object.tableRow = row;
 			
+			// Push in to the row
 			_rows[rowId] = row;
 			
 			insertSignal.dispatch(row);
