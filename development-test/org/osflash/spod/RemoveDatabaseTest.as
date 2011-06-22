@@ -1,23 +1,23 @@
 package org.osflash.spod
 {
-	import org.osflash.logger.utils.debug;
 	import org.osflash.logger.utils.error;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;
+
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.filesystem.File;
 	
 	[SWF(backgroundColor="#FFFFFF", frameRate="31", width="1280", height="720")]
-	public class UpdateDatabaseTest extends Sprite
+	public class RemoveDatabaseTest extends Sprite
 	{
 		
 		private static const sessionName : String = "session.db"; 
 		
 		protected var resource : File;
 		
-		public function UpdateDatabaseTest()
+		public function RemoveDatabaseTest()
 		{
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
@@ -45,26 +45,19 @@ package org.osflash.spod
 		
 		protected function handleInsertSignal(row : SpodTableRow) : void
 		{
-			row.updateSignal.add(handleRowUpdateSignal);
+			row.updateSignal.add(handleUpdateSignal);
 			
 			const user : User = row.object as User;
-			user.updateSignal.add(handleUserUpdateSignal);
+			
 		 	user.name = "Jim - " + Math.random();
 		 	user.update();
 		}
 		
-		protected function handleRowUpdateSignal(object : SpodObject) : void
+		protected function handleUpdateSignal(object : SpodObject) : void
 		{
 			const user : User = object as User;
 			
-			debug("I am from the row ", user.name);
-		}
-		
-		protected function handleUserUpdateSignal(object : SpodObject) : void
-		{
-			const user : User = object as User;
-			
-			debug("I am from the user ", user.name);
+			user.remove();
 		}
 			
 		protected function handleErrorSignal(event : SpodErrorEvent) : void
