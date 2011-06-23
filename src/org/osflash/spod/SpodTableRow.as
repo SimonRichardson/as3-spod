@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.spod.types.SpodDate;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.DeleteStatementBuilder;
@@ -172,8 +173,15 @@ package org.osflash.spod
 				}
 				else
 				{
-					if(_object[columnName] != object[columnName]) updated = true;
-					_object[columnName] = object[columnName];
+					if(column.type == SpodDate)
+					{
+						// TODO : update date.
+					}
+					else
+					{
+						if(_object[columnName] != object[columnName]) updated = true;
+						_object[columnName] = object[columnName];
+					}
 				}
 			}
 			

@@ -7,7 +7,5 @@ package org.osflash.spod.types
 	{
 		
 		function get type() : String;
-		
-		function get value() : String;
 	}
 }

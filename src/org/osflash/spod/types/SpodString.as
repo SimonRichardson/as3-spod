@@ -8,24 +8,13 @@ package org.osflash.spod.types
 		
 		public static const SQL_NAME : String = 'TEXT';
 		
-		/**
-		 * @private
-		 */
-		private var _value : String;
-		
-		public function SpodString(value : String)
+		public function SpodString()
 		{
-			_value = value;
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
 		public function get type() : String { return SQL_NAME; }
-
-		/**
-		 * @inheritDoc
-		 */
-		public function get value() : String { return _value; }
 	}
 }

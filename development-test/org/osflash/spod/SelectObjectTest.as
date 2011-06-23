@@ -63,7 +63,7 @@ package org.osflash.spod
 			else
 			{
 				const user : User = object as User;
-				debug('User id :', user.id);
+				debug('User id :', user.id, user.date);
 				debug(describeTable(user.tableRow.table));
 			}
 		}
