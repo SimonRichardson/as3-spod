@@ -97,13 +97,18 @@ package org.osflash.spod
 					throw new ArgumentError('Type constructor parameters need to be optional');
 			}
 			
+			var identifierFound : Boolean = false;
 			for each(var variable : XML in description..variable)
 			{
 				const variableName : String = variable.@name;
 				const variableType : String = variable.@type;
 				
+				if(variableName == 'id') identifierFound = true;
+				
 				schema.createByType(variableName, variableType);
 			}
+			
+			if(!identifierFound) throw new ArgumentError('Type needs id variable to work');
 			
 			// TODO : Add parameters (setters and getters)
 			
