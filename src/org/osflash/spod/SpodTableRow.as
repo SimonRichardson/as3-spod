@@ -1,6 +1,5 @@
 package org.osflash.spod
 {
-	import org.osflash.logger.utils.debug;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.DeleteStatementBuilder;
