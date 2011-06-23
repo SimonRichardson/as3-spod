@@ -11,11 +11,12 @@ package org.osflash.spod.support.user
 		
 		public var name : String;
 		
-		public var date : int;
+		public var date : Date;
 
 		public function User(name : String = null)
 		{
 			this.name = name;
+			this.date = new Date();
 		}	
 	}
 }

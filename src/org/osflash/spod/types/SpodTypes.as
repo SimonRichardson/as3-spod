@@ -12,10 +12,10 @@ package org.osflash.spod.types
 			{
 				case SpodInt: return SpodInt.SQL_NAME;
 				case SpodString: return SpodString.SQL_NAME;
+				case SpodDate: return SpodDate.SQL_NAME;
 				default:
 					throw new ArgumentError('Unknown type : ' + type);
 			}
 		}
-		
 	}
 }
