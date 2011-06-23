@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.logger.utils.debug;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.CreateStatementBuilder;
@@ -89,6 +90,12 @@ package org.osflash.spod
 			const tableName : String = getClassNameFromQname(description.@name);
 			
 			const schema : SpodTableSchema = new SpodTableSchema(type, tableName);
+			
+			for each(var parameter : XML in description..constructor.parameter)
+			{
+				if(parameter.@optional != 'true') 
+					throw new ArgumentError('Type constructor parameters need to be optional');
+			}
 			
 			for each(var variable : XML in description..variable)
 			{

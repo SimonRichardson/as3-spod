@@ -4,9 +4,11 @@ package org.osflash.spod
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.InsertStatementBuilder;
+	import org.osflash.spod.builders.SelectByIdStatementBuilder;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
 
+	import flash.data.SQLResult;
 	import flash.errors.IllegalOperationError;
 	import flash.utils.Dictionary;
 	/**
@@ -40,6 +42,11 @@ package org.osflash.spod
 		 */
 		private var _insertSignal : ISignal;
 		
+		/**
+		 * @private
+		 */
+		private var _selectSignal : ISignal;
+		
 		public function SpodTable(schema : SpodTableSchema, manager : SpodManager)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
@@ -67,10 +74,23 @@ package org.osflash.spod
 			_manager.executioner.add(statement);
 		}
 		
+		public function select(id : int) : void
+		{
+			if(isNaN(id)) throw new ArgumentError('id can not be NaN');
+			
+			const builder : ISpodStatementBuilder = new SelectByIdStatementBuilder(_schema, id);
+			const statement : SpodStatement = builder.build();
+			
+			statement.completedSignal.add(handleSelectCompletedSignal);
+			statement.errorSignal.add(handleSelectErrorSignal);
+			
+			_manager.executioner.add(statement);
+		}
+		
 		/**
 		 * @private
 		 */
-		internal function removeRow(value : SpodTableRow) : void
+		spod_namespace function removeRow(value : SpodTableRow) : void
 		{
 			for(var id : String in _rows)
 			{
@@ -108,12 +128,13 @@ package org.osflash.spod
 			// Create the correct inject references
 			use namespace spod_namespace;
 			object.table = this;
+			
 			object.tableRow = row;
 			
 			// Push in to the row
 			_rows[rowId] = row;
 			
-			insertSignal.dispatch(row);
+			insertSignal.dispatch(object);
 		}
 		
 		/**
@@ -129,6 +150,53 @@ package org.osflash.spod
 			_manager.errorSignal.dispatch(event);
 		}
 		
+		
+		/**
+		 * @private
+		 */
+		private function handleSelectCompletedSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleSelectCompletedSignal);
+			statement.errorSignal.remove(handleSelectErrorSignal);
+			
+			const result : SQLResult = statement.result;
+			if(	null == result || 
+				null == result.data || 
+				result.data.length == 0 || 
+				result.rowsAffected == 0
+				)
+			{
+				selectSignal.dispatch(null);	
+			}
+			else
+			{
+				const type : Class = _schema.type;
+				if(null == type) throw new IllegalOperationError('No valid type');
+				
+				const total : int = result.data.length;
+				for(var i : int = 0; i<total; i++)
+				{
+					if(!(result.data[i] is type)) throw new IllegalOperationError('Invalid type');
+					
+					const object : SpodObject = result.data[i];
+					
+				}
+			}	
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleSelectErrorSignal(	statement : SpodStatement, 
+													event : SpodErrorEvent
+													) : void
+		{
+			statement.completedSignal.remove(handleSelectCompletedSignal);
+			statement.errorSignal.remove(handleSelectErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
+		
 		public function get exists() : Boolean { return _exists; }
 		public function set exists(value : Boolean) : void { _exists = value; }
 
@@ -140,8 +208,14 @@ package org.osflash.spod
 		
 		public function get insertSignal() : ISignal
 		{
-			if(null == _insertSignal) _insertSignal = new Signal(SpodTableRow);
+			if(null == _insertSignal) _insertSignal = new Signal(SpodObject);
 			return _insertSignal;
+		}
+		
+		public function get selectSignal() : ISignal
+		{
+			if(null == _selectSignal) _selectSignal = new Signal(SpodObject);
+			return _selectSignal;
 		}
 	}
 }

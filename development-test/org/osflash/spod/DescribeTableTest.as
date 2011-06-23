@@ -44,9 +44,9 @@ package org.osflash.spod
 			table.insert(new User("Fred" + Math.random()));
 		}
 		
-		protected function handleInsertSignal(row : SpodTableRow) : void
+		protected function handleInsertSignal(object : SpodObject) : void
 		{
-			debug(describeTable(row.table).toXMLString());
+			debug(describeTable(object.tableRow.table).toXMLString());
 		}
 			
 		protected function handleErrorSignal(event : SpodErrorEvent) : void

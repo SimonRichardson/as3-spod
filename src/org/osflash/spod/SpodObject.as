@@ -61,11 +61,11 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleSyncSignal(object : SpodObject) : void
+		private function handleSyncSignal(object : SpodObject, updated : Boolean) : void
 		{
 			if(object != this) return;
 			
-			syncSignal.dispatch(this);
+			syncSignal.dispatch(this, updated);
 		}
 		
 		/**
@@ -86,7 +86,7 @@ package org.osflash.spod
 		
 		public function get syncSignal() : ISignal
 		{
-			if(null == _syncSignal) _syncSignal = new Signal(SpodObject); 
+			if(null == _syncSignal) _syncSignal = new Signal(SpodObject, Boolean); 
 			return _syncSignal;
 		}
 		
@@ -99,8 +99,8 @@ package org.osflash.spod
 		spod_namespace function get table() : SpodTable { return _table; }
 		spod_namespace function set table(value : SpodTable) : void { _table = value; }
 		
-		spod_namespace function get tableRow() : SpodTableRow { return _tableRow; }
-		spod_namespace function set tableRow(value : SpodTableRow) : void 
+		public function get tableRow() : SpodTableRow { return _tableRow; }
+		public function set tableRow(value : SpodTableRow) : void 
 		{ 
 			if(null != _tableRow)
 			{

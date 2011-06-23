@@ -51,9 +51,9 @@ package org.osflash.spod
 			table.insert(user);
 		}
 		
-		protected function handleInsertSignal(row : SpodTableRow) : void
+		protected function handleInsertSignal(object : SpodObject) : void
 		{
-			debug(describeTable(row.table).toXMLString());
+			debug(describeTable(object.tableRow.table).toXMLString());
 			
 			setTimeout(function() : void
 			{			
@@ -62,12 +62,13 @@ package org.osflash.spod
 			}, 10000);
 		}
 		
-		protected function handleSyncSignal(object : SpodObject) : void
+		protected function handleSyncSignal(object : SpodObject, updated : Boolean) : void
 		{
 			use	namespace spod_namespace;
 			
 			const table : SpodTable = object.table; 
 			
+			debug('Updated : ', updated);
 			debug(describeTable(table).toXMLString());
 		}
 			

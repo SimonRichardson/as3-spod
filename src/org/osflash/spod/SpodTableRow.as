@@ -149,7 +149,11 @@ package org.osflash.spod
 			const schema : SpodTableSchema = table.schema;
 			if(null == schema) throw new IllegalOperationError('Invalid table schema');
 			
-			const object : Object = data[0];
+			const object : SpodObject = data[0] as SpodObject;
+			if(null == object) throw new IllegalOperationError('Object mismatch');
+			
+			var updated : Boolean = false;
+			
 			const total : int = schema.columns.length;
 			if(total == 0) throw new IllegalOperationError('Invalid number of columns');
 			for(var i : int = 0; i<total; i++)
@@ -159,15 +163,16 @@ package org.osflash.spod
 				if(columnName == 'id' && column.type == SpodInt)
 				{
 					if(_object['id'] != object['id']) 
-						throw new IllegalOperationError('Object mismatch');
+						throw new IllegalOperationError('Object id mismatch');
 				}
 				else
 				{
+					if(_object[columnName] != object[columnName]) updated = true;
 					_object[columnName] = object[columnName];
 				}
 			}
 			
-			syncSignal.dispatch(_object);
+			syncSignal.dispatch(_object, updated);
 		}
 		
 		/**
@@ -192,6 +197,8 @@ package org.osflash.spod
 			statement.errorSignal.remove(handleRemoveErrorSignal);
 			
 			if(object != statement.object) throw new IllegalOperationError('SpodObject mismatch');
+
+			use namespace spod_namespace;
 			
 			_table.removeRow(this);
 			
