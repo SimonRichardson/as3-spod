@@ -11,14 +11,14 @@ package org.osflash.spod
 	import flash.filesystem.File;
 	
 	[SWF(backgroundColor="#FFFFFF", frameRate="31", width="1280", height="720")]
-	public class RemoveDatabaseTest extends Sprite
+	public class InsertTableTest extends Sprite
 	{
 		
 		private static const sessionName : String = "session.db"; 
 		
 		protected var resource : File;
 		
-		public function RemoveDatabaseTest()
+		public function InsertTableTest()
 		{
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
@@ -41,30 +41,15 @@ package org.osflash.spod
 		protected function handleCreatedSignal(table : SpodTable) : void
 		{
 			table.insertSignal.add(handleInsertSignal);
-			table.insert(new User("Fred - " + Math.random()));
+			table.insert(new User("Fred" + Math.random()));
 		}
 		
 		protected function handleInsertSignal(row : SpodTableRow) : void
 		{
 			const user : User = row.object as User;
+			debug(user.id);
+		}
 			
-		 	user.name = "Jim - " + Math.random();
-		 	user.updateSignal.add(handleUpdateSignal);
-		 	user.update();
-		}
-		
-		protected function handleUpdateSignal(object : SpodObject) : void
-		{
-			const user : User = object as User;
-			user.removeSignal.add(handleRemoveSignal);
-			user.remove();
-		}
-		
-		protected function handleRemoveSignal(object : SpodObject) : void
-		{
-			debug("REMOVED : ", object);
-		}
-		
 		protected function handleErrorSignal(event : SpodErrorEvent) : void
 		{
 			error(event.event.error);

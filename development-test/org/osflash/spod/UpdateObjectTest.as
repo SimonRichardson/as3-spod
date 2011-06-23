@@ -10,14 +10,14 @@ package org.osflash.spod
 	import flash.filesystem.File;
 	
 	[SWF(backgroundColor="#FFFFFF", frameRate="31", width="1280", height="720")]
-	public class UpdateDatabaseTest extends Sprite
+	public class UpdateObjectTest extends Sprite
 	{
 		
 		private static const sessionName : String = "session.db"; 
 		
 		protected var resource : File;
 		
-		public function UpdateDatabaseTest()
+		public function UpdateObjectTest()
 		{
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;

@@ -4,21 +4,21 @@ package org.osflash.spod
 	import org.osflash.logger.utils.error;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;
+	import org.osflash.spod.utils.describeTable;
 
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.filesystem.File;
-	
 	[SWF(backgroundColor="#FFFFFF", frameRate="31", width="1280", height="720")]
-	public class InsertDatabaseTest extends Sprite
+	public class DescribeTableTest extends Sprite
 	{
 		
 		private static const sessionName : String = "session.db"; 
 		
 		protected var resource : File;
 		
-		public function InsertDatabaseTest()
+		public function DescribeTableTest()
 		{
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
@@ -46,8 +46,7 @@ package org.osflash.spod
 		
 		protected function handleInsertSignal(row : SpodTableRow) : void
 		{
-			const user : User = row.object as User;
-			debug(user.id);
+			debug(describeTable(row.table).toXMLString());
 		}
 			
 		protected function handleErrorSignal(event : SpodErrorEvent) : void

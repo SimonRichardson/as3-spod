@@ -134,6 +134,10 @@ package org.osflash.spod
 
 		public function get schema() : SpodTableSchema { return _schema; }
 		
+		public function get name() : String { return _schema.name; }
+
+		spod_namespace function get rows() : Dictionary { return _rows; }
+		
 		public function get insertSignal() : ISignal
 		{
 			if(null == _insertSignal) _insertSignal = new Signal(SpodTableRow);
