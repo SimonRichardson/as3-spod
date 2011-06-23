@@ -105,6 +105,8 @@ package org.osflash.spod
 				schema.createByType(variableName, variableType);
 			}
 			
+			// TODO : Add parameters (setters and getters)
+			
 			if(schema.columns.length == 0) throw new IllegalOperationError('Schema has no columns');
 			
 			return schema;

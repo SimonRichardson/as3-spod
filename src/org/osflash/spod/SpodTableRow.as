@@ -41,6 +41,11 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private var _insertSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
 		private var _updateSignal : ISignal;
 		
 		/**
@@ -221,6 +226,12 @@ package org.osflash.spod
 		public function get object() : SpodObject { return _object; }
 		
 		public function get table() : SpodTable { return _table; }
+		
+		public function get insertSignal() : ISignal
+		{
+			if(null == _insertSignal) _insertSignal = new Signal(SpodObject);
+			return _insertSignal;
+		}
 		
 		public function get updateSignal() : ISignal
 		{

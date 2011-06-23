@@ -11,14 +11,14 @@ package org.osflash.spod
 	import flash.filesystem.File;
 	
 	[SWF(backgroundColor="#FFFFFF", frameRate="31", width="1280", height="720")]
-	public class InsertTableTest extends Sprite
+	public class InsertObjectTest extends Sprite
 	{
 		
 		private static const sessionName : String = "session.db"; 
 		
 		protected var resource : File;
 		
-		public function InsertTableTest()
+		public function InsertObjectTest()
 		{
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;

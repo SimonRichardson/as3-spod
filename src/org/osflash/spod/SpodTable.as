@@ -128,13 +128,13 @@ package org.osflash.spod
 			// Create the correct inject references
 			use namespace spod_namespace;
 			object.table = this;
-			
 			object.tableRow = row;
 			
 			// Push in to the row
 			_rows[rowId] = row;
 			
 			insertSignal.dispatch(object);
+			row.insertSignal.dispatch(object);
 		}
 		
 		/**
@@ -162,26 +162,45 @@ package org.osflash.spod
 			const result : SQLResult = statement.result;
 			if(	null == result || 
 				null == result.data || 
-				result.data.length == 0 || 
-				result.rowsAffected == 0
+				result.data.length == 0
 				)
 			{
 				selectSignal.dispatch(null);	
 			}
 			else
 			{
+				if(null == _schema) throw new IllegalOperationError('No valid schema');
+				
 				const type : Class = _schema.type;
 				if(null == type) throw new IllegalOperationError('No valid type');
 				
 				const total : int = result.data.length;
 				for(var i : int = 0; i<total; i++)
 				{
-					if(!(result.data[i] is type)) throw new IllegalOperationError('Invalid type');
+					const object : SpodObject = result.data[i] as SpodObject;
+					if(null == object) throw new IllegalOperationError('Invalid SpodObject');
+					if(!(object is type)) throw new IllegalOperationError('Invalid type');
 					
-					const object : SpodObject = result.data[i];
+					const id : int = object['id'];					
+					if(isNaN(id)) throw new IllegalOperationError('Invalid identifier');
+					const row : SpodTableRow = new SpodTableRow(this, type, object, _manager);
 					
+					if(null != _rows[id])
+					{
+						const prev : SpodTableRow = _rows[id];
+						prev.removeSignal.dispatch(prev.object);
+					}
+					
+					// Create the correct inject references
+					use namespace spod_namespace;
+					object.table = this;
+					object.tableRow = row;
+					
+					_rows[id] = row;
 				}
-			}	
+				
+				selectSignal.dispatch(object);
+			}
 		}
 		
 		/**

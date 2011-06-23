@@ -11,7 +11,7 @@ package org.osflash.spod.support.user
 		
 		public var name : String;
 
-		public function User(name : String)
+		public function User(name : String = null)
 		{
 			this.name = name;
 		}	

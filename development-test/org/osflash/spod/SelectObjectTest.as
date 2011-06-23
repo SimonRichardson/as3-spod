@@ -40,9 +40,21 @@ package org.osflash.spod
 		}
 		
 		protected function handleCreatedSignal(table : SpodTable) : void
+		{			
+			// flood the database with rows
+			const total : int = 20;
+			for(var i : int = 0; i < total; i++)
+			{
+				const user : User = new User("User - " + i);
+				if(i == total - 1) user.insertSignal.add(handleInsertSignal);
+				table.insert(user);
+			}
+		}
+		
+		protected function handleInsertSignal(object : SpodObject) : void
 		{
-			table.selectSignal.add(handleSelectSignal);
-			table.select(3);
+			object.tableRow.table.selectSignal.add(handleSelectSignal);
+			object.tableRow.table.select(3);
 		}
 		
 		protected function handleSelectSignal(object : SpodObject) : void
@@ -50,11 +62,9 @@ package org.osflash.spod
 			if(null == object) debug('Nothing found');
 			else
 			{
-				use	namespace spod_namespace;
-				
-				const table : SpodTable = object.table; 
-				
-				debug(describeTable(table).toXMLString());
+				const user : User = object as User;
+				debug('User id :', user.id);
+				debug(describeTable(user.tableRow.table));
 			}
 		}
 			

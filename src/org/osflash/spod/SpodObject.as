@@ -21,6 +21,11 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private var _insertSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
 		private var _updateSignal : ISignal;
 		
 		/**
@@ -46,6 +51,16 @@ package org.osflash.spod
 		public function sync() : void
 		{
 			_tableRow.sync();
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleInsertSignal(object : SpodObject) : void
+		{
+			if(object != this) return;
+			
+			insertSignal.dispatch(this);
 		}
 		
 		/**
@@ -78,6 +93,12 @@ package org.osflash.spod
 			removeSignal.dispatch(this);
 		}
 		
+		public function get insertSignal() : ISignal
+		{
+			if(null == _insertSignal) _insertSignal = new Signal(SpodObject); 
+			return _insertSignal;
+		}
+		
 		public function get updateSignal() : ISignal
 		{
 			if(null == _updateSignal) _updateSignal = new Signal(SpodObject); 
@@ -104,6 +125,7 @@ package org.osflash.spod
 		{ 
 			if(null != _tableRow)
 			{
+				_tableRow.insertSignal.remove(handleInsertSignal);
 				_tableRow.updateSignal.remove(handleUpdateSignal);
 				_tableRow.syncSignal.remove(handleSyncSignal);
 				_tableRow.removeSignal.remove(handleRemoveSignal);
@@ -113,6 +135,7 @@ package org.osflash.spod
 			
 			if(null != value)
 			{ 
+				_tableRow.insertSignal.add(handleInsertSignal);
 				_tableRow.updateSignal.add(handleUpdateSignal);
 				_tableRow.syncSignal.add(handleSyncSignal);
 				_tableRow.removeSignal.add(handleRemoveSignal);
