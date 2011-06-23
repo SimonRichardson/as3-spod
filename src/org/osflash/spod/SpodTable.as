@@ -4,6 +4,7 @@ package org.osflash.spod
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.InsertStatementBuilder;
+	import org.osflash.spod.builders.SelectAllStatementBuilder;
 	import org.osflash.spod.builders.SelectByIdStatementBuilder;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
@@ -47,6 +48,11 @@ package org.osflash.spod
 		 */
 		private var _selectSignal : ISignal;
 		
+		/**
+		 * @private
+		 */
+		private var _selectAllSignal : ISignal;
+		
 		public function SpodTable(schema : SpodTableSchema, manager : SpodManager)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
@@ -87,6 +93,17 @@ package org.osflash.spod
 			_manager.executioner.add(statement);
 		}
 		
+		public function selectAll() : void
+		{
+			const builder : ISpodStatementBuilder = new SelectAllStatementBuilder(_schema);
+			const statement : SpodStatement = builder.build();
+			
+			statement.completedSignal.add(handleSelectAllCompletedSignal);
+			statement.errorSignal.add(handleSelectAllErrorSignal);
+			
+			_manager.executioner.add(statement);
+		}
+		
 		/**
 		 * @private
 		 */
@@ -104,6 +121,48 @@ package org.osflash.spod
 			}
 			
 			throw new Error('SpodTableRow does not exist');
+		}
+		
+		/**
+		 * @private
+		 */
+		private function parseSelectStatementResult(result : SQLResult) : Vector.<SpodObject>
+		{
+			if(null == _schema) throw new IllegalOperationError('No valid schema');
+				
+			const type : Class = _schema.type;
+			if(null == type) throw new IllegalOperationError('No valid type');
+			
+			const objects : Vector.<SpodObject> = new Vector.<SpodObject>();
+			
+			const total : int = result.data.length;
+			for(var i : int = 0; i<total; i++)
+			{
+				const object : SpodObject = result.data[i] as SpodObject;
+				if(null == object) throw new IllegalOperationError('Invalid SpodObject');
+				if(!(object is type)) throw new IllegalOperationError('Invalid type');
+				
+				const id : int = object['id'];					
+				if(isNaN(id)) throw new IllegalOperationError('Invalid identifier');
+				
+				const row : SpodTableRow = new SpodTableRow(this, type, object, _manager);
+				if(null != _rows[id])
+				{
+					const prev : SpodTableRow = _rows[id];
+					prev.removeSignal.dispatch(prev.object);
+				}
+				
+				// Create the correct inject references
+				use namespace spod_namespace;
+				object.table = this;
+				object.tableRow = row;
+				
+				_rows[id] = row;
+				
+				objects.push(object);
+			}
+			
+			return objects;
 		}
 		
 		/**
@@ -150,7 +209,6 @@ package org.osflash.spod
 			_manager.errorSignal.dispatch(event);
 		}
 		
-		
 		/**
 		 * @private
 		 */
@@ -169,37 +227,8 @@ package org.osflash.spod
 			}
 			else
 			{
-				if(null == _schema) throw new IllegalOperationError('No valid schema');
-				
-				const type : Class = _schema.type;
-				if(null == type) throw new IllegalOperationError('No valid type');
-				
-				const total : int = result.data.length;
-				for(var i : int = 0; i<total; i++)
-				{
-					const object : SpodObject = result.data[i] as SpodObject;
-					if(null == object) throw new IllegalOperationError('Invalid SpodObject');
-					if(!(object is type)) throw new IllegalOperationError('Invalid type');
-					
-					const id : int = object['id'];					
-					if(isNaN(id)) throw new IllegalOperationError('Invalid identifier');
-					const row : SpodTableRow = new SpodTableRow(this, type, object, _manager);
-					
-					if(null != _rows[id])
-					{
-						const prev : SpodTableRow = _rows[id];
-						prev.removeSignal.dispatch(prev.object);
-					}
-					
-					// Create the correct inject references
-					use namespace spod_namespace;
-					object.table = this;
-					object.tableRow = row;
-					
-					_rows[id] = row;
-				}
-				
-				selectSignal.dispatch(object);
+				const objects :  Vector.<SpodObject> = parseSelectStatementResult(result);
+				selectSignal.dispatch(objects[0]);
 			}
 		}
 		
@@ -212,6 +241,42 @@ package org.osflash.spod
 		{
 			statement.completedSignal.remove(handleSelectCompletedSignal);
 			statement.errorSignal.remove(handleSelectErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleSelectAllCompletedSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleSelectAllCompletedSignal);
+			statement.errorSignal.remove(handleSelectAllErrorSignal);
+			
+			const result : SQLResult = statement.result;
+			if(	null == result || 
+				null == result.data || 
+				result.data.length == 0
+				)
+			{
+				selectAllSignal.dispatch(new Vector.<SpodObject>());	
+			}
+			else
+			{
+				const objects : Vector.<SpodObject> = parseSelectStatementResult(result);
+				selectAllSignal.dispatch(objects);
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleSelectAllErrorSignal(	statement : SpodStatement, 
+														event : SpodErrorEvent
+														) : void
+		{
+			statement.completedSignal.remove(handleSelectAllCompletedSignal);
+			statement.errorSignal.remove(handleSelectAllErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -235,6 +300,12 @@ package org.osflash.spod
 		{
 			if(null == _selectSignal) _selectSignal = new Signal(SpodObject);
 			return _selectSignal;
+		}
+		
+		public function get selectAllSignal() : ISignal
+		{
+			if(null == _selectAllSignal) _selectAllSignal = new Signal(Vector.<SpodObject>);
+			return _selectAllSignal;
 		}
 	}
 }

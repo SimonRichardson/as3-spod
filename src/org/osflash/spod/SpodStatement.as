@@ -132,7 +132,11 @@ package org.osflash.spod
 		public function set connection(value : SQLConnection) : void { _connection = value; }
 		
 		public function get query() : String { return _statement.text; }
-		public function set query(value : String) : void { _statement.text = value; }
+		public function set query(value : String) : void 
+		{ 
+			if(null == value || value.length < 1) throw new ArgumentError('Invalid query');
+			_statement.text = value;
+		}
 		
 		public function get parameters() : Object { return _statement.parameters; }
 		
