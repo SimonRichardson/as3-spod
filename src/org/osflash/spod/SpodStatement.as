@@ -76,7 +76,8 @@ package org.osflash.spod
 			_executed = false;
 			
 			_statement = new SQLStatement();
-			_statement.itemClass = type;
+			// If we assign a type it restricts us to a limited api!
+			// _statement.itemClass = type;
 			
 			_nativeCompletedSignal = new NativeSignal(_statement, SQLEvent.RESULT, SQLEvent);
 			_nativeErrorSignal = new NativeSignal(_statement, SQLErrorEvent.ERROR, SQLErrorEvent);

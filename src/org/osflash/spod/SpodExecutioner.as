@@ -1,6 +1,7 @@
 package org.osflash.spod
 {
 	import org.osflash.spod.errors.SpodErrorEvent;
+
 	import flash.errors.IllegalOperationError;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info

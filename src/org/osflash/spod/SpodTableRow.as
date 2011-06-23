@@ -4,9 +4,12 @@ package org.osflash.spod
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.DeleteStatementBuilder;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
+	import org.osflash.spod.builders.SelectStatementBuilder;
 	import org.osflash.spod.builders.UpdateStatementBuilder;
 	import org.osflash.spod.errors.SpodErrorEvent;
+	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
+	import org.osflash.spod.types.SpodInt;
 
 	import flash.errors.IllegalOperationError;
 	/**
@@ -43,6 +46,11 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private var _syncSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
 		private var _removeSignal : ISignal;
 		
 		public function SpodTableRow(	table : SpodTable, 
@@ -70,6 +78,18 @@ package org.osflash.spod
 			
 			statement.completedSignal.add(handleUpdateCompletedSignal);
 			statement.errorSignal.add(handleUpdateErrorSignal);
+			
+			_manager.executioner.add(statement);
+		}
+		
+		public function sync() : void
+		{
+			const schema : SpodTableSchema = _table.schema;
+			const builder : ISpodStatementBuilder = new SelectStatementBuilder(schema, object);
+			const statement : SpodStatement = builder.build();
+			
+			statement.completedSignal.add(handleSyncCompletedSignal);
+			statement.errorSignal.add(handleSyncErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -111,6 +131,57 @@ package org.osflash.spod
 			
 			_manager.errorSignal.dispatch(event);
 		}
+				
+		/**
+		 * @private
+		 */
+		private function handleSyncCompletedSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleSyncCompletedSignal);
+			statement.errorSignal.remove(handleSyncErrorSignal);
+			
+			if(null == statement.result) throw new IllegalOperationError('Result is null');
+			
+			const data : Array = statement.result.data;
+			if(null == data || data.length != 1) throw new IllegalOperationError('Result mismatch');
+			
+			if(null == table) throw new IllegalOperationError('Invalid table');
+			const schema : SpodTableSchema = table.schema;
+			if(null == schema) throw new IllegalOperationError('Invalid table schema');
+			
+			const object : Object = data[0];
+			const total : int = schema.columns.length;
+			if(total == 0) throw new IllegalOperationError('Invalid number of columns');
+			for(var i : int = 0; i<total; i++)
+			{
+				const column : SpodTableColumnSchema = schema.columns[i];
+				const columnName : String = column.name;
+				if(columnName == 'id' && column.type == SpodInt)
+				{
+					if(_object['id'] != object['id']) 
+						throw new IllegalOperationError('Object mismatch');
+				}
+				else
+				{
+					_object[columnName] = object[columnName];
+				}
+			}
+			
+			syncSignal.dispatch(_object);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleSyncErrorSignal(	statement : SpodStatement, 
+												event : SpodErrorEvent
+												) : void
+		{
+			statement.completedSignal.remove(handleSyncCompletedSignal);
+			statement.errorSignal.remove(handleSyncErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
 		
 		/**
 		 * @private
@@ -148,6 +219,12 @@ package org.osflash.spod
 		{
 			if(null == _updateSignal) _updateSignal = new Signal(SpodObject);
 			return _updateSignal;
+		}
+		
+		public function get syncSignal() : ISignal
+		{
+			if(null == _syncSignal) _syncSignal = new Signal(SpodObject);
+			return _syncSignal;
 		}
 		
 		public function get removeSignal() : ISignal

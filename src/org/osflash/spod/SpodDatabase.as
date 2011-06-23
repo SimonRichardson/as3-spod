@@ -62,6 +62,8 @@ package org.osflash.spod
 				if(null == statement) 
 					throw new IllegalOperationError('SpodStatement can not be null');
 				
+				_tables[type] = new SpodTable(schema, _manager);
+				
 				statement.completedSignal.add(handleCreateTableCompleteSignal);
 				statement.errorSignal.add(handleCreateTableErrorSignal);
 				
@@ -69,7 +71,6 @@ package org.osflash.spod
 				
 				// TODO : validate the schema of the table and the type.
 				
-				_tables[type] = new SpodTable(schema, _manager);
 			}
 			else throw new ArgumentError('Table already exists and is active, so you can not ' + 
 																				'create it again');
