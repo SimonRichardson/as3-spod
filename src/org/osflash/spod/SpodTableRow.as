@@ -1,6 +1,6 @@
 package org.osflash.spod
 {
-	import org.osflash.spod.types.SpodDate;
+	import org.osflash.logger.utils.debug;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.DeleteStatementBuilder;
@@ -10,6 +10,7 @@ package org.osflash.spod
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
+	import org.osflash.spod.types.SpodDate;
 	import org.osflash.spod.types.SpodInt;
 
 	import flash.errors.IllegalOperationError;
@@ -187,12 +188,17 @@ package org.osflash.spod
 							_object[columnName] = object[columnName];
 						else if(null != spodDate && null == objectDate)
 							_object[columnName] = null;
-						else if(spodDate.valueOf() != objectDate.valueOf()) 
-							spodDate.setTime(objectDate.valueOf());
 						else 
 						{
-							// Nothing has been updated so we'll move on.
-							continue;
+							// we have to test the toString() instead of valueOf because of rounding
+							// issues in the conversion between the database and the live object.
+							if(spodDate.toString() != objectDate.toString()) 
+								spodDate.setTime(objectDate.valueOf());
+							else 
+							{
+								// Nothing has been updated so we'll move on.
+								continue;
+							}
 						}
 						
 						updated = true;
