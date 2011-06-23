@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.logger.utils.debug;
 	import org.osflash.logger.utils.error;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;
@@ -33,9 +34,15 @@ package org.osflash.spod
 		
 		private function handleOpenSignal(database : SpodDatabase) : void
 		{
+			database.createTableSignal.add(handleCreateSignal);
 			database.createTable(User);
 		}
-			
+		
+		private function handleCreateSignal(table : SpodTable) : void
+		{
+			debug('Table created!', table);
+		}
+		
 		private function handleErrorSignal(event : SpodErrorEvent) : void
 		{
 			error(event.event.error);

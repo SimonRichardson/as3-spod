@@ -10,6 +10,8 @@ package org.osflash.spod.support.user
 		public var id : int;
 		
 		public var name : String;
+		
+		public var date : int;
 
 		public function User(name : String = null)
 		{
