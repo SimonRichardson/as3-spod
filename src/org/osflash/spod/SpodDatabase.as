@@ -101,6 +101,11 @@ package org.osflash.spod
 			return null != _tables[type];
 		}
 		
+		public function getTable(type : Class) : SpodTable
+		{
+			return active(type) ? _tables[type] : null; 
+		}
+		
 		public function buildSchemaFromType(type : Class) : SpodTableSchema
 		{
 			if(null == type) throw new ArgumentError('Type can not be null');
