@@ -8,36 +8,36 @@ const resouce : File = File.applicationStorageDirectory.resolvePath('session.db'
 
 const manager : SpodManager = new SpodManager();
 manager.open(resource, true);
-</pre></code>
+</code></pre>
 
 Create a table of Users:
 <pre><code>
 const database : SpodDatabase = maganger.database;
 database.createTable(User);
-</pre></code>
+</code></pre>
 
 Insert a new User:
 <pre><code>
 const table : SpodTable = database.getTable(User);
 const user : User = new User('Fred', 28);
 table.insert(user);
-</pre></code>
+</code></pre>
 
 Update a User with a new age (getting old!):
 <pre><code>
 user.age = 29;
 user.update();
-</pre></code>
+</code></pre>
 
 Delete a User:
 <pre><code>
 user.remove();
-</pre></code>
+</code></pre>
 
 Sync a User with a database in case some other program is editing the db:
 <pre><code>
 user.sync();
-</pre></code>
+</code></pre>
 
 There's much more, if you want to help then get forking and send pull requests.
 
