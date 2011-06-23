@@ -175,12 +175,36 @@ package org.osflash.spod
 				{
 					if(column.type == SpodDate)
 					{
-						// TODO : update date.
+						// Work out how to do a date update
+						const spodDate : Date = _object[columnName];
+						const objectDate : Date = object[columnName];
+						if(null == spodDate && null == objectDate) 
+						{
+							// both are null, continue 
+							continue;
+						}
+						else if(null == spodDate && null != objectDate)
+							_object[columnName] = object[columnName];
+						else if(null != spodDate && null == objectDate)
+							_object[columnName] = null;
+						else if(spodDate.valueOf() != objectDate.valueOf()) 
+							spodDate.setTime(objectDate.valueOf());
+						else 
+						{
+							// Nothing has been updated so we'll move on.
+							continue;
+						}
+						
+						updated = true;
 					}
 					else
 					{
-						if(_object[columnName] != object[columnName]) updated = true;
-						_object[columnName] = object[columnName];
+						// We're just any time, do a overwrite
+						if(_object[columnName] != object[columnName]) 
+						{
+							_object[columnName] = object[columnName];
+							updated = true;
+						}
 					}
 				}
 			}
