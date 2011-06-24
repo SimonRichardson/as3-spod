@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.spod.builders.expressions.limit.LimitExpression;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -61,7 +62,8 @@ package org.osflash.spod
 			
 			object.tableRow.table.selectWhereSignal.add(handleSelectWhereSignal);
 			object.tableRow.table.selectWhere(	new LessThanExpression('date', date), 
-												new DescOrderExpression('date')
+												new DescOrderExpression('date'),
+												new LimitExpression(28)
 												);
 		}
 		

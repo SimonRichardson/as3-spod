@@ -76,6 +76,7 @@ package org.osflash.spod.builders
 				
 				const whereBuffer : Array = [];
 				const orderBuffer : Array = [];
+				const limitBuffer : Array = [];
 				
 				const numExpressions : int = _expressions.length;				
 				for(i=0; i<numExpressions; i++)
@@ -91,6 +92,12 @@ package org.osflash.spod.builders
 						if(orderBuffer.length > 0) orderBuffer.push(' AND ');
 						orderBuffer.push(expression.build(_schema, statement));
 					}
+					else if(expression.type == SpodExpressionType.LIMIT)
+					{
+						if(limitBuffer.length > 0) 
+							throw new IllegalOperationError('Unexpected limit');
+						limitBuffer.push(expression.build(_schema, statement));
+					}
 					else throw new IllegalOperationError('Unknown expression type');
 				}
 				
@@ -104,6 +111,12 @@ package org.osflash.spod.builders
 				{
 					_buffer.push(' ORDER BY ');
 					_buffer.push.apply(null, orderBuffer);
+				}
+				
+				if(limitBuffer.length > 0)
+				{
+					_buffer.push(' LIMIT ');
+					_buffer.push.apply(null, limitBuffer);
 				}
 				
 				debug('QUERY : ', _buffer.join(''));
