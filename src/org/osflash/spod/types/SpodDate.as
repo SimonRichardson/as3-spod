@@ -16,9 +16,13 @@ package org.osflash.spod.types
 		{
 			var result : String = '';
 			
-			result += value.fullYear + '-' + pad(value.month) + '-' + pad(value.date);
+			result += value.fullYearUTC + '-' 
+					+ pad(value.monthUTC + 1) + '-' 
+					+ pad(value.dateUTC);
 			result += ' ';
-			result += pad(value.hours) + ':' + pad(value.minutes) + ':' + pad(value.seconds);
+			result += pad(value.hoursUTC) + ':' 
+					+ pad(value.minutesUTC) + ':' 
+					+ pad(value.secondsUTC);
 			
 			return result; 
 		}

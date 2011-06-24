@@ -50,7 +50,8 @@ package org.osflash.spod.builders.expressions.where
 				else if(_value is Date)
 				{
 					const formatDate : String = SpodDate.formatToSQLiteDateTime(_value);
-					return 'datetime(`' + _key + '`) <> datetime(\'' + formatDate + '\')';
+					return 'datetime(`' + _key + '`, \'utc\') <> datetime(\'' + 
+																		formatDate + '\', \'utc\')';
 				}
 				else 
 				{
