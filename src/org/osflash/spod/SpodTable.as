@@ -6,10 +6,12 @@ package org.osflash.spod
 	import org.osflash.spod.builders.InsertStatementBuilder;
 	import org.osflash.spod.builders.SelectAllStatementBuilder;
 	import org.osflash.spod.builders.SelectByIdStatementBuilder;
+	import org.osflash.spod.builders.SelectCountStatementBuilder;
 	import org.osflash.spod.builders.SelectWhereStatementBuilder;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
+
 	import flash.data.SQLResult;
 	import flash.errors.IllegalOperationError;
 	import flash.utils.Dictionary;
@@ -58,6 +60,11 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _selectAllSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
+		private var _countSignal : ISignal;
 		
 		public function SpodTable(schema : SpodTableSchema, manager : SpodManager)
 		{
@@ -123,6 +130,17 @@ package org.osflash.spod
 			
 			statement.completedSignal.add(handleSelectAllCompletedSignal);
 			statement.errorSignal.add(handleSelectAllErrorSignal);
+			
+			_manager.executioner.add(statement);
+		}
+		
+		public function count() : void
+		{
+			const builder : ISpodStatementBuilder = new SelectCountStatementBuilder(_schema);
+			const statement : SpodStatement = builder.build();
+			
+			statement.completedSignal.add(handleCountCompletedSignal);
+			statement.errorSignal.add(handleCountErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -340,6 +358,47 @@ package org.osflash.spod
 			_manager.errorSignal.dispatch(event);
 		}
 		
+		/**
+		 * @private
+		 */
+		private function handleCountCompletedSignal(	statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleCountCompletedSignal);
+			statement.errorSignal.remove(handleCountErrorSignal);
+			
+			const result : SQLResult = statement.result;
+			if(	null == result || 
+				null == result.data || 
+				result.data.length == 0
+				)
+			{
+				countSignal.dispatch(this, 0);	
+			}
+			else
+			{
+				if(statement.result.data.length > 1) 
+					throw new IllegalOperationError('Count result mismatch');
+				
+				const spodObjects : SpodObjects = statement.result.data[0] as SpodObjects;
+				if(null == spodObjects) throw new IllegalOperationError('Invalid Object');
+				
+				countSignal.dispatch(this, spodObjects.numObjects);
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleCountErrorSignal(	statement : SpodStatement, 
+													event : SpodErrorEvent
+													) : void
+		{
+			statement.completedSignal.remove(handleCountCompletedSignal);
+			statement.errorSignal.remove(handleCountErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
+		
 		public function get exists() : Boolean { return _exists; }
 		public function set exists(value : Boolean) : void { _exists = value; }
 
@@ -371,6 +430,12 @@ package org.osflash.spod
 		{
 			if(null == _selectAllSignal) _selectAllSignal = new Signal(Vector.<SpodObject>);
 			return _selectAllSignal;
+		}
+		
+		public function get countSignal() : ISignal
+		{
+			if(null == _countSignal) _countSignal = new Signal(SpodTable, int);
+			return _countSignal;
 		}
 	}
 }

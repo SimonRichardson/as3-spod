@@ -58,7 +58,7 @@ package org.osflash.spod.builders
 					
 					if(column.name == 'id' && column.type == SpodInt)
 					{
-						_buffer.push(column.name + ' ');
+						_buffer.push('`' + column.name + '` ');
 						_buffer.push('INTEGER ');
 						_buffer.push('PRIMARY KEY ');
 						_buffer.push('NOT NULL');
@@ -66,7 +66,7 @@ package org.osflash.spod.builders
 					}
 					else
 					{
-						_buffer.push(column.name + ' ');
+						_buffer.push('`' + column.name + '` ');
 						_buffer.push(SpodTypes.getSQLName(column.type) + ' ');
 						_buffer.push('NOT NULL');
 						_buffer.push(', ');
