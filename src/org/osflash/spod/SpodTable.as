@@ -6,9 +6,10 @@ package org.osflash.spod
 	import org.osflash.spod.builders.InsertStatementBuilder;
 	import org.osflash.spod.builders.SelectAllStatementBuilder;
 	import org.osflash.spod.builders.SelectByIdStatementBuilder;
+	import org.osflash.spod.builders.SelectWhereStatementBuilder;
+	import org.osflash.spod.builders.expressions.ISpodExpression;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
-
 	import flash.data.SQLResult;
 	import flash.errors.IllegalOperationError;
 	import flash.utils.Dictionary;
@@ -51,6 +52,11 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private var _selectWhereSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
 		private var _selectAllSignal : ISignal;
 		
 		public function SpodTable(schema : SpodTableSchema, manager : SpodManager)
@@ -85,6 +91,23 @@ package org.osflash.spod
 			if(isNaN(id)) throw new ArgumentError('id can not be NaN');
 			
 			const builder : ISpodStatementBuilder = new SelectByIdStatementBuilder(_schema, id);
+			const statement : SpodStatement = builder.build();
+			
+			statement.completedSignal.add(handleSelectCompletedSignal);
+			statement.errorSignal.add(handleSelectErrorSignal);
+			
+			_manager.executioner.add(statement);
+		}
+		
+		public function selectWhere(...rest) : void
+		{
+			if(null == rest) throw new ArgumentError('Rest can not be null');
+			
+			const expressions : Vector.<ISpodExpression> = Vector.<ISpodExpression>([rest]);
+			
+			const builder : ISpodStatementBuilder = new SelectWhereStatementBuilder(	_schema, 
+																						expressions
+																						);
 			const statement : SpodStatement = builder.build();
 			
 			statement.completedSignal.add(handleSelectCompletedSignal);
@@ -300,6 +323,12 @@ package org.osflash.spod
 		{
 			if(null == _selectSignal) _selectSignal = new Signal(SpodObject);
 			return _selectSignal;
+		}
+		
+		public function get selectWhereSignal() : ISignal
+		{
+			if(null == _selectWhereSignal) _selectWhereSignal = new Signal(Vector.<SpodObject>);
+			return _selectWhereSignal;
 		}
 		
 		public function get selectAllSignal() : ISignal
