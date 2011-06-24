@@ -1,9 +1,11 @@
 package org.osflash.spod.builders
 {
+	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
+	import org.osflash.spod.types.SpodDate;
 	import org.osflash.spod.types.SpodInt;
 
 	import flash.errors.IllegalOperationError;
@@ -85,13 +87,25 @@ package org.osflash.spod.builders
 					columnName = column.name;
 					if(columnName == 'id' && column.type == SpodInt) continue;
 					
-					_buffer.push(':' + columnName + '');
-					_buffer.push(', ');
+					if(column.type == SpodDate)
+					{
+						_buffer.push('datetime(\'');
+						_buffer.push(SpodDate.formatToSQLiteDateTime(_object[columnName]));
+						_buffer.push('\')');
+						_buffer.push(', ');
+					}
+					else
+					{
+						_buffer.push(':' + columnName + '');
+						_buffer.push(', ');
 					
-					statement.parameters[':' + columnName] = _object[columnName];
+						statement.parameters[':' + columnName] = _object[columnName];
+					}
 				}
 				_buffer.pop();
 				_buffer.push(')');
+				
+				debug(_buffer.join(''));
 				
 				// Make the query
 				statement.query = _buffer.join('');
