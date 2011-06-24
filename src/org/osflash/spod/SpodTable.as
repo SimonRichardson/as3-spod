@@ -2,6 +2,7 @@ package org.osflash.spod
 {
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
+	import org.osflash.spod.builders.DeleteWhereStatementBuilder;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.InsertStatementBuilder;
 	import org.osflash.spod.builders.SelectAllStatementBuilder;
@@ -66,6 +67,11 @@ package org.osflash.spod
 		 */
 		private var _countSignal : ISignal;
 		
+		/**
+		 * @private
+		 */
+		private var _removeWhereSignal : ISignal;
+		
 		public function SpodTable(schema : SpodTableSchema, manager : SpodManager)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
@@ -110,8 +116,11 @@ package org.osflash.spod
 		{
 			if(null == rest) throw new ArgumentError('Rest can not be null');
 			
-			const expressions : Vector.<ISpodExpression> = Vector.<ISpodExpression>(rest);
-			
+			const expressions : Vector.<ISpodExpression> = (rest[0] is Vector) ? 
+															rest[0] 
+															: 
+															Vector.<ISpodExpression>(rest);
+															
 			const builder : ISpodStatementBuilder = new SelectWhereStatementBuilder(	_schema, 
 																						expressions
 																						);
@@ -141,6 +150,26 @@ package org.osflash.spod
 			
 			statement.completedSignal.add(handleCountCompletedSignal);
 			statement.errorSignal.add(handleCountErrorSignal);
+			
+			_manager.executioner.add(statement);
+		}
+		
+		public function removeWhere(...rest) : void
+		{
+			if(null == rest) throw new ArgumentError('Rest can not be null');
+			
+			const expressions : Vector.<ISpodExpression> = (rest[0] is Vector) ? 
+															rest[0] 
+															: 
+															Vector.<ISpodExpression>(rest);
+															
+			const builder : ISpodStatementBuilder = new DeleteWhereStatementBuilder(	_schema, 
+																						expressions
+																						);
+			const statement : SpodStatement = builder.build();
+			
+			statement.completedSignal.add(handleRemoveWhereCompletedSignal);
+			statement.errorSignal.add(handleRemoveWhereErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -399,6 +428,31 @@ package org.osflash.spod
 			_manager.errorSignal.dispatch(event);
 		}
 		
+		/**
+		 * @private
+		 */
+		private function handleRemoveWhereCompletedSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleRemoveWhereCompletedSignal);
+			statement.errorSignal.remove(handleRemoveWhereErrorSignal);
+			
+			const result : SQLResult = statement.result;
+			removeWhereSignal.dispatch(result.rowsAffected);	
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleRemoveWhereErrorSignal(	statement : SpodStatement, 
+														event : SpodErrorEvent
+														) : void
+		{
+			statement.completedSignal.remove(handleRemoveWhereCompletedSignal);
+			statement.errorSignal.remove(handleRemoveWhereErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
+		
 		public function get exists() : Boolean { return _exists; }
 		public function set exists(value : Boolean) : void { _exists = value; }
 
@@ -436,6 +490,12 @@ package org.osflash.spod
 		{
 			if(null == _countSignal) _countSignal = new Signal(SpodTable, int);
 			return _countSignal;
+		}
+		
+		public function get removeWhereSignal() : ISignal
+		{
+			if(null == _removeWhereSignal) _removeWhereSignal = new Signal(int);
+			return _removeWhereSignal;
 		}
 	}
 }

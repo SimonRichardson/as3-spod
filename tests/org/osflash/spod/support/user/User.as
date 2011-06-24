@@ -13,11 +13,11 @@ package org.osflash.spod.support.user
 		
 		private var _date : Date;
 
-		public function User(name : String = null)
+		public function User(name : String = null, date : Date = null)
 		{
 			this.name = name;
 			
-			_date = new Date();
+			_date = date || new Date();
 		}
 
 		public function get date() : Date { return _date; }
