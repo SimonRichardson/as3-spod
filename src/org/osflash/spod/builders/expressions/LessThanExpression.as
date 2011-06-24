@@ -1,5 +1,9 @@
 package org.osflash.spod.builders.expressions
 {
+	import org.osflash.spod.SpodStatement;
+	import org.osflash.spod.schema.SpodTableSchema;
+
+	import flash.errors.IllegalOperationError;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */
@@ -28,13 +32,29 @@ package org.osflash.spod.builders.expressions
 		/**
 		 * @inheritDoc
 		 */
-		public function build() : String 
+		public function build(schema : SpodTableSchema, statement : SpodStatement) : String 
 		{ 
-			var value : String;
-			if(_value is int || _value is uint || _value is Number) value = '' + _value + '';
-			else value = '\'' + _value + '\''; 
+			if(null == schema) throw new ArgumentError('Schema can not be null');
+			if(null == statement) throw new ArgumentError('Statement can not be null');
 			
-			return '`' + _key + '` < ' + value; 
+			if(schema.match(_key, _value))
+			{
+				if(_value is int || _value is uint || _value is Number)
+				{
+					statement.parameters[':' + _key] = _value;
+					return '`' + _key + '` < :' + _key;
+				}
+				else if(_value is Date)
+				{
+					return 'datetime(`' + _key + '`) < datetime(\'' + _value + '\')';
+				}
+				else 
+				{
+					statement.parameters[':' + _key] = _value;
+					return '`' + _key + '` < :' + _key + ''; 
+				}
+
+			} else throw new IllegalOperationError('Invalid key');
 		}
 		
 		/**

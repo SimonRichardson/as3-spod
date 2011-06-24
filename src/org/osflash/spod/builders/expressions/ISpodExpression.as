@@ -1,12 +1,14 @@
 package org.osflash.spod.builders.expressions
 {
+	import org.osflash.spod.SpodStatement;
+	import org.osflash.spod.schema.SpodTableSchema;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */
 	public interface ISpodExpression
 	{
 		
-		function build() : String;
+		function build(schema : SpodTableSchema, statement : SpodStatement) : String;
 		
 		function get type() : int;
 	}

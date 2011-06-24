@@ -103,15 +103,15 @@ package org.osflash.spod
 		{
 			if(null == rest) throw new ArgumentError('Rest can not be null');
 			
-			const expressions : Vector.<ISpodExpression> = Vector.<ISpodExpression>([rest]);
+			const expressions : Vector.<ISpodExpression> = Vector.<ISpodExpression>(rest);
 			
 			const builder : ISpodStatementBuilder = new SelectWhereStatementBuilder(	_schema, 
 																						expressions
 																						);
 			const statement : SpodStatement = builder.build();
 			
-			statement.completedSignal.add(handleSelectCompletedSignal);
-			statement.errorSignal.add(handleSelectErrorSignal);
+			statement.completedSignal.add(handleSelectWhereCompletedSignal);
+			statement.errorSignal.add(handleSelectWhereErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -264,6 +264,42 @@ package org.osflash.spod
 		{
 			statement.completedSignal.remove(handleSelectCompletedSignal);
 			statement.errorSignal.remove(handleSelectErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleSelectWhereCompletedSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleSelectWhereCompletedSignal);
+			statement.errorSignal.remove(handleSelectWhereErrorSignal);
+			
+			const result : SQLResult = statement.result;
+			if(	null == result || 
+				null == result.data || 
+				result.data.length == 0
+				)
+			{
+				selectWhereSignal.dispatch(new Vector.<SpodObject>());	
+			}
+			else
+			{
+				const objects : Vector.<SpodObject> = parseSelectStatementResult(result);
+				selectWhereSignal.dispatch(objects);
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleSelectWhereErrorSignal(	statement : SpodStatement, 
+														event : SpodErrorEvent
+														) : void
+		{
+			statement.completedSignal.remove(handleSelectWhereCompletedSignal);
+			statement.errorSignal.remove(handleSelectWhereErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}

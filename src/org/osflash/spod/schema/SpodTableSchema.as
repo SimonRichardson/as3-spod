@@ -1,5 +1,6 @@
 package org.osflash.spod.schema
 {
+	import flash.utils.getQualifiedClassName;
 	import org.osflash.spod.types.SpodDate;
 	import org.osflash.spod.types.SpodInt;
 	import org.osflash.spod.types.SpodString;
@@ -36,6 +37,38 @@ package org.osflash.spod.schema
 			_name = name;
 			
 			_columns = new Vector.<SpodTableColumnSchema>();
+		}
+		
+		public function contains(name : String) : Boolean
+		{
+			var index : int = _columns.length;
+			while(--index > -1)
+			{
+				const column : SpodTableColumnSchema = _columns[index];
+				if(column.name == name) return true;
+			}
+			
+			return false;
+		}
+		
+		public function match(name : String, implementation : *) : Boolean
+		{
+			const type : String = getQualifiedClassName(implementation).toLowerCase();
+			
+			var index : int = _columns.length;
+			while(--index > -1)
+			{
+				const column : SpodTableColumnSchema = _columns[index];
+				if(column.name == name)
+				{
+					if(type == 'int' && column.type == SpodInt) return true;
+					else if(type == 'string' && column.type == SpodString) return true;
+					else if(type == 'date' && column.type == SpodDate) return true;
+					// TODO : Warn of a possible name clash!
+				}
+			}
+			
+			return false;
 		}
 		
 		public function createByType(name : String, type : String) : void

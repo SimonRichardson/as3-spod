@@ -9,5 +9,9 @@ package org.osflash.spod.builders.expressions
 		public static const WHERE : int = 0;
 		
 		public static const ORDER : int = 1;
+		
+		public static const LIMIT : int = 2;
+		
+		public static const OFFSET : int = 3;
 	}
 }

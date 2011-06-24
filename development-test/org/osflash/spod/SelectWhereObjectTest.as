@@ -44,7 +44,7 @@ package org.osflash.spod
 		protected function handleCreatedSignal(table : SpodTable) : void
 		{			
 			// flood the database with rows
-			const total : int = 20;
+			const total : int = 3;
 			for(var i : int = 0; i < total; i++)
 			{
 				const user : User = new User("User - " + i);
@@ -55,7 +55,9 @@ package org.osflash.spod
 		
 		protected function handleInsertSignal(object : SpodObject) : void
 		{
-			const date : Date = new Date();
+			const date : Date = new Date(2012, 11, 12);
+			
+			debug('SELECT : ', date);
 			
 			object.tableRow.table.selectWhereSignal.add(handleSelectWhereSignal);
 			object.tableRow.table.selectWhere(	new LessThanExpression('date', date), 

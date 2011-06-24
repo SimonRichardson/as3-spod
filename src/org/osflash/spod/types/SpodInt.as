@@ -16,5 +16,10 @@ package org.osflash.spod.types
 		 * @inheritDoc
 		 */
 		public function get type() : String { return SQL_NAME; }
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get typeClass() : Class { return int; }
 	}
 }

@@ -1,5 +1,6 @@
 package org.osflash.spod.builders
 {
+	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
 	import org.osflash.spod.builders.expressions.SpodExpressionType;
@@ -73,8 +74,8 @@ package org.osflash.spod.builders
 				
 				const statement : SpodStatement = new SpodStatement(tableSchema.type);
 				
-				const whereBuffer : Vector.<String> = new Vector.<String>();
-				const orderBuffer : Vector.<String> = new Vector.<String>();
+				const whereBuffer : Array = [];
+				const orderBuffer : Array = [];
 				
 				const numExpressions : int = _expressions.length;				
 				for(i=0; i<numExpressions; i++)
@@ -83,12 +84,12 @@ package org.osflash.spod.builders
 					if(expression.type == SpodExpressionType.WHERE)
 					{
 						if(whereBuffer.length > 0) whereBuffer.push(' AND ');
-						whereBuffer.push(expression.build());
+						whereBuffer.push(expression.build(_schema, statement));
 					}
 					else if(expression.type == SpodExpressionType.ORDER)
 					{
 						if(orderBuffer.length > 0) orderBuffer.push(' AND ');
-						orderBuffer.push(expression.build());
+						orderBuffer.push(expression.build(_schema, statement));
 					}
 					else throw new IllegalOperationError('Unknown expression type');
 				}
@@ -104,6 +105,8 @@ package org.osflash.spod.builders
 					_buffer.push(' ORDER BY ');
 					_buffer.push.apply(null, orderBuffer);
 				}
+				
+				debug('QUERY : ', _buffer.join(''));
 				
 				// Make the query
 				statement.query = _buffer.join('');
