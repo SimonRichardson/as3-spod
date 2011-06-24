@@ -1,13 +1,15 @@
-package org.osflash.spod.builders.expressions
+package org.osflash.spod.builders.expressions.order
 {
+	import flash.errors.IllegalOperationError;
 	import org.osflash.spod.SpodStatement;
+	import org.osflash.spod.builders.expressions.ISpodExpression;
+	import org.osflash.spod.builders.expressions.SpodExpressionType;
 	import org.osflash.spod.schema.SpodTableSchema;
 
-	import flash.errors.IllegalOperationError;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */
-	public class AscOrderExpression implements ISpodExpression
+	public class DescOrderExpression implements ISpodExpression
 	{
 
 		/**
@@ -15,14 +17,14 @@ package org.osflash.spod.builders.expressions
 		 */
 		private var _key : String;
 
-		public function AscOrderExpression(key : String)
+		public function DescOrderExpression(key : String)
 		{
 			if(null == key) throw new ArgumentError('Key can not be null');
 			if(key.length < 1) throw new ArgumentError('Key can not be empty');
 			
 			_key = key;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -33,10 +35,11 @@ package org.osflash.spod.builders.expressions
 			
 			if(schema.contains(_key))
 			{
-				return '`' + _key + '` ASC';
+				return '`' + _key + '` DESC';
 				
 			} else throw new IllegalOperationError('Invalid key');
 		}
+		
 
 		/**
 		 * @inheritDoc
