@@ -5,6 +5,7 @@ package org.osflash.spod
 	import org.osflash.spod.builders.DeleteWhereStatementBuilder;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.InsertStatementBuilder;
+	import org.osflash.spod.builders.RawStatementBuilder;
 	import org.osflash.spod.builders.SelectAllStatementBuilder;
 	import org.osflash.spod.builders.SelectByIdStatementBuilder;
 	import org.osflash.spod.builders.SelectCountStatementBuilder;
@@ -170,6 +171,22 @@ package org.osflash.spod
 			
 			statement.completedSignal.add(handleRemoveWhereCompletedSignal);
 			statement.errorSignal.add(handleRemoveWhereErrorSignal);
+			
+			_manager.executioner.add(statement);
+		}
+		
+		/**
+		 * @private
+		 */
+		spod_namespace function executeQuery(string : String, params : Object = null) : void
+		{
+			const parameters : Object = params || {};
+			
+			const builder : ISpodStatementBuilder = new RawStatementBuilder(string, parameters);
+			const statement : SpodStatement = builder.build();
+			
+			statement.completedSignal.add(handleQueryCompletedSignal);
+			statement.errorSignal.add(handleQueryErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -449,6 +466,30 @@ package org.osflash.spod
 		{
 			statement.completedSignal.remove(handleRemoveWhereCompletedSignal);
 			statement.errorSignal.remove(handleRemoveWhereErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleQueryCompletedSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleQueryCompletedSignal);
+			statement.errorSignal.remove(handleQueryErrorSignal);
+			
+			throw new Error('Missing Implementation');	
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleQueryErrorSignal(	statement : SpodStatement, 
+													event : SpodErrorEvent
+													) : void
+		{
+			statement.completedSignal.remove(handleQueryCompletedSignal);
+			statement.errorSignal.remove(handleQueryErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
