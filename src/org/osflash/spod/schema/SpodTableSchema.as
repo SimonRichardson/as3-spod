@@ -1,5 +1,6 @@
 package org.osflash.spod.schema
 {
+	import org.osflash.spod.types.SpodBoolean;
 	import flash.utils.getQualifiedClassName;
 	import org.osflash.spod.types.SpodDate;
 	import org.osflash.spod.types.SpodInt;
@@ -83,6 +84,7 @@ package org.osflash.spod.schema
 				case 'int': createInt(name); break;
 				case 'string': createString(name); break;
 				case 'date': createDate(name); break;
+				case 'boolean': createBoolean(name); break;
 				default:
 					throw new ArgumentError('Unknown type');
 			}
@@ -110,6 +112,14 @@ package org.osflash.spod.schema
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
 			
 			_columns.push(new SpodTableColumnSchema(name, SpodDate));
+		}
+		
+		public function createBoolean(name : String) : void
+		{
+			if(null == name) throw new ArgumentError('Name can not be null');
+			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			
+			_columns.push(new SpodTableColumnSchema(name, SpodBoolean));
 		}
 		
 		public function get columns() : Vector.<SpodTableColumnSchema> { return _columns; }
