@@ -77,7 +77,7 @@ package org.osflash.spod.builders
 					{
 						_buffer.push('datetime(\'');
 						_buffer.push(SpodDate.formatToSQLiteDateTime(_object[columnName]));
-						_buffer.push('\')');
+						_buffer.push('\', \'utc\')');
 						_buffer.push(', ');
 					}
 					else

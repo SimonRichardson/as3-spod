@@ -1,6 +1,5 @@
 package org.osflash.spod.builders
 {
-	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
@@ -91,7 +90,7 @@ package org.osflash.spod.builders
 					{
 						_buffer.push('datetime(\'');
 						_buffer.push(SpodDate.formatToSQLiteDateTime(_object[columnName]));
-						_buffer.push('\')');
+						_buffer.push('\', \'utc\')');
 						_buffer.push(', ');
 					}
 					else
@@ -102,10 +101,9 @@ package org.osflash.spod.builders
 						statement.parameters[':' + columnName] = _object[columnName];
 					}
 				}
+				
 				_buffer.pop();
 				_buffer.push(')');
-				
-				debug(_buffer.join(''));
 				
 				// Make the query
 				statement.query = _buffer.join('');

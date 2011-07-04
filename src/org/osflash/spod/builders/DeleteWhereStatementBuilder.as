@@ -1,6 +1,5 @@
 package org.osflash.spod.builders
 {
-	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
 	import org.osflash.spod.builders.expressions.SpodExpressionType;
@@ -80,8 +79,6 @@ package org.osflash.spod.builders
 					_buffer.push(' WHERE ');
 					_buffer.push.apply(null, whereBuffer);
 				}
-				
-				debug(_buffer.join(''));
 				
 				// Make the query
 				statement.query = _buffer.join('');
