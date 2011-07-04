@@ -212,67 +212,71 @@ package org.osflash.spod
 			if(null == schema) throw new IllegalOperationError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
-			const tables : Array = result.tables;
-			const total : int = tables.length;
-			 
-			if(total == 0) internalCreateTable(schema);
-			else if(total == 1)
+			if(null == result || null == result.tables) internalCreateTable(schema);
+			else
 			{
-				const sqlTable : SQLTableSchema = result.tables[0];
-				if(schema.name != sqlTable.name)
+				const tables : Array = result.tables;
+				const total : int = tables.length;
+				 
+				if(total == 0) internalCreateTable(schema);
+				else if(total == 1)
 				{
-					throw new SpodError('Unexpected table name, expected ' + schema.name + 
-																		' got ' + sqlTable.name);
-				}
-				
-				const numColumns : int = schema.columns.length; 
-				
-				if(sqlTable.columns.length != numColumns)
-				{
-					throw new SpodError('Invalid column count, expected ' + numColumns + 
-															' got ' + sqlTable.columns.length);
-				}
-				else
-				{
-					// This validates the schema of the database and the class!
-					for(var i : int = 0; i<numColumns; i++)
+					const sqlTable : SQLTableSchema = result.tables[0];
+					if(schema.name != sqlTable.name)
 					{
-						const sqlColumnSchema : SQLColumnSchema = sqlTable.columns[i];
-						const sqlColumnName : String = sqlColumnSchema.name;
-						const sqlDataType : String = sqlColumnSchema.dataType;
-						
-						var match : Boolean = false;
-						
-						var index : int = numColumns;
-						while(--index > -1)
+						throw new SpodError('Unexpected table name, expected ' + schema.name + 
+																		' got ' + sqlTable.name);
+					}
+					
+					const numColumns : int = schema.columns.length; 
+					
+					if(sqlTable.columns.length != numColumns)
+					{
+						throw new SpodError('Invalid column count, expected ' + numColumns + 
+																' got ' + sqlTable.columns.length);
+					}
+					else
+					{
+						// This validates the schema of the database and the class!
+						for(var i : int = 0; i<numColumns; i++)
 						{
-							const column : SpodTableColumnSchema = schema.columns[index];
-							const dataType : String = SpodTypes.getSQLName(column.type);
-							if(column.name == sqlColumnName && sqlDataType == dataType)
+							const sqlColumnSchema : SQLColumnSchema = sqlTable.columns[i];
+							const sqlColumnName : String = sqlColumnSchema.name;
+							const sqlDataType : String = sqlColumnSchema.dataType;
+							
+							var match : Boolean = false;
+							
+							var index : int = numColumns;
+							while(--index > -1)
 							{
-								match = true;
+								const column : SpodTableColumnSchema = schema.columns[index];
+								const dataType : String = SpodTypes.getSQLName(column.type);
+								if(column.name == sqlColumnName && sqlDataType == dataType)
+								{
+									match = true;
+								}
+							}
+							
+							if(!match) 
+							{
+								throw new SpodError('Invalid table schema, expected ' + 
+											schema.columns[i].name + ' and ' + 
+											SpodTypes.getSQLName(schema.columns[i].type) + ' got ' +
+											sqlColumnName + ' and ' + sqlDataType
+											);
 							}
 						}
 						
-						if(!match) 
-						{
-							throw new SpodError('Invalid table schema, expected ' + 
-										schema.columns[i].name + ' and ' + 
-										SpodTypes.getSQLName(schema.columns[i].type) + ' got ' +
-										sqlColumnName + ' and ' + sqlDataType
-										);
-						}
+						// We don't need to make a new table as we've already got one!
+						const table : SpodTable = new SpodTable(schema, _manager);
+						
+						_tables[type] = table;
+						
+						createTableSignal.dispatch(table);
 					}
-					
-					// We don't need to make a new table as we've already got one!
-					const table : SpodTable = new SpodTable(schema, _manager);
-					
-					_tables[type] = table;
-					
-					createTableSignal.dispatch(table);
 				}
+				else throw new SpodError('Invalid table count, expected 1 got ' + total);
 			}
-			else throw new SpodError('Invalid table count, expected 1 got ' + total);
 		}
 		
 		/**
