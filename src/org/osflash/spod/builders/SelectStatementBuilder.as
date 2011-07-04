@@ -4,6 +4,7 @@ package org.osflash.spod.builders
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
+	import org.osflash.spod.types.SpodDate;
 
 	import flash.errors.IllegalOperationError;
 	import flash.utils.getQualifiedClassName;
@@ -58,7 +59,10 @@ package org.osflash.spod.builders
 					const column : SpodTableColumnSchema = columns[i];
 					const columnName : String = column.name;
 					
-					_buffer.push('' + columnName + '');
+					if(column.type is SpodDate) 
+						_buffer.push('STRFTIME(\'%J\', ' + columnName + ') as ' + columnName);
+					else _buffer.push('`' + columnName + '`');
+					
 					_buffer.push(', ');
 				}
 				

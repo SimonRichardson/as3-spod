@@ -11,26 +11,6 @@ package org.osflash.spod.types
 		public function SpodDate()
 		{
 		}
-		
-		public static function formatToSQLiteDateTime(value : Date) : String
-		{
-			var result : String = '';
-			
-			result += value.fullYearUTC + '-' 
-					+ pad(value.monthUTC + 1) + '-' 
-					+ pad(value.dateUTC);
-			result += ' ';
-			result += pad(value.hoursUTC) + ':' 
-					+ pad(value.minutesUTC) + ':' 
-					+ pad(value.secondsUTC);
-			
-			return result; 
-		}
-		
-		private static function pad(value : int) : String
-		{
-			return value < 10 ? '0' + value : '' + value;
-		}
 
 		/**
 		 * @inheritDoc
