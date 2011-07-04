@@ -65,6 +65,7 @@ package org.osflash.spod.schema
 					if(type == 'int' && column.type == SpodInt) return true;
 					else if(type == 'string' && column.type == SpodString) return true;
 					else if(type == 'date' && column.type == SpodDate) return true;
+					else if(type == 'boolean' && column.type == SpodBoolean) return true;
 					// TODO : Warn of a possible name clash!
 				}
 			}
