@@ -12,7 +12,7 @@ package org.osflash.spod.types
 		{
 		}
 		
-		public static function formatToSQLiteDateTime(value : Date) : String
+		public static function formatToSQLiteDateTime1(value : Date) : String
 		{
 			var result : String = '';
 			
@@ -26,7 +26,7 @@ package org.osflash.spod.types
 			
 			return result; 
 		}
-		
+				
 		private static function pad(value : int) : String
 		{
 			return value < 10 ? '0' + value : '' + value;

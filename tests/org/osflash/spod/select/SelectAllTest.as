@@ -1,14 +1,18 @@
 package org.osflash.spod.select
 {
 	import asunit.asserts.assertEquals;
+	import asunit.asserts.assertNotNull;
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
-	import flash.events.SQLErrorEvent;
+
 	import org.osflash.spod.SpodDatabase;
 	import org.osflash.spod.SpodManager;
+	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.SpodTable;
 	import org.osflash.spod.support.BaseTest;
 	import org.osflash.spod.support.user.User;
+
+	import flash.events.SQLErrorEvent;
 
 
 	/**
@@ -58,9 +62,11 @@ package org.osflash.spod.select
 			}
 		}
 		
-		private function match_user_valueOf_and_date_valueOf(user : User, date : Date) : void
+		private function match_user_valueOf_and_date_valueOf(object : SpodObject, date : Date) : void
 		{
-			assertEquals('Date User should match date set', user.date.valueOf() == date.valueOf());
+			const user : User = object as User;
+			assertNotNull('User should not be null', user);
+			assertEquals('Date User should match date set', user.date.valueOf(), date.valueOf());
 		}
 		
 		private function select_all_users_validate_date(user : User, date : Date, total : int) : void
@@ -70,14 +76,15 @@ package org.osflash.spod.select
 			table.selectAll();
 		}
 		
-		private function match_users_valueOf_and_date_valueOf(users : Vector.<User>, date : Date, total : int) : void
+		private function match_users_valueOf_and_date_valueOf(objects : Vector.<SpodObject>, date : Date, total : int) : void
 		{
-			assertEquals('Number of users should equal ' + total, users.length == total);
+			assertEquals('Number of users should be ' + total, total, objects.length);
 			
 			for(var i : int = 0; i < total; i++)
 			{
-				const user : User = users[i];
-				assertEquals('Date User should match date set', user.date.valueOf() == date.valueOf());
+				const user : User = objects[i] as User;
+				assertNotNull('User should not be null', user);
+				assertEquals('Date User should match date set', user.date.toUTCString(), date.toUTCString());
 			}
 		}
 		

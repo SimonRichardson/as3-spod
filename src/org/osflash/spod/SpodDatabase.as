@@ -17,6 +17,7 @@ package org.osflash.spod
 	import flash.data.SQLSchemaResult;
 	import flash.data.SQLTableSchema;
 	import flash.errors.IllegalOperationError;
+	import flash.errors.SQLError;
 	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
 	import flash.utils.Dictionary;
@@ -90,7 +91,16 @@ package org.osflash.spod
 																).params = params;
 				
 				const name : String = getClassNameFromQname(getQualifiedClassName(type));
-				_manager.connection.loadSchema(SQLTableSchema, name);
+				try
+				{
+					_manager.connection.loadSchema(SQLTableSchema, name);
+				}
+				catch(error : SQLError)
+				{
+					// supress the error
+					if(error.errorID == 3115 && error.detailID == 1007 && !_manager.async)
+						handleSQLError(type);
+				}
 			}
 			else throw new ArgumentError('Table already exists and is active, so you can not ' + 
 																				'create it again');
@@ -189,17 +199,25 @@ package org.osflash.spod
 			{
 				event.stopImmediatePropagation();
 				
-				_nativeSQLErrorEventSignal.remove(handleSQLErrorEventSignal);
-				_nativeSQLEventSchemaSignal.remove(handleSQLEventSchemaSignal);
-				
-				if(null == type) throw new IllegalOperationError('Type can not be null');
-				
-				const schema : SpodTableSchema = buildSchemaFromType(type);
-				if(null == schema) throw new IllegalOperationError('Schema can not be null');
-				
-				// Create it because it doesn't exist
-				internalCreateTable(schema);
+				handleSQLError(type);
 			}
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleSQLError(type : Class) : void
+		{
+			_nativeSQLErrorEventSignal.remove(handleSQLErrorEventSignal);
+			_nativeSQLEventSchemaSignal.remove(handleSQLEventSchemaSignal);
+			
+			if(null == type) throw new IllegalOperationError('Type can not be null');
+			
+			const schema : SpodTableSchema = buildSchemaFromType(type);
+			if(null == schema) throw new IllegalOperationError('Schema can not be null');
+			
+			// Create it because it doesn't exist
+			internalCreateTable(schema);
 		}
 		
 		/**

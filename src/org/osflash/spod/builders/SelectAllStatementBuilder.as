@@ -1,5 +1,6 @@
 package org.osflash.spod.builders
 {
+	import org.osflash.spod.types.SpodDate;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
@@ -20,7 +21,7 @@ package org.osflash.spod.builders
 		/**
 		 * @private
 		 */
-		private var _buffer : String;
+		private var _buffer : Vector.<String>;
 
 		public function SelectAllStatementBuilder(schema : SpodTableSchema)
 		{
@@ -28,7 +29,7 @@ package org.osflash.spod.builders
 			
 			_schema = schema;
 			
-			_buffer = '';
+			_buffer = new Vector.<String>();
 		}
 
 		public function build() : SpodStatement
@@ -41,12 +42,31 @@ package org.osflash.spod.builders
 				
 				if(total == 0) throw new IllegalOperationError('Invalid columns length');
 				
-				_buffer = 'SELECT * FROM `' + _schema.name + '`';
+				_buffer.length = 0;
+				
+				_buffer.push('SELECT ');
+				
+				for(var i : int = 0; i<total; i++)
+				{
+					const column : SpodTableColumnSchema = columns[i];
+					const columnName : String = column.name;
+					
+					if(column.type is SpodDate) 
+						_buffer.push('STRFTIME(\'%J\', ' + columnName + ') as ' + columnName);
+					else _buffer.push('`' + columnName + '`');
+					
+					_buffer.push(', ');
+				}
+				
+				_buffer.pop();
+				
+				_buffer.push(' FROM ');
+				_buffer.push('`' + _schema.name + '`');
 				
 				const statement : SpodStatement = new SpodStatement(tableSchema.type);
 				
 				// Make the query
-				statement.query = _buffer;
+				statement.query = _buffer.join('');
 				
 				return statement;
 				

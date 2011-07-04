@@ -34,6 +34,24 @@ package org.osflash.spod.create
 			manager.open(resource);
 		}
 		
+		[Test]
+		public function make_spod_and_create_db_async() : void
+		{
+			const manager : SpodManager = new SpodManager();
+			manager.openSignal.add(openAsync.add(handleOpenSignal, 1000));
+			manager.errorSignal.add(handleErrorSignal);
+			manager.open(resource, true);
+		}
+		
+		[Test]
+		public function make_spod_and_create_again_db_async() : void
+		{
+			const manager : SpodManager = new SpodManager();
+			manager.openSignal.add(openAsync.add(handleOpenSignal, 1000));
+			manager.errorSignal.add(handleErrorSignal);
+			manager.open(resource, true);
+		}
+		
 		private function handleOpenSignal(database : SpodDatabase) : void
 		{
 			database.createTableSignal.add(createdAsync.add(handleCreatedSignal, 1000));
