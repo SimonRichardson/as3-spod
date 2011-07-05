@@ -4,7 +4,7 @@ package org.osflash.spod.builders
 	import org.osflash.spod.schema.ISpodSchema;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
-	import org.osflash.spod.types.SpodInt;
+	import org.osflash.spod.types.SpodTypeInt;
 	import org.osflash.spod.types.SpodTypes;
 
 	import flash.errors.IllegalOperationError;
@@ -56,7 +56,7 @@ package org.osflash.spod.builders
 				{
 					const column : SpodTableColumnSchema = columns[i];
 					
-					if(column.name == 'id' && column.type == SpodInt)
+					if(column.name == 'id' && column.type == SpodTypeInt)
 					{
 						_buffer.push('`' + column.name + '` ');
 						_buffer.push('INTEGER ');

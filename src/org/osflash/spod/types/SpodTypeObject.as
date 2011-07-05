@@ -3,12 +3,12 @@ package org.osflash.spod.types
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class SpodInt implements ISpodType
+	public class SpodTypeObject implements ISpodType
 	{
-
-		public static const SQL_NAME : String = 'INTEGER';
 		
-		public function SpodInt()
+		public static const SQL_NAME : String = 'OBJECT';
+		
+		public function SpodTypeObject()
 		{
 		}
 		
@@ -20,6 +20,6 @@ package org.osflash.spod.types
 		/**
 		 * @inheritDoc
 		 */
-		public function get typeClass() : Class { return int; }
+		public function get typeClass() : Class { return Object; }
 	}
 }

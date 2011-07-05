@@ -3,12 +3,12 @@ package org.osflash.spod.types
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class SpodString implements ISpodType
+	public class SpodTypeString implements ISpodType
 	{
 		
 		public static const SQL_NAME : String = 'TEXT';
 		
-		public function SpodString()
+		public function SpodTypeString()
 		{
 		}
 		

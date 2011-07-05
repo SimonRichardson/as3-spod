@@ -3,12 +3,12 @@ package org.osflash.spod.types
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class SpodBoolean implements ISpodType
+	public class SpodTypeInt implements ISpodType
 	{
+
+		public static const SQL_NAME : String = 'INTEGER';
 		
-		public static const SQL_NAME : String = 'BOOLEAN';
-		
-		public function SpodBoolean()
+		public function SpodTypeInt()
 		{
 		}
 		
@@ -20,6 +20,6 @@ package org.osflash.spod.types
 		/**
 		 * @inheritDoc
 		 */
-		public function get typeClass() : Class { return String; }
+		public function get typeClass() : Class { return int; }
 	}
 }

@@ -10,10 +10,11 @@ package org.osflash.spod.types
 		{
 			switch(type)
 			{
-				case SpodInt: return SpodInt.SQL_NAME;
-				case SpodString: return SpodString.SQL_NAME;
-				case SpodDate: return SpodDate.SQL_NAME;
-				case SpodBoolean: return SpodBoolean.SQL_NAME;
+				case SpodTypeInt: return SpodTypeInt.SQL_NAME;
+				case SpodTypeString: return SpodTypeString.SQL_NAME;
+				case SpodTypeDate: return SpodTypeDate.SQL_NAME;
+				case SpodTypeBoolean: return SpodTypeBoolean.SQL_NAME;
+				case SpodTypeObject: return SpodTypeObject.SQL_NAME;
 				default:
 					throw new ArgumentError('Unknown type : ' + type);
 			}

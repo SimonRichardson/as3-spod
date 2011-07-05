@@ -48,8 +48,17 @@ package org.osflash.spod
 		{
 			const user : User = object as User;
 			debug(user.id);
-		}
 			
+			user.tableRow.table.selectSignal.add(handleSelectSignal);
+			user.tableRow.table.select(2);
+		}
+		
+		protected function handleSelectSignal(object : SpodObject) : void
+		{
+			const user : User = object as User;
+			debug(user.id, user.object.name, user.object.age);
+		}
+		
 		protected function handleErrorSignal(event : SpodErrorEvent) : void
 		{
 			error(event.event.error);
