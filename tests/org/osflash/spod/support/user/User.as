@@ -11,8 +11,6 @@ package org.osflash.spod.support.user
 		
 		public var name : String;
 		
-		public var object : Object;
-		
 		private var _date : Date;
 
 		public function User(name : String = null, date : Date = null)
@@ -20,8 +18,6 @@ package org.osflash.spod.support.user
 			this.name = name;
 			
 			_date = date || new Date();
-			
-			object = {name: 'Name', age: 23};
 		}
 
 		public function get date() : Date { return _date; }

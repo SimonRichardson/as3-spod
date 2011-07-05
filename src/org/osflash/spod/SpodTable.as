@@ -216,7 +216,7 @@ package org.osflash.spod
 		private function parseSelectStatementResult(result : SQLResult) : Vector.<SpodObject>
 		{
 			if(null == _schema) throw new IllegalOperationError('No valid schema');
-				
+			
 			const type : Class = _schema.type;
 			if(null == type) throw new IllegalOperationError('No valid type');
 			

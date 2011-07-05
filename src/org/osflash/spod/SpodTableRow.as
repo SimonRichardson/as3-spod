@@ -9,8 +9,7 @@ package org.osflash.spod
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
-	import org.osflash.spod.types.SpodTypeDate;
-	import org.osflash.spod.types.SpodTypeInt;
+	import org.osflash.spod.types.SpodTypes;
 
 	import flash.errors.IllegalOperationError;
 	/**
@@ -166,14 +165,14 @@ package org.osflash.spod
 			{
 				const column : SpodTableColumnSchema = schema.columns[i];
 				const columnName : String = column.name;
-				if(columnName == 'id' && column.type == SpodTypeInt)
+				if(columnName == 'id' && column.type == SpodTypes.INT)
 				{
 					if(_object['id'] != object['id']) 
 						throw new IllegalOperationError('Object id mismatch');
 				}
 				else
 				{
-					if(column.type == SpodTypeDate)
+					if(column.type == SpodTypes.DATE)
 					{
 						// Work out how to do a date update
 						const spodDate : Date = _object[columnName];

@@ -1,10 +1,7 @@
 package org.osflash.spod.schema
 {
-	import org.osflash.spod.types.SpodTypeBoolean;
-	import org.osflash.spod.types.SpodTypeDate;
-	import org.osflash.spod.types.SpodTypeInt;
-	import org.osflash.spod.types.SpodTypeObject;
-	import org.osflash.spod.types.SpodTypeString;
+	import flash.errors.IllegalOperationError;
+	import org.osflash.spod.types.SpodTypes;
 	import org.osflash.spod.utils.validateString;
 
 	import flash.net.registerClassAlias;
@@ -65,12 +62,15 @@ package org.osflash.spod.schema
 				const column : SpodTableColumnSchema = _columns[index];
 				if(column.name == name)
 				{
-					if(type == 'int' && column.type == SpodTypeInt) return true;
-					else if(type == 'string' && column.type == SpodTypeString) return true;
-					else if(type == 'date' && column.type == SpodTypeDate) return true;
-					else if(type == 'boolean' && column.type == SpodTypeBoolean) return true;
-					else if(type == 'object' && column.type == SpodTypeObject) return true;
-					// TODO : Warn of a possible name clash!
+					if(type == 'int' && column.type == SpodTypes.INT) return true;
+					else if(type == 'uint' && column.type == SpodTypes.UINT) return true;
+					else if(type == 'number' && column.type == SpodTypes.NUMBER) return true;
+					else if(type == 'string' && column.type == SpodTypes.STRING) return true;
+					else if(type == 'date' && column.type == SpodTypes.DATE) return true;
+					else if(type == 'boolean' && column.type == SpodTypes.BOOLEAN) return true;
+					else if(type == 'object' && column.type == SpodTypes.OBJECT) return true;
+					else
+						throw new IllegalOperationError('Unknown column type : ' + type);
 				}
 			}
 			
@@ -87,6 +87,8 @@ package org.osflash.spod.schema
 			switch(type.toLowerCase())
 			{
 				case 'int': createInt(name); break;
+				case 'uint': createUInt(name); break;
+				case 'number': createNumber(name); break;
 				case 'string': createString(name); break;
 				case 'date': createDate(name); break;
 				case 'boolean': createBoolean(name); break;
@@ -101,7 +103,23 @@ package org.osflash.spod.schema
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
 			
-			_columns.push(new SpodTableColumnSchema(name, SpodTypeInt));
+			_columns.push(new SpodTableColumnSchema(name, SpodTypes.INT));
+		}
+		
+		public function createUInt(name : String) : void
+		{
+			if(null == name) throw new ArgumentError('Name can not be null');
+			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			
+			_columns.push(new SpodTableColumnSchema(name, SpodTypes.UINT));
+		}
+		
+		public function createNumber(name : String) : void
+		{
+			if(null == name) throw new ArgumentError('Name can not be null');
+			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			
+			_columns.push(new SpodTableColumnSchema(name, SpodTypes.NUMBER));
 		}
 		
 		public function createString(name : String) : void
@@ -109,7 +127,7 @@ package org.osflash.spod.schema
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
 			
-			_columns.push(new SpodTableColumnSchema(name, SpodTypeString));
+			_columns.push(new SpodTableColumnSchema(name, SpodTypes.STRING));
 		}
 		
 		public function createDate(name : String) : void
@@ -117,7 +135,7 @@ package org.osflash.spod.schema
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
 			
-			_columns.push(new SpodTableColumnSchema(name, SpodTypeDate));
+			_columns.push(new SpodTableColumnSchema(name, SpodTypes.DATE));
 		}
 		
 		public function createBoolean(name : String) : void
@@ -125,7 +143,7 @@ package org.osflash.spod.schema
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
 			
-			_columns.push(new SpodTableColumnSchema(name, SpodTypeBoolean));
+			_columns.push(new SpodTableColumnSchema(name, SpodTypes.BOOLEAN));
 		}
 		
 		public function createObject(name : String) : void
@@ -135,7 +153,7 @@ package org.osflash.spod.schema
 			
 			registerClassAlias('Object', Object);
 			
-			_columns.push(new SpodTableColumnSchema(name, SpodTypeObject));
+			_columns.push(new SpodTableColumnSchema(name, SpodTypes.OBJECT));
 		}
 		
 		public function get columns() : Vector.<SpodTableColumnSchema> { return _columns; }

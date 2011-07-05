@@ -56,7 +56,7 @@ package org.osflash.spod
 		protected function handleSelectSignal(object : SpodObject) : void
 		{
 			const user : User = object as User;
-			debug(user.id, user.object.name, user.object.age);
+			debug(user.id, user.date);
 		}
 		
 		protected function handleErrorSignal(event : SpodErrorEvent) : void

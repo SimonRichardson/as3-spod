@@ -84,7 +84,7 @@ package org.osflash.spod.select
 			{
 				const user : User = objects[i] as User;
 				assertNotNull('User should not be null', user);
-				assertEquals('Date User should match date set', user.date.toUTCString(), date.toUTCString());
+				assertEquals('Date User should match date set', user.date.toString(), date.toString());
 			}
 		}
 		

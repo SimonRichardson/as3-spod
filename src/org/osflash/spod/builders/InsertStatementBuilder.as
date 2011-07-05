@@ -4,7 +4,7 @@ package org.osflash.spod.builders
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
-	import org.osflash.spod.types.SpodTypeInt;
+	import org.osflash.spod.types.SpodTypes;
 
 	import flash.errors.IllegalOperationError;
 	import flash.utils.getQualifiedClassName;
@@ -65,7 +65,7 @@ package org.osflash.spod.builders
 				{
 					column = columns[i];
 					columnName = column.name;
-					if(columnName == 'id' && column.type == SpodTypeInt) continue;
+					if(columnName == 'id' && column.type == SpodTypes.INT) continue;
 					
 					_buffer.push('`' + columnName + '`');
 					_buffer.push(', ');
@@ -83,7 +83,7 @@ package org.osflash.spod.builders
 				{
 					column = columns[i];
 					columnName = column.name;
-					if(columnName == 'id' && column.type == SpodTypeInt) continue;
+					if(columnName == 'id' && column.type == SpodTypes.INT) continue;
 										
 					_buffer.push(':' + columnName + '');
 					_buffer.push(', ');

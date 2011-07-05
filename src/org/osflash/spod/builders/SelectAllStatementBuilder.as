@@ -1,9 +1,9 @@
 package org.osflash.spod.builders
 {
-	import org.osflash.spod.types.SpodTypeDate;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
+	import org.osflash.spod.types.SpodTypes;
 
 	import flash.errors.IllegalOperationError;
 	import flash.utils.getQualifiedClassName;
@@ -51,7 +51,7 @@ package org.osflash.spod.builders
 					const column : SpodTableColumnSchema = columns[i];
 					const columnName : String = column.name;
 					
-					if(column.type is SpodTypeDate) 
+					if(column.type == SpodTypes.DATE) 
 						_buffer.push('STRFTIME(\'%J\', ' + columnName + ') as ' + columnName);
 					else _buffer.push('`' + columnName + '`');
 					

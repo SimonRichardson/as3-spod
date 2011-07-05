@@ -45,7 +45,7 @@ package org.osflash.spod
 			const total : int = 20;
 			for(var i : int = 0; i < total; i++)
 			{
-				const user : User = new User("User - " + i);
+				const user : User = new User("User - " + i, new Date(1981, 11, 17));
 				if(i == total - 1) user.insertSignal.add(handleInsertSignal);
 				table.insert(user);
 			}
@@ -54,7 +54,7 @@ package org.osflash.spod
 		protected function handleInsertSignal(object : SpodObject) : void
 		{
 			object.tableRow.table.selectSignal.add(handleSelectSignal);
-			object.tableRow.table.select(3);
+			object.tableRow.table.select(10);
 		}
 		
 		protected function handleSelectSignal(object : SpodObject) : void
