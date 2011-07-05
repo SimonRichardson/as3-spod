@@ -6,7 +6,7 @@ package org.osflash.spod.types
 	public class SpodTypeDate implements ISpodType
 	{
 		
-		public static const SQL_NAME : String = 'DATETIME';
+		public static const SQL_NAME : String = 'DATE';
 		
 		public function SpodTypeDate()
 		{

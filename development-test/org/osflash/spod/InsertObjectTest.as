@@ -41,7 +41,7 @@ package org.osflash.spod
 		protected function handleCreatedSignal(table : SpodTable) : void
 		{
 			table.insertSignal.add(handleInsertSignal);
-			table.insert(new User("Fred" + Math.random()));
+			table.insert(new User("Fred" + Math.random(), new Date(1981, 11, 17, 12, 12, 12, 12)));
 		}
 		
 		protected function handleInsertSignal(object : SpodObject) : void
@@ -50,7 +50,7 @@ package org.osflash.spod
 			debug(user.id);
 			
 			user.tableRow.table.selectSignal.add(handleSelectSignal);
-			user.tableRow.table.select(2);
+			user.tableRow.table.select(4);
 		}
 		
 		protected function handleSelectSignal(object : SpodObject) : void
