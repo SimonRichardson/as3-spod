@@ -43,7 +43,7 @@ package org.osflash.spod.builders.expressions.where
 			if(schema.match(_key, _value))
 			{
 				statement.parameters[':' + _key] = _value;
-				return '`' + _key + '` = :' + _key;
+				return '`' + _key + '` == :' + _key;
 			} else throw new IllegalOperationError('Invalid key');
 		}
 		

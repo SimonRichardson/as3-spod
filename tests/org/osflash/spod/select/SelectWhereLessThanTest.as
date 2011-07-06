@@ -4,20 +4,20 @@ package org.osflash.spod.select
 	import asunit.asserts.assertNotNull;
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
-
+	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.SpodDatabase;
 	import org.osflash.spod.SpodManager;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.SpodTable;
+	import org.osflash.spod.builders.expressions.where.LessThanExpression;
 	import org.osflash.spod.support.BaseTest;
 	import org.osflash.spod.support.user.User;
 
 	import flash.events.SQLErrorEvent;
-
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class SelectAllTest extends BaseTest
+	public class SelectWhereLessThanTest extends BaseTest
 	{
 		
 		[Inject]
@@ -44,19 +44,29 @@ package org.osflash.spod.select
 		private function handleCreateSignal(table : SpodTable) : void
 		{
 			const date : Date = new Date();
+			const value : Number = date.time;
 			
-			const total : int = 3;
+			const offset : int = 5;
+			const total : int = 20;
 			for(var i : int = 0; i < total; i++)
 			{
 				const user : User = new User();
 				user.name = 'Tim';
-				user.date = date;
+				user.date = new Date(value);
+				
+				if(i >= total - offset)
+				{
+					user.date.minutes += 1;
+				}
 				
 				if(i == total - 1)
 				{
-					user.insertSignal.add(insertAsync.add(match_user_valueOf_and_date_valueOf, 1000)).params = [date];
-					user.insertSignal.add(insertAsync.add(select_all_users_validate_date, 1000)).params = [date, total];
+					debug(date, user.date);
+					
+					user.insertSignal.addOnce(insertAsync.add(match_user_valueOf_and_date_valueOf, 1000)).params = [user.date];
+					user.insertSignal.addOnce(insertAsync.add(select_where_users_less_than_date, 1000)).params = [date, user.date, total - offset];
 				}
+				
 				table.insert(user);
 			}
 		}
@@ -68,20 +78,21 @@ package org.osflash.spod.select
 			assertEquals('Date User should match date set', user.date.valueOf(), date.valueOf());
 		}
 		
-		private function select_all_users_validate_date(user : User, date : Date, total : int) : void
+		private function select_where_users_less_than_date(user : User, originalDate : Date, userDate : Date, total : int) : void
 		{
 			const table : SpodTable = user.tableRow.table;
-			table.selectAllSignal.add(selectAsync.add(match_users_valueOf_and_date_valueOf)).params = [date, total];
-			table.selectAll();
+			table.selectWhereSignal.addOnce(selectAsync.add(match_users_valueOf_and_date_valueOf)).params = [originalDate, total];
+			table.selectWhere(new LessThanExpression('date', userDate));
 		}
-		
+				
 		private function match_users_valueOf_and_date_valueOf(objects : Vector.<SpodObject>, date : Date, total : int) : void
-		{
+		{	
 			assertEquals('Number of users should be ' + total, total, objects.length);
 			
 			for(var i : int = 0; i < total; i++)
 			{
 				const user : User = objects[i] as User;
+				
 				assertNotNull('User should not be null', user);
 				assertEquals('Date User should match date set', user.date.toString(), date.toString());
 			}
