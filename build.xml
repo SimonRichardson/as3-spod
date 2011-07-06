@@ -19,7 +19,6 @@
 	<target name="swc" depends="clean" description="Compile AS3 code into a SWC.">
 		<echo>[swc] Building SWC</echo>
 		<echo>[swc] Using Flex SDK at: ${FLEX_HOME}</echo>
-		<echo>${FLEX_HOME}/${air.libs.dir}</echo>
 		<mkdir dir="${output.dir}"/>
 			
 		<java jar="${FLEX_HOME}/lib/compc.jar" dir="." fork="true" failonerror="true">
