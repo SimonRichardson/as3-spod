@@ -19,6 +19,7 @@
 	<target name="swc" depends="clean" description="Compile AS3 code into a SWC.">
 		<echo>[swc] Building SWC</echo>
 		<echo>[swc] Using Flex SDK at: ${FLEX_HOME}</echo>
+		<echo>${FLEX_HOME}/${air.libs.dir}</echo>
 		<mkdir dir="${output.dir}"/>
 			
 		<java jar="${FLEX_HOME}/lib/compc.jar" dir="." fork="true" failonerror="true">
@@ -32,6 +33,8 @@
 			
 			<!-- Link in classes from swc library (only those used). -->
 			<!-- arg value="-library-path+=${libs.dir}" / -->
+			
+			<arg value="-external-library-path+=${FLEX_HOME}/frameworks/libs/air"/>
 			<arg value="-external-library-path+=${libs.dir}" />
 
 			<arg value="-output=${output.swc}" />
@@ -40,6 +43,7 @@
 	
 	<target name="test" depends="swc" description="Run unit tests in a Flash Player window.">
 		<echo>[test] Running unit tests</echo>
+		
 		<!-- Compile SWF -->
 		<java jar="${FLEX_HOME}/lib/mxmlc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
 			<arg value="${tests.dir}/${package.dir}/AllTestsRunner.as"/>
