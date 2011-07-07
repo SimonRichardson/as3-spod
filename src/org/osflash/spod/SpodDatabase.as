@@ -255,6 +255,10 @@ package org.osflash.spod
 					}
 					else
 					{
+						var column : SpodTableColumnSchema;
+						var columnName : String;
+						var dataType : String;
+						
 						// This validates the schema of the database and the class!
 						for(var i : int = 0; i<numColumns; i++)
 						{
@@ -267,9 +271,11 @@ package org.osflash.spod
 							var index : int = numColumns;
 							while(--index > -1)
 							{
-								const column : SpodTableColumnSchema = schema.columns[index];
-								const dataType : String = SpodTypes.getSQLName(column.type);
-								if(column.name == sqlColumnName && sqlDataType == dataType)
+								column = schema.columns[index];
+								columnName = column.name;
+								dataType = SpodTypes.getSQLName(column.type);
+								
+								if(sqlColumnName == columnName && sqlDataType == dataType)
 								{
 									match = true;
 								}
@@ -277,6 +283,27 @@ package org.osflash.spod
 							
 							if(!match) 
 							{
+								// Try and work out if it's just a data change.
+								index = numColumns;
+								while(--index > -1)
+								{
+									column = schema.columns[index];
+									columnName = column.name;
+									dataType = SpodTypes.getSQLName(column.type);
+									
+									if(sqlColumnName == columnName && sqlDataType != dataType)
+									{
+										throw new SpodError('Invalid data type in table schema, ' +
+											'expected ' + dataType + ' got ' + sqlDataType + 
+											' for ' + columnName 
+											);
+										
+										// Exit it out as no further action is required.
+										return;
+									}
+								}
+								
+								// Database has really changed
 								throw new SpodError('Invalid table schema, expected ' + 
 											schema.columns[i].name + ' and ' + 
 											SpodTypes.getSQLName(schema.columns[i].type) + ' got ' +
