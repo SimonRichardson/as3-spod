@@ -4,7 +4,7 @@ package org.osflash.spod
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.signals.natives.NativeSignal;
-	import org.osflash.spod.builders.CreateStatementBuilder;
+	import org.osflash.spod.builders.CreateTableStatementBuilder;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
@@ -49,8 +49,14 @@ package org.osflash.spod
 		 */
 		private var _createTableSignal : ISignal;
 		
+		/**
+		 * @private
+		 */
 		private var _nativeSQLErrorEventSignal : IPrioritySignal;
 		
+		/**
+		 * @private
+		 */
 		private var _nativeSQLEventSchemaSignal : IPrioritySignal;
 				
 		public function SpodDatabase(name : String, manager : SpodManager)
@@ -175,7 +181,7 @@ package org.osflash.spod
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
 			
-			const builder : ISpodStatementBuilder = new CreateStatementBuilder(schema);
+			const builder : ISpodStatementBuilder = new CreateTableStatementBuilder(schema);
 			const statement : SpodStatement = builder.build();
 			
 			if(null == statement) 

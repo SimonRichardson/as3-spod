@@ -11,7 +11,7 @@ package org.osflash.spod.builders
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class CreateStatementBuilder implements ISpodStatementBuilder
+	public class CreateTableStatementBuilder implements ISpodStatementBuilder
 	{
 		
 		/**
@@ -29,7 +29,7 @@ package org.osflash.spod.builders
 		 */
 		private var _ignoreIfExists : Boolean;
 		
-		public function CreateStatementBuilder(schema : ISpodSchema)
+		public function CreateTableStatementBuilder(schema : ISpodSchema)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
 			_schema = schema;
