@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.spod.errors.SpodError;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.DeleteWhereStatementBuilder;
@@ -94,8 +95,8 @@ package org.osflash.spod
 			const builder : ISpodStatementBuilder = new InsertStatementBuilder(_schema, object);
 			const statement : SpodStatement = builder.build();
 			
-			statement.completedSignal.add(handleInsertCompletedSignal);
-			statement.errorSignal.add(handleInsertErrorSignal);
+			statement.completedSignal.addOnce(handleInsertCompletedSignal);
+			statement.errorSignal.addOnce(handleInsertErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -107,8 +108,8 @@ package org.osflash.spod
 			const builder : ISpodStatementBuilder = new SelectByIdStatementBuilder(_schema, id);
 			const statement : SpodStatement = builder.build();
 			
-			statement.completedSignal.add(handleSelectCompletedSignal);
-			statement.errorSignal.add(handleSelectErrorSignal);
+			statement.completedSignal.addOnce(handleSelectCompletedSignal);
+			statement.errorSignal.addOnce(handleSelectErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -117,29 +118,43 @@ package org.osflash.spod
 		{
 			if(null == rest) throw new ArgumentError('Rest can not be null');
 			
-			const expressions : Vector.<ISpodExpression> = (rest[0] is Vector) ? 
-															rest[0] 
-															: 
-															Vector.<ISpodExpression>(rest);
-															
+			var prefetch : int;
+			var expressions : Vector.<ISpodExpression>;
+			if(rest[0] is int)
+			{
+				prefetch = rest[0];
+				if(rest[1] is Vector) expressions = Vector.<ISpodExpression>(rest[1]);
+				else expressions = Vector.<ISpodExpression>(rest);
+			}
+			else if(rest[0] is Vector)
+			{
+				prefetch = -1;
+				if(rest[0] is Vector) expressions = Vector.<ISpodExpression>(rest[0]);
+				else expressions = Vector.<ISpodExpression>(rest);
+			}
+			else expressions = Vector.<ISpodExpression>(rest);
+			
+			
 			const builder : ISpodStatementBuilder = new SelectWhereStatementBuilder(	_schema, 
 																						expressions
 																						);
 			const statement : SpodStatement = builder.build();
+			statement.prefetch = prefetch;
 			
-			statement.completedSignal.add(handleSelectWhereCompletedSignal);
-			statement.errorSignal.add(handleSelectWhereErrorSignal);
+			statement.completedSignal.addOnce(handleSelectWhereCompletedSignal);
+			statement.errorSignal.addOnce(handleSelectWhereErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
 		
-		public function selectAll() : void
+		public function selectAll(prefetch : int = -1) : void
 		{
 			const builder : ISpodStatementBuilder = new SelectAllStatementBuilder(_schema);
 			const statement : SpodStatement = builder.build();
+			statement.prefetch = prefetch;
 			
-			statement.completedSignal.add(handleSelectAllCompletedSignal);
-			statement.errorSignal.add(handleSelectAllErrorSignal);
+			statement.completedSignal.addOnce(handleSelectAllCompletedSignal);
+			statement.errorSignal.addOnce(handleSelectAllErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -149,8 +164,8 @@ package org.osflash.spod
 			const builder : ISpodStatementBuilder = new SelectCountStatementBuilder(_schema);
 			const statement : SpodStatement = builder.build();
 			
-			statement.completedSignal.add(handleCountCompletedSignal);
-			statement.errorSignal.add(handleCountErrorSignal);
+			statement.completedSignal.addOnce(handleCountCompletedSignal);
+			statement.errorSignal.addOnce(handleCountErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -169,8 +184,8 @@ package org.osflash.spod
 																						);
 			const statement : SpodStatement = builder.build();
 			
-			statement.completedSignal.add(handleRemoveWhereCompletedSignal);
-			statement.errorSignal.add(handleRemoveWhereErrorSignal);
+			statement.completedSignal.addOnce(handleRemoveWhereCompletedSignal);
+			statement.errorSignal.addOnce(handleRemoveWhereErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -185,8 +200,8 @@ package org.osflash.spod
 			const builder : ISpodStatementBuilder = new RawStatementBuilder(string, parameters);
 			const statement : SpodStatement = builder.build();
 			
-			statement.completedSignal.add(handleQueryCompletedSignal);
-			statement.errorSignal.add(handleQueryErrorSignal);
+			statement.completedSignal.addOnce(handleQueryCompletedSignal);
+			statement.errorSignal.addOnce(handleQueryErrorSignal);
 			
 			_manager.executioner.add(statement);
 		}
@@ -311,6 +326,8 @@ package org.osflash.spod
 			else
 			{
 				const objects :  Vector.<SpodObject> = parseSelectStatementResult(result);
+				if(objects.length > 1) throw new SpodError('Unexpected objects found, expected ' +
+																	'1 got ' + objects.length);
 				selectSignal.dispatch(objects[0]);
 			}
 		}
@@ -331,23 +348,35 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleSelectWhereCompletedSignal(statement : SpodStatement) : void
+		private function handleSelectWhereCompletedSignal(	statement : SpodStatement, 
+															prefetched : Vector.<SpodObject> = null
+															) : void
 		{
 			statement.completedSignal.remove(handleSelectWhereCompletedSignal);
 			statement.errorSignal.remove(handleSelectWhereErrorSignal);
 			
 			const result : SQLResult = statement.result;
 			if(	null == result || 
-				null == result.data || 
-				result.data.length == 0
+				null == result.data 
 				)
 			{
 				selectWhereSignal.dispatch(new Vector.<SpodObject>());	
 			}
+			else if(result.data.length == 0) selectWhereSignal.dispatch(prefetched);
 			else
 			{
 				const objects : Vector.<SpodObject> = parseSelectStatementResult(result);
-				selectWhereSignal.dispatch(objects);
+				if(!result.complete)
+				{
+					const params : Vector.<SpodObject> = prefetched.concat(objects);
+					statement.nextSignal.addOnce(handleSelectWhereCompletedSignal).params = [params];
+					statement.errorSignal.addOnce(handleSelectWhereErrorSignal);
+					statement.next();
+				}
+				else
+				{
+					selectWhereSignal.dispatch(objects);
+				}
 			}
 		}
 		
@@ -367,23 +396,35 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleSelectAllCompletedSignal(statement : SpodStatement) : void
+		private function handleSelectAllCompletedSignal(	statement : SpodStatement, 
+															prefetched : Vector.<SpodObject> = null
+															) : void
 		{
 			statement.completedSignal.remove(handleSelectAllCompletedSignal);
 			statement.errorSignal.remove(handleSelectAllErrorSignal);
 			
 			const result : SQLResult = statement.result;
 			if(	null == result || 
-				null == result.data || 
-				result.data.length == 0
+				null == result.data
 				)
 			{
 				selectAllSignal.dispatch(new Vector.<SpodObject>());	
 			}
+			else if(result.data.length == 0) selectAllSignal.dispatch(prefetched);
 			else
 			{
 				const objects : Vector.<SpodObject> = parseSelectStatementResult(result);
-				selectAllSignal.dispatch(objects);
+				if(!result.complete)
+				{
+					const params : Vector.<SpodObject> = prefetched.concat(objects);
+					statement.nextSignal.addOnce(handleSelectAllCompletedSignal).params = [params];
+					statement.errorSignal.addOnce(handleSelectAllErrorSignal);
+					statement.next();
+				}
+				else
+				{
+					selectAllSignal.dispatch(objects);
+				}
 			}
 		}
 		

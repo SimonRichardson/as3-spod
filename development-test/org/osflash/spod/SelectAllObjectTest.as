@@ -41,7 +41,7 @@ package org.osflash.spod
 		protected function handleCreatedSignal(table : SpodTable) : void
 		{			
 			// flood the database with rows
-			const total : int = 20;
+			const total : int = 2000;
 			for(var i : int = 0; i < total; i++)
 			{
 				const user : User = new User("User - " + i);

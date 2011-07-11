@@ -9,7 +9,6 @@ package org.osflash.spod
 	import flash.data.SQLConnection;
 	import flash.data.SQLResult;
 	import flash.data.SQLStatement;
-	import flash.errors.IllegalOperationError;
 	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
 	/**
@@ -22,6 +21,11 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _type : Class;
+		
+		/**
+		 * @private
+		 */
+		private var _prefetch : int;
 		
 		/**
 		 * @private
@@ -56,6 +60,11 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private var _nextSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
 		private var _errorSignal : ISignal;
 		
 		/**
@@ -73,6 +82,7 @@ package org.osflash.spod
 			if(null == type) throw new ArgumentError('Type can not be null');
 			_type = type;
 			_object = object;
+			_prefetch = -1;
 			
 			_executed = false;
 			
@@ -83,17 +93,34 @@ package org.osflash.spod
 			_nativeErrorSignal = new NativeSignal(_statement, SQLErrorEvent.ERROR, SQLErrorEvent);
 		}
 		
-		public function execute() : void
+		public function execute(prefetch : int = -1) : void
 		{
-			if(null == _connection) throw new IllegalOperationError('No connection found');
+			if(null == _connection) throw new SpodError('No connection found');
+			if(prefetch < -1 || prefetch == 0) throw new SpodError('Invalid prefetch value');
+			
+			_prefetch = prefetch;
 			
 			_executed = false;
 			
-			_nativeCompletedSignal.add(handleCompletedSignal);
-			_nativeErrorSignal.add(handleErrorSignal);
+			_nativeCompletedSignal.addOnce(handleCompletedSignal);
+			_nativeErrorSignal.addOnce(handleErrorSignal);
 			
 			_statement.sqlConnection = _connection;
-			_statement.execute();
+			_statement.execute(prefetch);
+		}
+		
+		public function next() : void
+		{
+			if(null == _connection) throw new SpodError('No connection found');
+			
+			if(_executed)
+			{
+				_nativeCompletedSignal.addOnce(handleNextSignal);
+				_nativeErrorSignal.addOnce(handleErrorSignal);
+
+				_statement.next(prefetch);
+			}
+			else throw new SpodError('Transaction in process');
 		}
 		
 		/**
@@ -109,14 +136,27 @@ package org.osflash.spod
 				errorSignal.dispatch(this, new SpodErrorEvent('Result is null'));
 				return;
 			}
-			else if(!result.complete) 
-			{
-				errorSignal.dispatch(this, new SpodErrorEvent('Result did not complete'));
+			
+			_result = result;
+			_completedSignal.dispatch(this);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleNextSignal(event : SQLEvent) : void
+		{
+			_executed = true;
+			
+			const result : SQLResult = _statement.getResult();
+			if(null == result)
+			{	
+				errorSignal.dispatch(this, new SpodErrorEvent('Result is null'));
 				return;
 			}
 			
 			_result = result;
-			_completedSignal.dispatch(this);
+			_nextSignal.dispatch(this);
 		}
 		
 		/**
@@ -136,6 +176,14 @@ package org.osflash.spod
 		
 		public function get object() : SpodObject { return _object; }
 		
+		public function get prefetch() : int { return _prefetch; }
+		public function set prefetch(value : int) : void 
+		{
+			if(prefetch < -1 || prefetch == 0) throw new ArgumentError('Invalid prefetch value');
+			
+			_prefetch = value;
+		}
+		
 		public function get connection() : SQLConnection { return _connection; }
 		public function set connection(value : SQLConnection) : void { _connection = value; }
 		
@@ -154,8 +202,8 @@ package org.osflash.spod
 		
 		public function get result() : SQLResult
 		{
-			if(null == _connection) throw new IllegalOperationError('No connection found');
-			if(!_executed) throw new IllegalOperationError('SpodStatment not executed');
+			if(null == _connection) throw new SpodError('No connection found');
+			if(!_executed) throw new SpodError('SpodStatment not executed');
 			
 			return _result;
 		}
@@ -164,6 +212,12 @@ package org.osflash.spod
 		{
 			if(null == _completedSignal) _completedSignal = new Signal(SpodStatement);
 			return _completedSignal;
+		}
+		
+		public function get nextSignal() : ISignal
+		{
+			if(null == _nextSignal) _nextSignal = new Signal(SpodStatement);
+			return _nextSignal;
 		}
 
 		public function get errorSignal() : ISignal
