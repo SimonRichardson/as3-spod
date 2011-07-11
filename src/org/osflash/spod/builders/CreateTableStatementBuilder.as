@@ -29,13 +29,15 @@ package org.osflash.spod.builders
 		 */
 		private var _ignoreIfExists : Boolean;
 		
-		public function CreateTableStatementBuilder(schema : ISpodSchema)
+		public function CreateTableStatementBuilder(	schema : ISpodSchema, 
+														ignoreIfExists : Boolean = true
+														)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
 			_schema = schema;
 			
 			_buffer = new Vector.<String>();
-			_ignoreIfExists = true; // TODO : make sure we can inject this.
+			_ignoreIfExists = ignoreIfExists;
 		}
 		
 		/**

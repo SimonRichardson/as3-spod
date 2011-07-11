@@ -11,6 +11,7 @@ package org.osflash.spod
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.types.SpodTypes;
+	import org.osflash.spod.utils.buildSchemaFromType;
 	import org.osflash.spod.utils.getClassNameFromQname;
 
 	import flash.data.SQLColumnSchema;
@@ -21,7 +22,6 @@ package org.osflash.spod
 	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
 	import flash.utils.Dictionary;
-	import flash.utils.describeType;
 	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -83,13 +83,24 @@ package org.osflash.spod
 			_tables = new Dictionary();
 		}
 		
-		public function createTable(type : Class) : void
+		/**
+		 * Create a table with the type of class. This is a 1 to 1 relationship and can be considered
+		 * as strongly typed. If the table doesn't match the type of class here then an TypeError 
+		 * will be thrown because it can't convert the Class to a table row.
+		 * 
+		 * @param type of Class to use for the database table.
+		 * @param ignoreIfExists Boolean if you want to ignore the table if it already exists. This
+		 * 						 prevents a SQLError from being thrown if the table already exists.
+		 * @throws ArgumentError if the type is null
+		 * @throws ArgumentError if the table already exists in the active memory 						 
+		 */
+		public function createTable(type : Class, ignoreIfExists : Boolean = true) : void
 		{
 			if(null == type) throw new ArgumentError('Type can not be null');
 			
 			if(!active(type))
 			{
-				const params : Array = [type];
+				const params : Array = [type, ignoreIfExists];
 				_nativeSQLErrorEventSignal.addWithPriority(	handleSQLErrorEventSignal, 
 															int.MAX_VALUE
 															).params = params;
@@ -105,83 +116,73 @@ package org.osflash.spod
 				{
 					// supress the error
 					if(error.errorID == 3115 && error.detailID == 1007 && !_manager.async)
-						handleSQLError(type);
+						handleSQLError(type, ignoreIfExists);
 				}
 			}
 			else throw new ArgumentError('Table already exists and is active, so you can not ' + 
 																				'create it again');
 		}
+		
+		/**
+		 * Load a table with the type of class. This is a 1 to 1 relationship and can be considered
+		 * as strongly typed. If the table doesn't match the type of class here then an TypeError 
+		 * will be thrown because it can't convert the Class to a table row.
+		 * 
+		 * @param type of Class to use for the database table.
+		 * @param ignoreIfExists Boolean if you want to ignore the table if it already exists. This
+		 * 						 prevents a SQLError from being thrown if the table already exists.
+		 * @throws ArgumentError if the type is null
+		 * @throws ArgumentError if the table already exists in the active memory 	
+		 */
+		public function loadTable(type : Class) : void
+		{
+			if(null == type) throw new ArgumentError('Type can not be null');
+			
+			if(active(type))
+			{
 				
+			}
+			else
+			{
+				
+			}
+		}
+		
+		/**
+		 * Work out if the table with the type of class is active or not. Active being in memory,
+		 * this doesn't check the database. Consider calling createTable for now to load it into
+		 * memory.
+		 * 
+		 * @param type of Class to work out if it's active
+		 * @return Boolean state of the table memory
+		 */
 		public function active(type : Class) : Boolean
 		{
 			return null != _tables[type];
 		}
 		
+		/**
+		 * Return the table of type of class. 
+		 * 
+		 * @param type of Class to work out if it's active
+		 * @return the table as a SpodTable.
+		 */
 		public function getTable(type : Class) : SpodTable
 		{
 			return active(type) ? _tables[type] : null; 
 		}
-		
-		public function buildSchemaFromType(type : Class) : SpodTableSchema
-		{
-			if(null == type) throw new ArgumentError('Type can not be null');
-			
-			const description : XML = describeType(type);
-			const tableName : String = getClassNameFromQname(description.@name);
-			
-			const schema : SpodTableSchema = new SpodTableSchema(type, tableName);
-			
-			for each(var parameter : XML in description..constructor.parameter)
-			{
-				if(parameter.@optional != 'true') 
-					throw new ArgumentError('Type constructor parameters need to be optional');
-			}
-			
-			var identifierFound : Boolean = false;
-			for each(var variable : XML in description..variable)
-			{
-				const variableName : String = variable.@name;
-				const variableType : String = variable.@type;
 				
-				if(variableName == 'id') identifierFound = true;
-				
-				schema.createByType(variableName, variableType);
-			}
-			
-			const spodObjectQName : String = getQualifiedClassName(SpodObject);
-			
-			for each(var accessor : XML in description.factory.accessor)
-			{
-				const accessorName : String = accessor.@name;
-				const accessorType : String = accessor.@type;
-				
-				if(accessor.@declaredBy == spodObjectQName) continue;
-				if(accessor.@access != 'readwrite') 
-				{
-					throw new ArgumentError('Accessor (getter & setter) needs to be \'readwrite\'' +
-																	' to work with SQLStatement');
-				}
-				
-				if(accessorName == 'id') identifierFound = true;
-				
-				if(!schema.contains(accessorName)) schema.createByType(accessorName, accessorType);
-			}
-			
-			if(!identifierFound) throw new ArgumentError('Type needs id variable to work');
-			
-			if(schema.columns.length == 0) throw new IllegalOperationError('Schema has no columns');
-			
-			return schema;
-		}
-		
 		/**
 		 * @private
 		 */
-		private function internalCreateTable(schema : SpodTableSchema) : void
+		private function internalCreateTable(	schema : SpodTableSchema, 
+												ignoreIfExists : Boolean
+												) : void
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
 			
-			const builder : ISpodStatementBuilder = new CreateTableStatementBuilder(schema);
+			const builder : ISpodStatementBuilder = new CreateTableStatementBuilder(
+																			schema, ignoreIfExists);
 			const statement : SpodStatement = builder.build();
 			
 			if(null == statement) 
@@ -198,21 +199,24 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleSQLErrorEventSignal(event : SQLErrorEvent, type : Class) : void
+		private function handleSQLErrorEventSignal(	event : SQLErrorEvent, 
+													type : Class,
+													ignoreIfExists : Boolean
+													) : void
 		{
 			// Catch the database not found error, if anything else we just let it slip through!
 			if(event.errorID == 3115 && event.error.detailID == 1007)
 			{
 				event.stopImmediatePropagation();
 				
-				handleSQLError(type);
+				handleSQLError(type, ignoreIfExists);
 			}
 		}
 		
 		/**
 		 * @private
 		 */
-		private function handleSQLError(type : Class) : void
+		private function handleSQLError(type : Class, ignoreIfExists : Boolean) : void
 		{
 			_nativeSQLErrorEventSignal.remove(handleSQLErrorEventSignal);
 			_nativeSQLEventSchemaSignal.remove(handleSQLEventSchemaSignal);
@@ -223,26 +227,29 @@ package org.osflash.spod
 			if(null == schema) throw new IllegalOperationError('Schema can not be null');
 			
 			// Create it because it doesn't exist
-			internalCreateTable(schema);
+			internalCreateTable(schema, ignoreIfExists);
 		}
 		
 		/**
 		 * @private
 		 */
-		private function handleSQLEventSchemaSignal(event : SQLEvent, type : Class) : void
+		private function handleSQLEventSchemaSignal(	event : SQLEvent, 
+														type : Class, 
+														ignoreIfExists : Boolean
+														) : void
 		{
 			// This works out if there is a need to migrate a database or not!
 			const schema : SpodTableSchema = buildSchemaFromType(type);
 			if(null == schema) throw new IllegalOperationError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
-			if(null == result || null == result.tables) internalCreateTable(schema);
+			if(null == result || null == result.tables) internalCreateTable(schema, ignoreIfExists);
 			else
 			{
 				const tables : Array = result.tables;
 				const total : int = tables.length;
 				 
-				if(total == 0) internalCreateTable(schema);
+				if(total == 0) internalCreateTable(schema, ignoreIfExists);
 				else if(total == 1)
 				{
 					const sqlTable : SQLTableSchema = result.tables[0];
