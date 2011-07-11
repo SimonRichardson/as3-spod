@@ -240,8 +240,6 @@ package org.osflash.spod
 				}
 				
 				// Create the correct inject references
-				use namespace spod_namespace;
-				object.table = this;
 				object.tableRow = row;
 				
 				_rows[id] = row;
@@ -272,8 +270,6 @@ package org.osflash.spod
 			if('id' in object) object['id'] = rowId;
 			
 			// Create the correct inject references
-			use namespace spod_namespace;
-			object.table = this;
 			object.tableRow = row;
 			
 			// Push in to the row

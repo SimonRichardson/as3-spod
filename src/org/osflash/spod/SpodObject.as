@@ -7,12 +7,7 @@ package org.osflash.spod
 	 */
 	public class SpodObject
 	{
-		
-		/**
-		 * @private
-		 */
-		private var _table : SpodTable;
-		
+				
 		/**
 		 * @private
 		 */
@@ -116,9 +111,6 @@ package org.osflash.spod
 			if(null == _removeSignal) _removeSignal = new Signal(SpodObject); 
 			return _removeSignal;
 		}
-
-		spod_namespace function get table() : SpodTable { return _table; }
-		spod_namespace function set table(value : SpodTable) : void { _table = value; }
 		
 		public function get tableRow() : SpodTableRow { return _tableRow; }
 		public function set tableRow(value : SpodTableRow) : void 
