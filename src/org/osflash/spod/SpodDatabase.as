@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.logger.utils.debug;
 	import org.osflash.signals.IPrioritySignal;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
@@ -8,13 +9,10 @@ package org.osflash.spod
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
-	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
-	import org.osflash.spod.types.SpodTypes;
 	import org.osflash.spod.utils.buildSchemaFromType;
 	import org.osflash.spod.utils.getClassNameFromQname;
 
-	import flash.data.SQLColumnSchema;
 	import flash.data.SQLSchemaResult;
 	import flash.data.SQLTableSchema;
 	import flash.errors.IllegalOperationError;
@@ -48,6 +46,11 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _createTableSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
+		private var _loadTableSignal : ISignal;
 		
 		/**
 		 * @private
@@ -101,11 +104,11 @@ package org.osflash.spod
 			if(!active(type))
 			{
 				const params : Array = [type, ignoreIfExists];
-				_nativeSQLErrorEventSignal.addWithPriority(	handleSQLErrorEventSignal, 
-															int.MAX_VALUE
-															).params = params;
-				_nativeSQLEventSchemaSignal.addWithPriority(	handleSQLEventSchemaSignal
+				_nativeSQLErrorEventSignal.addOnceWithPriority(	handleCreateSQLErrorEventSignal, 
+																int.MAX_VALUE
 																).params = params;
+				_nativeSQLEventSchemaSignal.addOnceWithPriority(	handleCreateSQLEventSchemaSignal
+																	).params = params;
 				
 				const name : String = getClassNameFromQname(getQualifiedClassName(type));
 				try
@@ -138,13 +141,25 @@ package org.osflash.spod
 		{
 			if(null == type) throw new ArgumentError('Type can not be null');
 			
-			if(active(type))
-			{
-				
-			}
+			if(active(type)) loadTableSignal.dispatch(getTable(type));
 			else
 			{
+				const params : Array = [type];
+				_nativeSQLErrorEventSignal.addOnceWithPriority(	handleLoadSQLErrorEventSignal, 
+																int.MAX_VALUE
+																).params = params;
+				_nativeSQLEventSchemaSignal.addOnceWithPriority(	handleLoadSQLEventSchemaSignal
+																	).params = params;
 				
+				const name : String = getClassNameFromQname(getQualifiedClassName(type));
+				try
+				{
+					_manager.connection.loadSchema(SQLTableSchema, name);
+				}
+				catch(error : SQLError)
+				{
+					debug("Table does not exist");
+				}
 			}
 		}
 		
@@ -199,10 +214,10 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleSQLErrorEventSignal(	event : SQLErrorEvent, 
-													type : Class,
-													ignoreIfExists : Boolean
-													) : void
+		private function handleCreateSQLErrorEventSignal(	event : SQLErrorEvent, 
+															type : Class,
+															ignoreIfExists : Boolean
+															) : void
 		{
 			// Catch the database not found error, if anything else we just let it slip through!
 			if(event.errorID == 3115 && event.error.detailID == 1007)
@@ -216,10 +231,25 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private function handleLoadSQLErrorEventSignal(event : SQLErrorEvent, type : Class) : void
+		{
+			// Catch the database not found error, if anything else we just let it slip through!
+			if(event.errorID == 3115 && event.error.detailID == 1007)
+			{
+				event.stopImmediatePropagation();
+				
+				// we should state no spod table exists.
+				loadTableSignal.dispatch(null);
+			}
+		}
+				
+		/**
+		 * @private
+		 */
 		private function handleSQLError(type : Class, ignoreIfExists : Boolean) : void
 		{
-			_nativeSQLErrorEventSignal.remove(handleSQLErrorEventSignal);
-			_nativeSQLEventSchemaSignal.remove(handleSQLEventSchemaSignal);
+			_nativeSQLErrorEventSignal.remove(handleCreateSQLErrorEventSignal);
+			_nativeSQLEventSchemaSignal.remove(handleCreateSQLEventSchemaSignal);
 			
 			if(null == type) throw new IllegalOperationError('Type can not be null');
 			
@@ -233,10 +263,10 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleSQLEventSchemaSignal(	event : SQLEvent, 
-														type : Class, 
-														ignoreIfExists : Boolean
-														) : void
+		private function handleCreateSQLEventSchemaSignal(	event : SQLEvent, 
+															type : Class, 
+															ignoreIfExists : Boolean
+															) : void
 		{
 			// This works out if there is a need to migrate a database or not!
 			const schema : SpodTableSchema = buildSchemaFromType(type);
@@ -253,84 +283,68 @@ package org.osflash.spod
 				else if(total == 1)
 				{
 					const sqlTable : SQLTableSchema = result.tables[0];
-					if(schema.name != sqlTable.name)
-					{
-						throw new SpodError('Unexpected table name, expected ' + schema.name + 
-																		' got ' + sqlTable.name);
-					}
 					
-					const numColumns : int = schema.columns.length; 
-					
-					if(sqlTable.columns.length != numColumns)
+					// This throws a lot of errors, we should wrap it up in try...catch... and 
+					// broadcast it to the error message
+					try { schema.validate(sqlTable); }
+					catch(error : SpodError)
 					{
-						throw new SpodError('Invalid column count, expected ' + numColumns + 
-																' got ' + sqlTable.columns.length);
+						_manager.errorSignal.dispatch(new SpodErrorEvent(error.message, error));
 					}
-					else
-					{
-						var column : SpodTableColumnSchema;
-						var columnName : String;
-						var dataType : String;
-						
-						// This validates the schema of the database and the class!
-						for(var i : int = 0; i<numColumns; i++)
-						{
-							const sqlColumnSchema : SQLColumnSchema = sqlTable.columns[i];
-							const sqlColumnName : String = sqlColumnSchema.name;
-							const sqlDataType : String = sqlColumnSchema.dataType;
-							
-							var match : Boolean = false;
-							
-							var index : int = numColumns;
-							while(--index > -1)
-							{
-								column = schema.columns[index];
-								columnName = column.name;
-								dataType = SpodTypes.getSQLName(column.type);
-								
-								if(sqlColumnName == columnName && sqlDataType == dataType)
-								{
-									match = true;
-								}
-							}
-							
-							if(!match) 
-							{
-								// Try and work out if it's just a data change.
-								index = numColumns;
-								while(--index > -1)
-								{
-									column = schema.columns[index];
-									columnName = column.name;
-									dataType = SpodTypes.getSQLName(column.type);
-									
-									if(sqlColumnName == columnName && sqlDataType != dataType)
-									{
-										throw new SpodError('Invalid data type in table schema, ' +
-											'expected ' + dataType + ' got ' + sqlDataType + 
-											' for ' + columnName 
-											);
 										
-										// Exit it out as no further action is required.
-										return;
-									}
-								}
-								
-								// Database has really changed
-								throw new SpodError('Invalid table schema, expected ' + 
-											schema.columns[i].name + ' and ' + 
-											SpodTypes.getSQLName(schema.columns[i].type) + ' got ' +
-											sqlColumnName + ' and ' + sqlDataType
-											);
-							}
-						}
-						
+					if(null != schema)
+					{
 						// We don't need to make a new table as we've already got one!
 						const table : SpodTable = new SpodTable(schema, _manager);
 						
 						_tables[type] = table;
 						
 						createTableSignal.dispatch(table);
+					}
+				}
+				else throw new SpodError('Invalid table count, expected 1 got ' + total);
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleLoadSQLEventSchemaSignal(	event : SQLEvent, 
+															type : Class
+															) : void
+		{
+			// This works out if there is a need to migrate a database or not!
+			const schema : SpodTableSchema = buildSchemaFromType(type);
+			if(null == schema) throw new IllegalOperationError('Schema can not be null');
+			
+			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
+			if(null == result || null == result.tables) loadTableSignal.dispatch(null);
+			else
+			{
+				const tables : Array = result.tables;
+				const total : int = tables.length;
+				
+				if(total == 0) loadTableSignal.dispatch(null);
+				else if(total == 1)
+				{
+					 const sqlTable : SQLTableSchema = result.tables[0];
+					
+					// This throws a lot of errors, we should wrap it up in try...catch... and 
+					// broadcast it to the error message
+					try { schema.validate(sqlTable); }
+					catch(error : SpodError)
+					{
+						_manager.errorSignal.dispatch(new SpodErrorEvent(error.message, error));
+					}
+										
+					if(null != schema)
+					{
+						// We don't need to make a new table as we've already got one!
+						const table : SpodTable = new SpodTable(schema, _manager);
+						
+						_tables[type] = table;
+						
+						loadTableSignal.dispatch(table);
 					}
 				}
 				else throw new SpodError('Invalid table count, expected 1 got ' + total);
@@ -368,6 +382,12 @@ package org.osflash.spod
 		{
 			if(null == _createTableSignal) _createTableSignal = new Signal(SpodTable);
 			return _createTableSignal;
+		}
+		
+		public function get loadTableSignal() : ISignal
+		{
+			if(null == _loadTableSignal) _loadTableSignal = new Signal(SpodTable);
+			return _loadTableSignal;
 		}
 	}
 }

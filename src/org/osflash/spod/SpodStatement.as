@@ -3,6 +3,7 @@ package org.osflash.spod
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.signals.natives.NativeSignal;
+	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
 
 	import flash.data.SQLConnection;
@@ -95,6 +96,9 @@ package org.osflash.spod
 			_statement.execute();
 		}
 		
+		/**
+		 * @private
+		 */
 		private function handleCompletedSignal(event : SQLEvent) : void
 		{
 			_executed = true;
@@ -115,13 +119,17 @@ package org.osflash.spod
 			_completedSignal.dispatch(this);
 		}
 		
+		/**
+		 * @private
+		 */
 		private function handleErrorSignal(event : SQLErrorEvent) : void
 		{
 			event.stopImmediatePropagation();
 			
 			_executed = false;
 			
-			_errorSignal.dispatch(this, new SpodErrorEvent(event.text, event));
+			const error : SpodError = new SpodError('Native SQLStatement Error');
+			_errorSignal.dispatch(this, new SpodErrorEvent(event.text, error, event));
 		}
 		
 		public function get type() : Class { return _type; }

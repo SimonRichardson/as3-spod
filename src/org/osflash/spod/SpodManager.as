@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
@@ -141,7 +142,8 @@ package org.osflash.spod
 		 */
 		private function handleNativeErrorSignal(event : SQLErrorEvent) : void
 		{
-			errorSignal.dispatch(new SpodErrorEvent(event.text, event));
+			const error : SpodError = new SpodError('Native SQLError');
+			errorSignal.dispatch(new SpodErrorEvent(event.text, error, event));
 		}
 		
 		private function opened() : void
