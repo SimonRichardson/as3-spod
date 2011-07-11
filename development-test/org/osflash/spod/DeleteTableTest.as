@@ -11,38 +11,38 @@ package org.osflash.spod
 	import flash.filesystem.File;
 
 	[SWF(backgroundColor="#FFFFFF", frameRate="31", width="1280", height="720")]
-	public class LoadDatabaseTest extends Sprite
+	public class DeleteTableTest extends Sprite
 	{
-		
-		private static const sessionName : String = "session.db"; 
-		
+
+		private static const sessionName : String = "session.db";
+
 		protected var resource : File;
 
-		public function LoadDatabaseTest()
+		public function DeleteTableTest()
 		{
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
-						
+
 			const storage : File = File.applicationStorageDirectory.resolvePath(sessionName);
 			resource = storage;
-			
+
 			const manager : SpodManager = new SpodManager();
 			manager.openSignal.add(handleOpenSignal);
 			manager.errorSignal.add(handleErrorSignal);
 			manager.open(resource, true);
 		}
-		
+
 		private function handleOpenSignal(database : SpodDatabase) : void
 		{
-			database.loadTableSignal.add(handleLoadSignal);
-			database.loadTable(User);
+			database.deleteTableSignal.add(handleDeleteSignal);
+			database.deleteTable(User);
 		}
-		
-		private function handleLoadSignal(table : SpodTable) : void
+
+		private function handleDeleteSignal(table : SpodTable) : void
 		{
-			debug('Table loaded!', table);
+			debug('Table deleted!', table);
 		}
-		
+
 		private function handleErrorSignal(event : SpodErrorEvent) : void
 		{
 			error(event.event.error);

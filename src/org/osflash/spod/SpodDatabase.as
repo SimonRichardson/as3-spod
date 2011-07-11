@@ -1,11 +1,11 @@
 package org.osflash.spod
 {
-	import org.osflash.logger.utils.debug;
 	import org.osflash.signals.IPrioritySignal;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.signals.natives.NativeSignal;
 	import org.osflash.spod.builders.CreateTableStatementBuilder;
+	import org.osflash.spod.builders.DeleteTableStatementBuilder;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
@@ -15,7 +15,6 @@ package org.osflash.spod
 
 	import flash.data.SQLSchemaResult;
 	import flash.data.SQLTableSchema;
-	import flash.errors.IllegalOperationError;
 	import flash.errors.SQLError;
 	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
@@ -51,6 +50,11 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _loadTableSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
+		private var _deleteTableSignal : ISignal;
 		
 		/**
 		 * @private
@@ -119,7 +123,7 @@ package org.osflash.spod
 				{
 					// supress the error
 					if(error.errorID == 3115 && error.detailID == 1007 && !_manager.async)
-						handleSQLError(type, ignoreIfExists);
+						handleCreateSQLError(type, ignoreIfExists);
 				}
 			}
 			else throw new ArgumentError('Table already exists and is active, so you can not ' + 
@@ -158,8 +162,59 @@ package org.osflash.spod
 				}
 				catch(error : SQLError)
 				{
-					debug("Table does not exist");
+					loadTableSignal.dispatch(null);
 				}
+			}
+		}
+		
+		/**
+		 * Delete a table with the type of class.  This is a 1 to 1 relationship and can be considered
+		 * as strongly typed. If the table doesn't match the type of class here then an TypeError 
+		 * will be thrown because it can't convert the Class to a table row.
+		 * 
+		 * @param type of Class to use for the database table.
+		 */
+		public function deleteTable(type : Class, ifExists : Boolean = true) : void
+		{
+			if(null == type) throw new ArgumentError('Type can not be null');
+			if(!active(type))
+			{
+				const params : Array = [type];
+				_nativeSQLErrorEventSignal.addOnceWithPriority(	handleDeleteSQLErrorEventSignal, 
+																int.MAX_VALUE
+																).params = params;
+				_nativeSQLEventSchemaSignal.addOnceWithPriority(	handleDeleteSQLEventSchemaSignal
+																	).params = params;
+				
+				const name : String = getClassNameFromQname(getQualifiedClassName(type));
+				try
+				{
+					_manager.connection.loadSchema(SQLTableSchema, name);
+				}
+				catch(error : SQLError)
+				{
+					deleteTableSignal.dispatch(null);
+				}
+			}
+			else
+			{
+				const table : SpodTable = getTable(type);
+				const schema : SpodTableSchema = table.schema;
+				
+				if(null == schema) throw new SpodError('SpodTableSchema can not be null');
+				
+				const builder : ISpodStatementBuilder = new DeleteTableStatementBuilder(
+																				schema, ifExists);
+				const statement : SpodStatement = builder.build();
+				
+				if(null == statement) 
+					throw new SpodError('SpodStatement can not be null');
+								
+				statement.completedSignal.add(handleDeleteTableCompleteSignal);
+				statement.errorSignal.add(handleDeleteTableErrorSignal);
+				
+				_manager.executioner.add(statement);
+				
 			}
 		}
 		
@@ -201,7 +256,7 @@ package org.osflash.spod
 			const statement : SpodStatement = builder.build();
 			
 			if(null == statement) 
-				throw new IllegalOperationError('SpodStatement can not be null');
+				throw new SpodError('SpodStatement can not be null');
 			
 			_tables[schema.type] = new SpodTable(schema, _manager);
 			
@@ -224,7 +279,7 @@ package org.osflash.spod
 			{
 				event.stopImmediatePropagation();
 				
-				handleSQLError(type, ignoreIfExists);
+				handleCreateSQLError(type, ignoreIfExists);
 			}
 		}
 		
@@ -242,19 +297,34 @@ package org.osflash.spod
 				loadTableSignal.dispatch(null);
 			}
 		}
+		
+		/**
+		 * @private
+		 */
+		private function handleDeleteSQLErrorEventSignal(event : SQLErrorEvent, type : Class) : void
+		{
+			// Catch the database not found error, if anything else we just let it slip through!
+			if(event.errorID == 3115 && event.error.detailID == 1007)
+			{
+				event.stopImmediatePropagation();
+				
+				// we should state no spod table exists.
+				deleteTableSignal.dispatch(null);
+			}
+		}
 				
 		/**
 		 * @private
 		 */
-		private function handleSQLError(type : Class, ignoreIfExists : Boolean) : void
+		private function handleCreateSQLError(type : Class, ignoreIfExists : Boolean) : void
 		{
 			_nativeSQLErrorEventSignal.remove(handleCreateSQLErrorEventSignal);
 			_nativeSQLEventSchemaSignal.remove(handleCreateSQLEventSchemaSignal);
 			
-			if(null == type) throw new IllegalOperationError('Type can not be null');
+			if(null == type) throw new SpodError('Type can not be null');
 			
 			const schema : SpodTableSchema = buildSchemaFromType(type);
-			if(null == schema) throw new IllegalOperationError('Schema can not be null');
+			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			// Create it because it doesn't exist
 			internalCreateTable(schema, ignoreIfExists);
@@ -268,9 +338,12 @@ package org.osflash.spod
 															ignoreIfExists : Boolean
 															) : void
 		{
+			_nativeSQLErrorEventSignal.remove(handleCreateSQLErrorEventSignal);
+			_nativeSQLEventSchemaSignal.remove(handleCreateSQLEventSchemaSignal);
+			
 			// This works out if there is a need to migrate a database or not!
 			const schema : SpodTableSchema = buildSchemaFromType(type);
-			if(null == schema) throw new IllegalOperationError('Schema can not be null');
+			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
 			if(null == result || null == result.tables) internalCreateTable(schema, ignoreIfExists);
@@ -313,9 +386,12 @@ package org.osflash.spod
 															type : Class
 															) : void
 		{
+			_nativeSQLErrorEventSignal.remove(handleLoadSQLErrorEventSignal);
+			_nativeSQLEventSchemaSignal.remove(handleLoadSQLEventSchemaSignal);
+			
 			// This works out if there is a need to migrate a database or not!
 			const schema : SpodTableSchema = buildSchemaFromType(type);
-			if(null == schema) throw new IllegalOperationError('Schema can not be null');
+			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
 			if(null == result || null == result.tables) loadTableSignal.dispatch(null);
@@ -354,13 +430,61 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private function handleDeleteSQLEventSchemaSignal(	event : SQLEvent, 
+															type : Class
+															) : void
+		{
+			_nativeSQLErrorEventSignal.remove(handleDeleteSQLErrorEventSignal);
+			_nativeSQLEventSchemaSignal.remove(handleDeleteSQLEventSchemaSignal);
+			
+			// This works out if there is a need to migrate a database or not!
+			const schema : SpodTableSchema = buildSchemaFromType(type);
+			if(null == schema) throw new SpodError('Schema can not be null');
+			
+			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
+			if(null == result || null == result.tables) deleteTableSignal.dispatch(null);
+			else
+			{
+				const tables : Array = result.tables;
+				const total : int = tables.length;
+				
+				if(total == 0) deleteTableSignal.dispatch(null);
+				else if(total == 1)
+				{
+					 const sqlTable : SQLTableSchema = result.tables[0];
+					
+					// This throws a lot of errors, we should wrap it up in try...catch... and 
+					// broadcast it to the error message
+					try { schema.validate(sqlTable); }
+					catch(error : SpodError)
+					{
+						_manager.errorSignal.dispatch(new SpodErrorEvent(error.message, error));
+					}
+										
+					if(null != schema)
+					{
+						// We don't need to make a new table as we've already got one!
+						const table : SpodTable = new SpodTable(schema, _manager);
+						
+						_tables[type] = table;
+						
+						deleteTable(type);
+					}
+				}
+				else throw new SpodError('Invalid table count, expected 1 got ' + total);
+			}
+		}
+		
+		/**
+		 * @private
+		 */
 		private function handleCreateTableCompleteSignal(statement : SpodStatement) : void
 		{
 			statement.completedSignal.remove(handleCreateTableCompleteSignal);
 			statement.errorSignal.remove(handleCreateTableErrorSignal);
 			
 			const table : SpodTable = _tables[statement.type];
-			if(null == table) throw new IllegalOperationError('SpodTable does not exist');
+			if(null == table) throw new SpodError('SpodTable does not exist');
 			
 			createTableSignal.dispatch(table);
 		}
@@ -378,6 +502,35 @@ package org.osflash.spod
 			_manager.errorSignal.dispatch(event);
 		}
 		
+		/**
+		 * @private
+		 */
+		private function handleDeleteTableCompleteSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleDeleteTableCompleteSignal);
+			statement.errorSignal.remove(handleDeleteTableErrorSignal);
+			
+			const table : SpodTable = _tables[statement.type];
+			
+			_tables[statement.type] = null;
+			delete _tables[statement.type];
+			
+			deleteTableSignal.dispatch(table);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleDeleteTableErrorSignal(	statement : SpodStatement, 
+														event : SpodErrorEvent
+														) : void
+		{
+			statement.completedSignal.remove(handleDeleteTableCompleteSignal);
+			statement.errorSignal.remove(handleDeleteTableErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
+		
 		public function get createTableSignal() : ISignal
 		{
 			if(null == _createTableSignal) _createTableSignal = new Signal(SpodTable);
@@ -388,6 +541,12 @@ package org.osflash.spod
 		{
 			if(null == _loadTableSignal) _loadTableSignal = new Signal(SpodTable);
 			return _loadTableSignal;
+		}
+		
+		public function get deleteTableSignal() : ISignal
+		{
+			if(null == _deleteTableSignal) _deleteTableSignal = new Signal(SpodTable);
+			return _deleteTableSignal;
 		}
 	}
 }
