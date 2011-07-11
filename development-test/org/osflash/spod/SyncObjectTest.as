@@ -64,9 +64,7 @@ package org.osflash.spod
 		
 		protected function handleSyncSignal(object : SpodObject, updated : Boolean) : void
 		{
-			use	namespace spod_namespace;
-			
-			const table : SpodTable = object.table; 
+			const table : SpodTable = object.tableRow.table; 
 			
 			debug('Updated : ', updated);
 			debug(describeTable(table).toXMLString());
