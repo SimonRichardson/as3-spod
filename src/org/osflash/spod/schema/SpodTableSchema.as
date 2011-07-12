@@ -15,6 +15,8 @@ package org.osflash.spod.schema
 	public class SpodTableSchema implements ISpodSchema
 	{
 		
+		public static const DEFAULT_UNIQUE_IDENTIFIER : String = 'id';
+		
 		/**
 		 * @private
 		 */
@@ -24,7 +26,12 @@ package org.osflash.spod.schema
 		 * @private
 		 */
 		private var _name : String;
-				
+		
+		/**
+		 * @private
+		 */
+		private var _identifier : String;
+			
 		/**
 		 * @private
 		 */
@@ -245,5 +252,25 @@ package org.osflash.spod.schema
 		public function get type() : Class { return _type; }
 		
 		public function get name() : String { return _name; }
+		
+		public function get identifier() : String { return _identifier; }
+		public function set identifier(value : String) : void 
+		{ 
+			if(_identifier != value)
+			{
+				var index : int = _columns.length;
+				while(--index > -1)
+				{
+					const column : SpodTableColumnSchema = _columns[index];
+					if(column.name == value)
+					{
+						_identifier = value;
+						return;
+					}
+				}
+				
+				throw new SpodError('Invalid identifier');
+			}
+		}
 	}
 }

@@ -1,5 +1,6 @@
 package org.osflash.spod.utils
 {
+	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.schema.SpodTableSchema;
 
@@ -17,6 +18,7 @@ package org.osflash.spod.utils
 		const tableName : String = getClassNameFromQname(description.@name);
 		
 		const schema : SpodTableSchema = new SpodTableSchema(type, tableName);
+		const defaultId : String = SpodTableSchema.DEFAULT_UNIQUE_IDENTIFIER;
 		
 		for each(var parameter : XML in description..constructor.parameter)
 		{
@@ -24,14 +26,28 @@ package org.osflash.spod.utils
 				throw new ArgumentError('Type constructor parameters need to be optional');
 		}
 		
+		var identifier : String = defaultId;
 		var identifierFound : Boolean = false;
 		for each(var variable : XML in description..variable)
 		{
 			const variableName : String = variable.@name;
 			const variableType : String = variable.@type;
 			
-			if(variableName == 'id') identifierFound = true;
-			
+			const variableMetadata : XMLList = variable..metadata.(@name == 'Type');
+			if(null != variableMetadata && variableMetadata.length() > 0)
+			{
+				const variableArg : XMLList = variableMetadata.arg.(	@key == 'identifier' 
+																		&& @value == 'true'
+																		);
+				if(null != variableArg && variableArg.length() > 0)
+				{
+					identifier = variableName;
+					identifierFound = true;
+				}
+				else if(variableName == defaultId) identifierFound = true;
+			}
+			else if(variableName == defaultId) identifierFound = true;
+
 			schema.createByType(variableName, variableType);
 		}
 		
@@ -48,13 +64,29 @@ package org.osflash.spod.utils
 																' to work with SQLStatement');
 			}
 			
-			if(accessorName == 'id') identifierFound = true;
+			const accessorMetadata : XMLList = accessor..metadata.(@name == 'Type');
+			if(null != accessorMetadata && accessorMetadata.length() > 0)
+			{
+				const accessorArg : XMLList = accessorMetadata.arg.(	@key == 'identifier' 
+																		&& 
+																		@value == 'true'
+																		);
+				if(null != accessorArg && accessorArg.length() > 0)
+				{
+					identifier = accessorName;
+					identifierFound = true;
+				}
+				else if(accessorName == defaultId) identifierFound = true;
+			}
+			else if(accessorName == defaultId) identifierFound = true;
 			
 			if(!schema.contains(accessorName)) schema.createByType(accessorName, accessorType);
 		}
 		
-		if(!identifierFound) throw new ArgumentError('Type needs id variable to work');
+		if(!identifierFound) throw new ArgumentError('Type needs identifier variable to work');
 		if(schema.columns.length == 0) throw new IllegalOperationError('Schema has no columns');
+		
+		schema.identifier = identifier;
 		
 		return schema;
 	}

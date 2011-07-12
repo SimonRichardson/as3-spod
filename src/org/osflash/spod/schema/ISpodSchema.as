@@ -7,5 +7,7 @@ package org.osflash.spod.schema
 	{
 		
 		function get name() : String;
+		
+		function get identifier() : String;
 	}
 }
