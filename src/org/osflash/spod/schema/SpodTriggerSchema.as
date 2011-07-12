@@ -1,5 +1,6 @@
 package org.osflash.spod.schema
 {
+	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.utils.validateString;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
@@ -16,6 +17,11 @@ package org.osflash.spod.schema
 		 * @private
 		 */
 		private var _name : String;
+		
+		/**
+		 * @private
+		 */
+		private var _identifier : String;
 				
 		/**
 		 * @private
@@ -31,6 +37,7 @@ package org.osflash.spod.schema
 			
 			_type = type;
 			_name = name;
+			_identifier = SpodTableSchema.DEFAULT_UNIQUE_IDENTIFIER;
 			
 			_columns = new Vector.<SpodTableColumnSchema>();
 		}
@@ -40,5 +47,25 @@ package org.osflash.spod.schema
 		public function get type() : Class { return _type; }
 		
 		public function get name() : String { return _name; }
+		
+		public function get identifier() : String { return _identifier; }
+		public function set identifier(value : String) : void 
+		{ 
+			if(_identifier != value)
+			{
+				var index : int = _columns.length;
+				while(--index > -1)
+				{
+					const column : SpodTableColumnSchema = _columns[index];
+					if(column.name == value)
+					{
+						_identifier = value;
+						return;
+					}
+				}
+				
+				throw new SpodError('Invalid trigger identifier');
+			}
+		}
 	}
 }

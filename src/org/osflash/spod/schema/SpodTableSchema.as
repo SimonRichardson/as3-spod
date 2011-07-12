@@ -46,6 +46,7 @@ package org.osflash.spod.schema
 			
 			_type = type;
 			_name = name;
+			_identifier = DEFAULT_UNIQUE_IDENTIFIER;
 			
 			_columns = new Vector.<SpodTableColumnSchema>();
 		}

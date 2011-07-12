@@ -4,7 +4,7 @@ package org.osflash.spod.schema
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class SpodTableColumnSchema
+	public class SpodTableColumnSchema implements ISpodSchema
 	{
 		
 		/**
@@ -29,6 +29,8 @@ package org.osflash.spod.schema
 		}
 
 		public function get name() : String { return _name; }
+		
+		public function get identifier() : String { return _name; }
 
 		public function get type() : int { return _type; }
 	}
