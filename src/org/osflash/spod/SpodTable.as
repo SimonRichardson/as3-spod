@@ -104,6 +104,8 @@ package org.osflash.spod
 		public function select(id : int) : void
 		{
 			if(isNaN(id)) throw new ArgumentError('id can not be NaN');
+			if(!_schema.isValidSelectIdentifier()) throw new SpodError('Unable to select by id, ' + 
+										'where a custom identifier is used and is not type of int');
 			
 			const builder : ISpodStatementBuilder = new SelectByIdStatementBuilder(_schema, id);
 			const statement : SpodStatement = builder.build();

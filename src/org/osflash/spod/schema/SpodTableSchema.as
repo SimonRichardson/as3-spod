@@ -248,6 +248,25 @@ package org.osflash.spod.schema
 			_columns.push(new SpodTableColumnSchema(name, SpodTypes.OBJECT));
 		}
 		
+		public function getColumnByName(value : String) : SpodTableColumnSchema
+		{
+			var index : int = _columns.length;
+			while(--index > -1)
+			{
+				const column : SpodTableColumnSchema = _columns[index];
+				if(column.name == value) return column;
+			}
+			
+			return null;
+		}
+		
+		public function isValidSelectIdentifier() : Boolean
+		{
+			const column : SpodTableColumnSchema = getColumnByName(_identifier);
+			if(null == column) throw new SpodError('Invalid column identifier');
+			return column.type == SpodTypes.INT || column.type == SpodTypes.UINT;
+		}
+		
 		public function get columns() : Vector.<SpodTableColumnSchema> { return _columns; }
 		
 		public function get type() : Class { return _type; }
