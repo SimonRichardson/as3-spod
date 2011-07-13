@@ -1,5 +1,9 @@
 package org.osflash.spod.utils
 {
+	import org.osflash.spod.spod_namespace;
+	import org.osflash.spod.types.SpodTypes;
+	import org.osflash.spod.schema.SpodTableColumnSchema;
+	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.SpodTableSchema;
@@ -27,6 +31,7 @@ package org.osflash.spod.utils
 		
 		var identifier : String = defaultId;
 		var identifierFound : Boolean = false;
+		
 		for each(var variable : XML in description..variable)
 		{
 			const variableName : String = variable.@name;
@@ -46,7 +51,7 @@ package org.osflash.spod.utils
 				else if(variableName == defaultId) identifierFound = true;
 			}
 			else if(variableName == defaultId) identifierFound = true;
-
+						
 			schema.createByType(variableName, variableType);
 		}
 		
@@ -78,6 +83,7 @@ package org.osflash.spod.utils
 				{
 					identifier = accessorName;
 					identifierFound = true;
+					
 				}
 				else if(accessorName == defaultId) identifierFound = true;
 			}
@@ -90,6 +96,15 @@ package org.osflash.spod.utils
 		if(schema.columns.length == 0) throw new SpodError('Schema has no columns');
 		
 		schema.identifier = identifier;
+		
+		if(schema.contains(identifier))
+		{
+			const identifierColumn : SpodTableColumnSchema = schema.getColumnByName(identifier);
+			
+			if(null != identifierColumn) identifierColumn.autoIncrement = true;
+			else throw new SpodError('Invalid table column schema identifier');
+		}
+		else throw new SpodError('Invalid table schema identifier');
 				
 		return schema;
 	}

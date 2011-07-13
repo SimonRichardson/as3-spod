@@ -5,6 +5,7 @@ package org.osflash.spod.builders
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.types.SpodTypes;
+	import org.osflash.spod.utils.getIdentifierValueFromObject;
 
 	import flash.errors.IllegalOperationError;
 	import flash.utils.getQualifiedClassName;
@@ -67,7 +68,12 @@ package org.osflash.spod.builders
 				{
 					column = columns[i];
 					columnName = column.name;
-					if(columnName == 'id' && column.type == SpodTypes.INT) continue;
+					
+					if(	columnName == _schema.identifier && 
+						column.type == SpodTypes.INT &&
+						column.autoIncrement
+						) 
+						continue;
 					
 					_buffer.push('`' + columnName + '`');
 					_buffer.push('=');
@@ -80,9 +86,11 @@ package org.osflash.spod.builders
 				_buffer.pop();
 				
 				_buffer.push(' WHERE ');
-				_buffer.push('`id`=:id');
+				_buffer.push('`' + _schema.identifier + '`=:id');
 				
-				statement.parameters[':id'] = _object['id'];
+				statement.parameters[':id'] = getIdentifierValueFromObject(	_object, 
+																			_schema.identifier
+																			);
 				
 				// Make the query
 				statement.query = _buffer.join('');

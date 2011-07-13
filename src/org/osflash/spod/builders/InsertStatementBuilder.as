@@ -65,11 +65,17 @@ package org.osflash.spod.builders
 				{
 					column = columns[i];
 					columnName = column.name;
-					if(columnName == 'id' && column.type == SpodTypes.INT) continue;
+					
+					if(	columnName == _schema.identifier && 
+						column.type == SpodTypes.INT &&
+						column.autoIncrement
+						) 
+						continue;
 					
 					_buffer.push('`' + columnName + '`');
 					_buffer.push(', ');
 				}
+				
 				_buffer.pop();
 				_buffer.push(')');
 				
@@ -83,7 +89,12 @@ package org.osflash.spod.builders
 				{
 					column = columns[i];
 					columnName = column.name;
-					if(columnName == 'id' && column.type == SpodTypes.INT) continue;
+					
+					if(	columnName == _schema.identifier && 
+						column.type == SpodTypes.INT &&
+						column.autoIncrement
+						) 
+						continue;
 										
 					_buffer.push(':' + columnName + '');
 					_buffer.push(', ');

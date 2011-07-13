@@ -4,6 +4,7 @@ package org.osflash.spod.builders
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
+	import org.osflash.spod.utils.getIdentifierValueFromObject;
 
 	import flash.errors.IllegalOperationError;
 	import flash.utils.getQualifiedClassName;
@@ -54,10 +55,12 @@ package org.osflash.spod.builders
 				_buffer.push('DELETE FROM ');
 				_buffer.push('`' + _schema.name + '`');
 				_buffer.push(' WHERE ');
-				_buffer.push('`id`=:id');
+				_buffer.push('`' + _schema.identifier + '`=:id');
 				
 				const statement : SpodStatement = new SpodStatement(tableSchema.type, _object);
-				statement.parameters[':id'] = _object['id'];
+				statement.parameters[':id'] = getIdentifierValueFromObject(	_object, 
+																			_schema.identifier
+																			);
 				
 				// Make the query
 				statement.query = _buffer.join('');
