@@ -1,10 +1,9 @@
 package org.osflash.spod.utils
 {
-	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.SpodObject;
+	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.SpodTableSchema;
 
-	import flash.errors.IllegalOperationError;
 	import flash.utils.describeType;
 	import flash.utils.getQualifiedClassName;
 	/**
@@ -71,6 +70,10 @@ package org.osflash.spod.utils
 																		&& 
 																		@value == 'true'
 																		);
+				
+				if(identifierFound) throw new SpodError('Identifier already exists, only one ' + 
+																		'can be used at one time.');
+																		
 				if(null != accessorArg && accessorArg.length() > 0)
 				{
 					identifier = accessorName;
@@ -84,10 +87,10 @@ package org.osflash.spod.utils
 		}
 		
 		if(!identifierFound) throw new ArgumentError('Type needs identifier variable to work');
-		if(schema.columns.length == 0) throw new IllegalOperationError('Schema has no columns');
+		if(schema.columns.length == 0) throw new SpodError('Schema has no columns');
 		
 		schema.identifier = identifier;
-		
+				
 		return schema;
 	}
 }
