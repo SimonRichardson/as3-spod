@@ -66,7 +66,7 @@ package org.osflash.spod.builders
 				_buffer.push(' FROM ');
 				_buffer.push('`' + _schema.name + '`');
 				_buffer.push(' WHERE ');
-				_buffer.push('`id`=:id');
+				_buffer.push('`' + _schema.identifier + '`=:id');
 				
 				const statement : SpodStatement = new SpodStatement(tableSchema.type);
 				statement.parameters[':id'] = _id;

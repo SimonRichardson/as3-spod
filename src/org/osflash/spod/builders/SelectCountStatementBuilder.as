@@ -45,7 +45,7 @@ package org.osflash.spod.builders
 				_buffer.length = 0;
 				
 				_buffer.push('SELECT ');
-				_buffer.push('COUNT(*) AS numObjects');				
+				_buffer.push('COUNT(`' + _schema.identifier + '`) AS numObjects');				
 				_buffer.push(' FROM ');
 				_buffer.push('`' + _schema.name + '`');
 				

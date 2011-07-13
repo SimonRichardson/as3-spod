@@ -2,10 +2,10 @@ package org.osflash.spod.builders
 {
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.SpodStatement;
+	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 
-	import flash.errors.IllegalOperationError;
 	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -47,7 +47,7 @@ package org.osflash.spod.builders
 				const columns : Vector.<SpodTableColumnSchema> = tableSchema.columns.reverse();
 				const total : int = columns.length;
 				
-				if(total == 0) throw new IllegalOperationError('Invalid columns length');
+				if(total == 0) throw new SpodError('Invalid columns length');
 				
 				_buffer.length = 0;
 				
@@ -67,15 +67,38 @@ package org.osflash.spod.builders
 				_buffer.push(' FROM ');
 				_buffer.push('`' + _schema.name + '`');
 				_buffer.push(' WHERE ');
-				_buffer.push('id=:id');
+				_buffer.push('`' + _schema.identifier + '`=:id');
 				
 				const statement : SpodStatement = new SpodStatement(tableSchema.type, _object);
 				
-				const id : int = _object['id'];
-				if(isNaN(id)) 
-					throw new IllegalOperationError('Unable to get because identifier is invalid');
+				if(_schema.identifier in _object)
+				{
+					// Check the new identifier
+					const type : String = getQualifiedClassName(_object[_schema.identifier]);
+					if(type == 'int' || type == 'uint' || type == 'Number')
+					{
+						if(isNaN(_object[_schema.identifier])) 
+							throw new SpodError('Given object identifier value is NaN');
+					}
+					else if(type == 'String')
+					{
+						if(	null == _object[_schema.identifier])
+							throw new SpodError('Given object identifier value is null');
+						else if(	String(_object[_schema.identifier]).length == 0 ||
+									String(_object[_schema.identifier]) == ''
+									)
+							throw new SpodError('Given object identifier value is empty');
+					}
+					else
+					{
+						if(	null == _object[_schema.identifier])
+							throw new SpodError('Given object identifier value is null');
+					}
 					
-				statement.parameters[':id'] = id;
+					// We've passed the verification
+					statement.parameters[':id'] = _object[_schema.identifier];
+				}
+				else throw new SpodError('Unable to locate identifier in object');
 				
 				// Make the query
 				statement.query = _buffer.join('');
