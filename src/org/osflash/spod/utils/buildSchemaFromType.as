@@ -1,11 +1,8 @@
 package org.osflash.spod.utils
 {
-	import org.osflash.spod.spod_namespace;
-	import org.osflash.spod.types.SpodTypes;
-	import org.osflash.spod.schema.SpodTableColumnSchema;
-	import org.osflash.logger.utils.debug;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 
 	import flash.utils.describeType;
