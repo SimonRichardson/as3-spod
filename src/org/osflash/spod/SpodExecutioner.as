@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
 
 	import flash.errors.IllegalOperationError;
@@ -12,7 +13,12 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private var _statements : Vector.<SpodStatement>;
+		private var _queues : Vector.<SpodStatementQueue>;
+		
+		/**
+		 * @private
+		 */
+		private var _queue : SpodStatementQueueIterator;
 		
 		/**
 		 * @private
@@ -30,32 +36,28 @@ package org.osflash.spod
 			_manager = manager;
 			
 			_running = false;
-			_statements = new Vector.<SpodStatement>();
+			_queues = new Vector.<SpodStatementQueue>();
 		}
 		
-		public function add(statement : SpodStatement) : void
+		public function add(statement : SpodStatementQueue) : void
 		{
-			if(_statements.indexOf(statement) != -1) 
+			if(_queues.indexOf(statement) != -1) 
 				throw new ArgumentError('SpodStatement already exists');
 			
-			statement.connection = _manager.connection;
-			
-			_statements.push(statement);
+			_queues.push(statement);
 			
 			if(!_running) advance();
 		}
 		
-		public function remove(statement : SpodStatement) : void
+		public function remove(statement : SpodStatementQueue) : void
 		{
-			const index : int = _statements.indexOf(statement);
+			const index : int = _queues.indexOf(statement);
 			if(index == -1)
 				throw new ArgumentError('No such SpodStatement');
 				
-			const removed : SpodStatement = _statements.splice(index, 1)[0];
+			const removed : SpodStatementQueue = _queues.splice(index, 1)[0];
 			if(removed != statement)
 				throw new IllegalOperationError('SpodStatement mismatch');
-			
-			statement.connection = null;
 		}
 		
 		/**
@@ -64,7 +66,7 @@ package org.osflash.spod
 		private function execute() : void
 		{
 			if(_running) return;
-			if(_statements.length == 0)
+			if(null == _queue || !_queue.hasNext)
 			{
 				_running = false;
 				return;
@@ -72,7 +74,9 @@ package org.osflash.spod
 			
 			_running = true;
 			
-			const statement : SpodStatement = _statements.shift();
+			const statement : SpodStatement = _queue.next;
+			statement.connection = _manager.connection;
+			
 			if(statement.executing) 
 				throw new IllegalOperationError('SpodStatement is already executing');
 			
@@ -87,17 +91,75 @@ package org.osflash.spod
 		private function advance() : void
 		{
 			_running = false;
+			
+			if(null != _queue && _queue.hasNext) execute();
+			else
+			{
+				 if(_queues.length == 0) 
+				 {
+					if(null != _queue)
+					{
+						use namespace spod_namespace;
+						_queue.queue.active = false;
+					} 
+					
+					_queue = null;
+				 }
+				 else 
+				 {
+					_manager.beginSignal.addOnce(handleBeginSignal);
+					_manager.begin();
+				 }
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleBeginSignal() : void
+		{
+			if(_queues.length > 0) 
+			{
+				use namespace spod_namespace;
+				
+				if(null != _queue) _queue.queue.active = false;
+				
+				_queue = _queues.shift();
+				_queue.queue.active = true;
+			}
+			else throw new SpodError('Unable to begin statement queue');
+			
 			execute();
 		}
-				
+		
+		/**
+		 * @private
+		 */
+		private function handleCommitSignal() : void
+		{
+			advance();
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleRollbackSignal() : void
+		{
+			advance();
+		}
+		
 		/**
 		 * @private
 		 */
 		private function handleCompletedSignal(statement : SpodStatement) : void
 		{
-			advance();
-			
-			statement;
+			if(!_queue.hasNext) 
+			{
+				_manager.commitSignal.addOnce(handleCommitSignal);
+				_manager.commit();
+			}
+						
+			statement.connection = null;
 		}
 		
 		/**
@@ -105,10 +167,18 @@ package org.osflash.spod
 		 */
 		private function handleErrorSignal(statement : SpodStatement, event : SpodErrorEvent) : void
 		{
-			advance();
+			const transaction : Boolean = statement.connection.inTransaction;
+			
+			statement.connection = null;
+			
+			if(transaction)
+			{
+				_manager.rollbackSignal.addOnce(handleRollbackSignal);
+				_manager.rollback();
+			}
+			else advance();
 			
 			event;
-			statement;
 		}
 	}
 }

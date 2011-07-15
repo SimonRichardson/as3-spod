@@ -17,10 +17,12 @@ package org.osflash.spod
 		 */
 		private var _statements : Vector.<SpodStatement>;
 
-		public function SpodStatementQueue()
+		public function SpodStatementQueue(initialStatement : SpodStatement = null)
 		{
 			_active = false;
 			_statements = new Vector.<SpodStatement>();
+			
+			if(null != initialStatement) add(initialStatement);
 		}
 		
 		public function add(statement : SpodStatement) : void
@@ -55,7 +57,7 @@ package org.osflash.spod
 		
 		public function get iterator() : SpodStatementQueueIterator
 		{
-			return new SpodStatementQueueIterator(_statements);
+			return new SpodStatementQueueIterator(this, _statements);
 		}
 		
 		public function get length() : int { return _statements.length; }

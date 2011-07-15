@@ -1,10 +1,10 @@
 package org.osflash.spod
 {
-	import org.osflash.spod.errors.SpodError;
-	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.signals.natives.NativeSignal;
+	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.utils.getDatabaseName;
 
 	import flash.data.SQLConnection;
@@ -42,12 +42,7 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _executioner : SpodExecutioner;
-		
-		/**
-		 * @private
-		 */
-		private var _savepointName : String;
-		
+				
 		/**
 		 * @private
 		 */
@@ -61,6 +56,21 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private var _nativeBeginSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
+		private var _nativeCommitSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
+		private var _nativeRollbackSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
 		private var _openSignal : ISignal;
 		
 		/**
@@ -68,14 +78,45 @@ package org.osflash.spod
 		 */
 		private var _errorSignal : ISignal;
 		
+		/**
+		 * @private
+		 */
+		private var _beginSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
+		private var _commitSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
+		private var _rollbackSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
+		private var _queuing : Boolean;
+		
+		/**
+		 * @private
+		 */
+		private var _queue : SpodStatementQueue;
+		
 		public function SpodManager()
 		{
+			_queuing = false;
+			
 			_connection = new SQLConnection();
 			_executioner = new SpodExecutioner(this);
 			
 			_nativeOpenSignal = new NativeSignal(_connection, SQLEvent.OPEN, SQLEvent);
 			_nativeErrorSignal = new NativeSignal(_connection, SQLErrorEvent.ERROR, SQLErrorEvent);
 			_nativeErrorSignal.add(handleNativeErrorSignal);
+			
+			_nativeBeginSignal = new NativeSignal(_connection, SQLEvent.BEGIN, SQLEvent);
+			_nativeCommitSignal = new NativeSignal(_connection, SQLEvent.COMMIT, SQLEvent);
+			_nativeRollbackSignal = new NativeSignal(_connection, SQLEvent.ROLLBACK, SQLEvent);
 		}
 		
 		public function open(resource : File, async : Boolean = false) : void
@@ -111,22 +152,58 @@ package org.osflash.spod
 			_async = false;
 		}
 		
-		public function addSavepoint() : void
+		public function begin() : void
 		{
-			_savepointName = "Savepoint" + new Date().time;
-			_connection.setSavepoint(_savepointName);
+			_nativeBeginSignal.addOnce(handleNativeBeginSignal);
+			
+			_connection.begin();
 		}
 		
-		public function commitSavepoint() : void
+		public function commit() : void
 		{
-			_connection.releaseSavepoint(_savepointName);
+			_nativeCommitSignal.addOnce(handleNativeCommitSignal);
+			
+			_connection.commit();
 		}
 		
-		public function revertSavepoint() : void
+		public function rollback() : void
 		{
-			_connection.rollbackToSavepoint(_savepointName);
+			_nativeRollbackSignal.addOnce(handleNativeRollbackSignal);
+			
+			_connection.rollback();
 		}
 		
+		spod_namespace function beginQueue() : void
+		{
+			if(_queuing) throw new SpodError('Unable to begin as already in begin state');
+			
+			_queuing = true;
+			_queue = new SpodStatementQueue();
+		}
+		
+		spod_namespace function releaseQueue() : void
+		{
+			if(_queue.active) throw new SpodError('Unable to release queue as already active');
+			
+			_queue = null;
+			_queuing = false;
+		}
+		
+		spod_namespace function commitQueue() : void
+		{
+			if(!_queuing) throw new SpodError('Unable to commit as there is nothing to commit, ' + 
+																			'try calling begin()');
+			if(null == _queue) throw new SpodError('Invalid queue found');
+			if(_queue.length == 0) throw new SpodError('Queue can not be 0');
+			
+			_queuing = false;
+			_executioner.add(_queue);
+		}
+		
+		spod_namespace function get queue() : SpodStatementQueue { return _queue; }
+
+		spod_namespace function get queuing() : Boolean { return _queuing; }
+				
 		/**
 		 * @private
 		 */
@@ -146,6 +223,33 @@ package org.osflash.spod
 			errorSignal.dispatch(new SpodErrorEvent(event.text, error, event));
 		}
 		
+		/**
+		 * @private
+		 */
+		private function handleNativeBeginSignal() : void
+		{
+			_beginSignal.dispatch();
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleNativeCommitSignal() : void
+		{
+			_commitSignal.dispatch();
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleNativeRollbackSignal() : void
+		{
+			_rollbackSignal.dispatch();
+		}
+		
+		/**
+		 * @private
+		 */
 		private function opened() : void
 		{
 			_database = new SpodDatabase(getDatabaseName(_resource), this);
@@ -176,6 +280,24 @@ package org.osflash.spod
 		{
 			if(null == _errorSignal) _errorSignal = new Signal(SpodErrorEvent);
 			return _errorSignal;
+		}
+
+		public function get beginSignal() : ISignal
+		{
+			if(null == _beginSignal) _beginSignal = new Signal();
+			return _beginSignal;
+		}
+		
+		public function get commitSignal() : ISignal
+		{
+			if(null == _commitSignal) _commitSignal = new Signal();
+			return _commitSignal;
+		}
+		
+		public function get rollbackSignal() : ISignal
+		{
+			if(null == _rollbackSignal) _rollbackSignal = new Signal();
+			return _rollbackSignal;
 		}
 	}
 }

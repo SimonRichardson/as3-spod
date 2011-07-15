@@ -26,6 +26,8 @@ package org.osflash.spod
 	public class SpodDatabase
 	{
 		
+		use namespace spod_namespace;
+		
 		/**
 		 * @private
 		 */
@@ -88,6 +90,21 @@ package org.osflash.spod
 			_nativeSQLEventSchemaSignal.strict = false;
 			
 			_tables = new Dictionary();
+		}
+		
+		public function begin() : void
+		{
+			_manager.beginQueue();
+		}
+		
+		public function release() : void
+		{
+			_manager.releaseQueue();
+		}
+		
+		public function commit() : void
+		{
+			_manager.commitQueue();
 		}
 		
 		/**
@@ -213,8 +230,8 @@ package org.osflash.spod
 				statement.completedSignal.add(handleDeleteTableCompleteSignal);
 				statement.errorSignal.add(handleDeleteTableErrorSignal);
 				
-				_manager.executioner.add(statement);
-				
+				if(_manager.queuing) _manager.queue.add(statement);
+				else _manager.executioner.add(new SpodStatementQueue(statement));
 			}
 		}
 		
@@ -263,7 +280,8 @@ package org.osflash.spod
 			statement.completedSignal.add(handleCreateTableCompleteSignal);
 			statement.errorSignal.add(handleCreateTableErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		/**

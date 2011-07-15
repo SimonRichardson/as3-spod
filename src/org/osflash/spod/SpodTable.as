@@ -24,6 +24,8 @@ package org.osflash.spod
 	public class SpodTable
 	{
 		
+		use namespace spod_namespace;
+		
 		/**
 		 * @private
 		 */
@@ -73,7 +75,7 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _removeWhereSignal : ISignal;
-		
+				
 		public function SpodTable(schema : SpodTableSchema, manager : SpodManager)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
@@ -87,6 +89,21 @@ package org.osflash.spod
 			_rows = new Dictionary();
 		}
 		
+		public function begin() : void
+		{
+			_manager.beginQueue();
+		}
+		
+		public function release() : void
+		{
+			_manager.releaseQueue();
+		}
+		
+		public function commit() : void
+		{
+			_manager.commitQueue();
+		}
+		
 		public function insert(object : SpodObject) : void
 		{
 			if(null == object) throw new ArgumentError('SpodObject can not be null');
@@ -98,7 +115,8 @@ package org.osflash.spod
 			statement.completedSignal.addOnce(handleInsertCompletedSignal);
 			statement.errorSignal.addOnce(handleInsertErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		public function select(id : int) : void
@@ -113,7 +131,8 @@ package org.osflash.spod
 			statement.completedSignal.addOnce(handleSelectCompletedSignal);
 			statement.errorSignal.addOnce(handleSelectErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		public function selectWhere(...rest) : void
@@ -146,7 +165,8 @@ package org.osflash.spod
 			statement.completedSignal.addOnce(handleSelectWhereCompletedSignal);
 			statement.errorSignal.addOnce(handleSelectWhereErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		public function selectAll(prefetch : int = -1) : void
@@ -158,7 +178,8 @@ package org.osflash.spod
 			statement.completedSignal.addOnce(handleSelectAllCompletedSignal);
 			statement.errorSignal.addOnce(handleSelectAllErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		public function count() : void
@@ -169,7 +190,8 @@ package org.osflash.spod
 			statement.completedSignal.addOnce(handleCountCompletedSignal);
 			statement.errorSignal.addOnce(handleCountErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		public function removeWhere(...rest) : void
@@ -189,7 +211,8 @@ package org.osflash.spod
 			statement.completedSignal.addOnce(handleRemoveWhereCompletedSignal);
 			statement.errorSignal.addOnce(handleRemoveWhereErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		/**
@@ -205,7 +228,8 @@ package org.osflash.spod
 			statement.completedSignal.addOnce(handleQueryCompletedSignal);
 			statement.errorSignal.addOnce(handleQueryErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		/**

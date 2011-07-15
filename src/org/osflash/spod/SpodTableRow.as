@@ -18,6 +18,8 @@ package org.osflash.spod
 	public class SpodTableRow
 	{
 		
+		use namespace spod_namespace;
+		
 		/**
 		 * @private
 		 */
@@ -75,6 +77,21 @@ package org.osflash.spod
 			_manager = manager;
 		}
 		
+		public function begin() : void
+		{
+			_manager.beginQueue();
+		}
+		
+		public function release() : void
+		{
+			_manager.releaseQueue();
+		}
+		
+		public function commit() : void
+		{
+			_manager.commitQueue();
+		}
+		
 		public function update() : void
 		{
 			const schema : SpodTableSchema = _table.schema;
@@ -84,7 +101,8 @@ package org.osflash.spod
 			statement.completedSignal.add(handleUpdateCompletedSignal);
 			statement.errorSignal.add(handleUpdateErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		public function sync() : void
@@ -96,7 +114,8 @@ package org.osflash.spod
 			statement.completedSignal.add(handleSyncCompletedSignal);
 			statement.errorSignal.add(handleSyncErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		public function remove() : void
@@ -108,7 +127,8 @@ package org.osflash.spod
 			statement.completedSignal.add(handleRemoveCompletedSignal);
 			statement.errorSignal.add(handleRemoveErrorSignal);
 			
-			_manager.executioner.add(statement);
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		/**

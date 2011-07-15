@@ -14,13 +14,25 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private var _queue : SpodStatementQueue;
+		
+		/**
+		 * @private
+		 */
 		private var _statements : Vector.<SpodStatement>;
 		
-		public function SpodStatementQueueIterator(statements : Vector.<SpodStatement>)
+		public function SpodStatementQueueIterator(	queue : SpodStatementQueue,
+													statements : Vector.<SpodStatement>
+													)
 		{
+			if(null == queue) throw new ArgumentError('Queue can not be null');
 			if(null == statements) throw new ArgumentError('Statements can not be null');
 			
 			_cursor = 0;
+			
+			_queue = queue;
+			_queue.active = true;
+			
 			_statements = statements;
 		}
 		
@@ -39,5 +51,7 @@ package org.osflash.spod
 			
 			return statement;
 		}
+		
+		spod_namespace function get queue() : SpodStatementQueue { return _queue; }
 	}
 }

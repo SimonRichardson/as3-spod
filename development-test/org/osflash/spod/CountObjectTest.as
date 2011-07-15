@@ -43,6 +43,8 @@ package org.osflash.spod
 		protected function handleCreatedSignal(table : SpodTable) : void
 		{			
 			// flood the database with rows
+			table.begin();
+			
 			const total : int = 3;
 			for(var i : int = 0; i < total; i++)
 			{
@@ -50,6 +52,8 @@ package org.osflash.spod
 				if(i == total - 1) user.insertSignal.add(handleInsertSignal);
 				table.insert(user);
 			}
+			
+			table.commit();
 		}
 		
 		protected function handleInsertSignal(object : SpodObject) : void
