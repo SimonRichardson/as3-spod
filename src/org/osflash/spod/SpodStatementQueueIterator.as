@@ -53,5 +53,7 @@ package org.osflash.spod
 		}
 		
 		spod_namespace function get queue() : SpodStatementQueue { return _queue; }
+		
+		spod_namespace function get length() : int { return _queue.length; }
 	}
 }

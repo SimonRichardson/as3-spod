@@ -1,7 +1,7 @@
 package org.osflash.spod
 {
-	import org.osflash.logger.utils.debug;
-	import org.osflash.logger.utils.error;
+	import org.osflash.logger.logs.debug;
+	import org.osflash.logger.logs.error;
 	import org.osflash.spod.builders.expressions.where.EqualsToExpression;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;

@@ -18,6 +18,8 @@ package org.osflash.spod
 	public class SpodManager
 	{
 		
+		use namespace spod_namespace;
+		
 		/**
 		 * @private
 		 */
@@ -196,13 +198,28 @@ package org.osflash.spod
 			if(null == _queue) throw new SpodError('Invalid queue found');
 			if(_queue.length == 0) throw new SpodError('Queue can not be 0');
 			
-			_queuing = false;
+			_executioner.executedSignal.addOnce(handleExecutedSignal);
 			_executioner.add(_queue);
+			
+			_queuing = false;
 		}
 		
 		spod_namespace function get queue() : SpodStatementQueue { return _queue; }
 
 		spod_namespace function get queuing() : Boolean { return _queuing; }
+		
+		/**
+		 * @private
+		 */
+		private function handleExecutedSignal() : void
+		{
+			const queued : Boolean = _queuing;
+			
+			_queue = null;
+			_queuing = false;
+			
+			if(queued) _executioner.advance();
+		}
 				
 		/**
 		 * @private

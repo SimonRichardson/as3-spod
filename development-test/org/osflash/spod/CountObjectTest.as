@@ -1,7 +1,7 @@
 package org.osflash.spod
 {
-	import org.osflash.logger.utils.debug;
-	import org.osflash.logger.utils.error;
+	import org.osflash.logger.logs.debug;
+	import org.osflash.logger.logs.error;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;
 	import org.osflash.spod.utils.getClassNameFromQname;
@@ -11,6 +11,7 @@ package org.osflash.spod
 	import flash.display.StageScaleMode;
 	import flash.filesystem.File;
 	import flash.utils.getQualifiedClassName;
+	import flash.utils.getTimer;
 	
 	[SWF(backgroundColor="#FFFFFF", frameRate="31", width="1280", height="720")]
 	public class CountObjectTest extends Sprite
@@ -20,8 +21,12 @@ package org.osflash.spod
 		
 		protected var resource : File;
 		
+		private var _timer : int;
+		
 		public function CountObjectTest()
 		{
+			debug(getQualifiedClassName(this));
+			
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
 						
@@ -41,17 +46,23 @@ package org.osflash.spod
 		}
 		
 		protected function handleCreatedSignal(table : SpodTable) : void
-		{			
+		{		
+			debug("Begin");
+			
+			_timer = getTimer();
+			
 			// flood the database with rows
 			table.begin();
 			
-			const total : int = 3;
+			const total : int = 1000;
 			for(var i : int = 0; i < total; i++)
 			{
 				const user : User = new User("User - " + i);
 				if(i == total - 1) user.insertSignal.add(handleInsertSignal);
 				table.insert(user);
 			}
+			
+			debug("Commit");
 			
 			table.commit();
 		}
@@ -66,6 +77,8 @@ package org.osflash.spod
 		{
 			const name : String = getClassNameFromQname(getQualifiedClassName(table.schema.type));
 			debug(total + " " + name + "s in table " + name);
+			
+			debug(getTimer() - _timer, 'ms');
 		}
 			
 		protected function handleErrorSignal(event : SpodErrorEvent) : void

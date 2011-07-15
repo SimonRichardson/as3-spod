@@ -1,5 +1,7 @@
 package org.osflash.spod
 {
+	import org.osflash.signals.ISignal;
+	import org.osflash.signals.Signal;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
 
@@ -31,6 +33,11 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _running : Boolean;
+		
+		/**
+		 * @private
+		 */
+		private var _executedSignal : ISignal;
 				
 		public function SpodExecutioner(manager : SpodManager)
 		{
@@ -90,7 +97,7 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function advance() : void
+		spod_namespace function advance() : void
 		{
 			_running = false;
 			
@@ -100,11 +107,22 @@ package org.osflash.spod
 				 if(_queues.length == 0) 
 				 {
 					if(null != _queue) _queue.queue.active = false;
+					
 					_queue = null;
 				 }
 				 else 
 				 {
-					if(_manager.queuing)
+					if(_queues.length > 0) 
+					{
+						if(null != _queue) _queue.queue.active = false;
+						
+						const queue : SpodStatementQueue = _queues.shift();
+						_queue = queue.iterator;
+						_queue.queue.active = true;
+					}
+					else throw new SpodError('Unable to begin statement queue');
+					
+					if(_queue.length > 1)
 					{
 						_manager.beginSignal.addOnce(handleBeginSignal);
 						_manager.begin();
@@ -119,16 +137,6 @@ package org.osflash.spod
 		 */
 		private function handleBeginSignal() : void
 		{
-			if(_queues.length > 0) 
-			{
-				if(null != _queue) _queue.queue.active = false;
-				
-				const queue : SpodStatementQueue = _queues.shift();
-				_queue = queue.iterator;
-				_queue.queue.active = true;
-			}
-			else throw new SpodError('Unable to begin statement queue');
-			
 			execute();
 		}
 		
@@ -137,6 +145,8 @@ package org.osflash.spod
 		 */
 		private function handleCommitSignal() : void
 		{
+			executedSignal.dispatch();
+			
 			advance();
 		}
 		
@@ -155,14 +165,15 @@ package org.osflash.spod
 		{
 			if(!_queue.hasNext) 
 			{
-				if(_manager.queuing)
+				if(_queue.length > 1)
 				{
 					_manager.commitSignal.addOnce(handleCommitSignal);
 					_manager.commit();
 				} else handleCommitSignal();
 			}
-						
-			statement.connection = null;
+			else advance();
+			
+			statement;
 		}
 		
 		/**
@@ -171,9 +182,6 @@ package org.osflash.spod
 		private function handleErrorSignal(statement : SpodStatement, event : SpodErrorEvent) : void
 		{
 			const transaction : Boolean = statement.connection.inTransaction;
-			
-			statement.connection = null;
-			
 			if(transaction)
 			{
 				_manager.rollbackSignal.addOnce(handleRollbackSignal);
@@ -182,6 +190,12 @@ package org.osflash.spod
 			else advance();
 			
 			event;
+		}
+		
+		public function get executedSignal() : ISignal
+		{
+			if(null == _executedSignal) _executedSignal = new Signal();
+			return _executedSignal;
 		}
 	}
 }

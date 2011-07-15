@@ -1,10 +1,10 @@
 package org.osflash.spod
 {
-	import org.osflash.spod.utils.describeTable;
-	import org.osflash.logger.utils.debug;
-	import org.osflash.logger.utils.error;
+	import org.osflash.logger.logs.debug;
+	import org.osflash.logger.logs.error;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;
+	import org.osflash.spod.utils.describeTable;
 
 	import flash.display.Sprite;
 	import flash.display.StageAlign;

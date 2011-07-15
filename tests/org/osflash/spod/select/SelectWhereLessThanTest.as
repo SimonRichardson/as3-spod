@@ -4,7 +4,8 @@ package org.osflash.spod.select
 	import asunit.asserts.assertNotNull;
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
-	import org.osflash.logger.utils.debug;
+
+	import org.osflash.logger.logs.debug;
 	import org.osflash.spod.SpodDatabase;
 	import org.osflash.spod.SpodManager;
 	import org.osflash.spod.SpodObject;

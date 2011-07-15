@@ -31,7 +31,7 @@ package org.osflash.spod
 			
 			if(_statements.indexOf(statement) != -1) 
 				throw new ArgumentError('SpodStatement already exists');
-						
+			
 			_statements.push(statement);
 		}
 		
