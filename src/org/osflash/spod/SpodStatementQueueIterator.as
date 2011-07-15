@@ -38,7 +38,7 @@ package org.osflash.spod
 		
 		public function get hasNext() : Boolean
 		{
-			return _cursor + 1 < _statements.length;
+			return _cursor < _statements.length;
 		}
 		
 		public function get next() : SpodStatement
