@@ -53,6 +53,11 @@ package org.osflash.spod
 			return _statements[index];
 		}
 		
+		public function get iterator() : SpodStatementQueueIterator
+		{
+			return new SpodStatementQueueIterator(_statements);
+		}
+		
 		public function get length() : int { return _statements.length; }
 		
 		public function get active() : Boolean { return _active; }
