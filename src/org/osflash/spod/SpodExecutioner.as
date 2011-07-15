@@ -10,6 +10,8 @@ package org.osflash.spod
 	public class SpodExecutioner
 	{
 		
+		use namespace spod_namespace;
+		
 		/**
 		 * @private
 		 */
@@ -97,18 +99,17 @@ package org.osflash.spod
 			{
 				 if(_queues.length == 0) 
 				 {
-					if(null != _queue)
-					{
-						use namespace spod_namespace;
-						_queue.queue.active = false;
-					} 
-					
+					if(null != _queue) _queue.queue.active = false;
 					_queue = null;
 				 }
 				 else 
 				 {
-					_manager.beginSignal.addOnce(handleBeginSignal);
-					_manager.begin();
+					if(_manager.queuing)
+					{
+						_manager.beginSignal.addOnce(handleBeginSignal);
+						_manager.begin();
+					}
+					else handleBeginSignal();
 				 }
 			}
 		}
@@ -120,11 +121,10 @@ package org.osflash.spod
 		{
 			if(_queues.length > 0) 
 			{
-				use namespace spod_namespace;
-				
 				if(null != _queue) _queue.queue.active = false;
 				
-				_queue = _queues.shift();
+				const queue : SpodStatementQueue = _queues.shift();
+				_queue = queue.iterator;
 				_queue.queue.active = true;
 			}
 			else throw new SpodError('Unable to begin statement queue');
@@ -155,8 +155,11 @@ package org.osflash.spod
 		{
 			if(!_queue.hasNext) 
 			{
-				_manager.commitSignal.addOnce(handleCommitSignal);
-				_manager.commit();
+				if(_manager.queuing)
+				{
+					_manager.commitSignal.addOnce(handleCommitSignal);
+					_manager.commit();
+				} else handleCommitSignal();
 			}
 						
 			statement.connection = null;

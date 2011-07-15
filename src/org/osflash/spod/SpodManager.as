@@ -226,7 +226,7 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleNativeBeginSignal() : void
+		private function handleNativeBeginSignal(event : SQLEvent) : void
 		{
 			_beginSignal.dispatch();
 		}
@@ -234,7 +234,7 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleNativeCommitSignal() : void
+		private function handleNativeCommitSignal(event : SQLEvent) : void
 		{
 			_commitSignal.dispatch();
 		}
@@ -242,7 +242,7 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleNativeRollbackSignal() : void
+		private function handleNativeRollbackSignal(event : SQLEvent) : void
 		{
 			_rollbackSignal.dispatch();
 		}
