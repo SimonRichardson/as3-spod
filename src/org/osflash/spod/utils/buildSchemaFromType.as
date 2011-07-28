@@ -1,5 +1,6 @@
 package org.osflash.spod.utils
 {
+	import org.osflash.spod.schema.SpodSchemaIdentifier;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
@@ -18,7 +19,7 @@ package org.osflash.spod.utils
 		const tableName : String = getClassNameFromQname(description.@name);
 		
 		const schema : SpodTableSchema = new SpodTableSchema(type, tableName);
-		const defaultId : String = SpodTableSchema.DEFAULT_UNIQUE_IDENTIFIER;
+		const defaultId : String = SpodSchemaIdentifier.DEFAULT;
 		
 		for each(var parameter : XML in description..constructor.parameter)
 		{

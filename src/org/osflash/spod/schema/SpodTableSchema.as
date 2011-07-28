@@ -14,9 +14,7 @@ package org.osflash.spod.schema
 	 */
 	public class SpodTableSchema implements ISpodSchema
 	{
-		
-		public static const DEFAULT_UNIQUE_IDENTIFIER : String = 'id';
-		
+				
 		/**
 		 * @private
 		 */
@@ -46,7 +44,7 @@ package org.osflash.spod.schema
 			
 			_type = type;
 			_name = name;
-			_identifier = DEFAULT_UNIQUE_IDENTIFIER;
+			_identifier = SpodSchemaIdentifier.DEFAULT;
 			
 			_columns = new Vector.<SpodTableColumnSchema>();
 		}
