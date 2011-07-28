@@ -133,7 +133,7 @@ package org.osflash.spod
 			nativeSQLErrorEventSignal.remove(handleTriggerSQLErrorEventSignal);
 			nativeSQLEventSchemaSignal.remove(handleTriggerSQLEventSchemaSignal);
 			
-			info('Handle trigger sql event', ignoreIfExists);
+			info('Handle trigger sql event', ignoreIfExists );
 		}
 		
 		public function get createTriggerSignal() : ISignal
