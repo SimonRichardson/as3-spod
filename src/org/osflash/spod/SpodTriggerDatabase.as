@@ -77,7 +77,7 @@ package org.osflash.spod
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
 			
-			info('Create trigger table', schema);
+			info('Create trigger table', schema, ignoreIfExists);
 		}
 		
 		/**
@@ -133,7 +133,7 @@ package org.osflash.spod
 			nativeSQLErrorEventSignal.remove(handleTriggerSQLErrorEventSignal);
 			nativeSQLEventSchemaSignal.remove(handleTriggerSQLEventSchemaSignal);
 			
-			info('Handle trigger sql event');
+			info('Handle trigger sql event', ignoreIfExists);
 		}
 		
 		public function get createTriggerSignal() : ISignal
