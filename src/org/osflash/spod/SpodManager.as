@@ -1,10 +1,12 @@
 package org.osflash.spod
 {
+	import org.osflash.spod.factories.SpodDatabaseFactory;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.signals.natives.NativeSignal;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
+	import org.osflash.spod.factories.ISpodDatabaseFactory;
 	import org.osflash.spod.utils.getDatabaseName;
 
 	import flash.data.SQLConnection;
@@ -105,12 +107,19 @@ package org.osflash.spod
 		 */
 		private var _queue : SpodStatementQueue;
 		
-		public function SpodManager()
+		/**
+		 * @private
+		 */
+		private var _databaseFactory : ISpodDatabaseFactory;
+		
+		public function SpodManager(databaseFactory : ISpodDatabaseFactory = null)
 		{
 			_queuing = false;
 			
 			_connection = new SQLConnection();
 			_executioner = new SpodExecutioner(this);
+			
+			_databaseFactory = databaseFactory || new SpodDatabaseFactory();
 			
 			_nativeOpenSignal = new NativeSignal(_connection, SQLEvent.OPEN, SQLEvent);
 			_nativeErrorSignal = new NativeSignal(_connection, SQLErrorEvent.ERROR, SQLErrorEvent);
@@ -269,8 +278,11 @@ package org.osflash.spod
 		 */
 		private function opened() : void
 		{
-			_database = new SpodDatabase(getDatabaseName(_resource), this);
+			if(null == _databaseFactory) throw new SpodError('Invalid Database Factory');
 			
+			const name : String = getDatabaseName(_resource);
+			_database = _databaseFactory.create(name, this);
+					
 			openSignal.dispatch(_database);
 		}
 		

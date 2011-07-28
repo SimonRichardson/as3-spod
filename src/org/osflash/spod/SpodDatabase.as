@@ -10,7 +10,7 @@ package org.osflash.spod
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
-	import org.osflash.spod.utils.buildSchemaFromType;
+	import org.osflash.spod.utils.buildTableSchemaFromType;
 	import org.osflash.spod.utils.getClassNameFromQname;
 
 	import flash.data.SQLSchemaResult;
@@ -28,6 +28,11 @@ package org.osflash.spod
 		
 		use namespace spod_namespace;
 		
+		/**
+		 * @private
+		 */
+		private var _qname : String;
+				
 		/**
 		 * @private
 		 */
@@ -77,6 +82,8 @@ package org.osflash.spod
 			_name = name;
 			_manager = manager;
 			
+			_qname = getQualifiedClassName(this);
+			
 			if(null == manager.connection) throw new ArgumentError('SpodConnection required');
 			_nativeSQLErrorEventSignal = new NativeSignal(	_manager.connection, 
 															SQLErrorEvent.ERROR, 
@@ -124,7 +131,7 @@ package org.osflash.spod
 			
 			if(!active(type))
 			{
-				const params : Array = [type, ignoreIfExists];
+				const params : Array = [type, ignoreIfExists, _qname];
 				_nativeSQLErrorEventSignal.addOnceWithPriority(	handleCreateSQLErrorEventSignal, 
 																int.MAX_VALUE
 																).params = params;
@@ -165,7 +172,7 @@ package org.osflash.spod
 			if(active(type)) loadTableSignal.dispatch(getTable(type));
 			else
 			{
-				const params : Array = [type];
+				const params : Array = [type, _qname];
 				_nativeSQLErrorEventSignal.addOnceWithPriority(	handleLoadSQLErrorEventSignal, 
 																int.MAX_VALUE
 																).params = params;
@@ -289,9 +296,13 @@ package org.osflash.spod
 		 */
 		private function handleCreateSQLErrorEventSignal(	event : SQLErrorEvent, 
 															type : Class,
-															ignoreIfExists : Boolean
+															ignoreIfExists : Boolean,
+															qname : String
 															) : void
 		{
+			// We're not interested in this signal
+			if(qname != _qname) return;
+			
 			// Catch the database not found error, if anything else we just let it slip through!
 			if(event.errorID == 3115 && event.error.detailID == 1007)
 			{
@@ -304,8 +315,14 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleLoadSQLErrorEventSignal(event : SQLErrorEvent, type : Class) : void
+		private function handleLoadSQLErrorEventSignal(	event : SQLErrorEvent, 
+														type : Class, 
+														qname : String
+														) : void
 		{
+			// We're not interested in this signal
+			if(qname != _qname) return;
+			
 			// Catch the database not found error, if anything else we just let it slip through!
 			if(event.errorID == 3115 && event.error.detailID == 1007)
 			{
@@ -319,8 +336,14 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleDeleteSQLErrorEventSignal(event : SQLErrorEvent, type : Class) : void
+		private function handleDeleteSQLErrorEventSignal(	event : SQLErrorEvent, 
+															type : Class,
+															qname : String
+															) : void
 		{
+			// We're not interested in this signal
+			if(qname != _qname) return;
+			
 			// Catch the database not found error, if anything else we just let it slip through!
 			if(event.errorID == 3115 && event.error.detailID == 1007)
 			{
@@ -334,14 +357,16 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleCreateSQLError(type : Class, ignoreIfExists : Boolean) : void
+		private function handleCreateSQLError(	type : Class, 
+												ignoreIfExists : Boolean
+												) : void
 		{
 			_nativeSQLErrorEventSignal.remove(handleCreateSQLErrorEventSignal);
 			_nativeSQLEventSchemaSignal.remove(handleCreateSQLEventSchemaSignal);
 			
 			if(null == type) throw new SpodError('Type can not be null');
 			
-			const schema : SpodTableSchema = buildSchemaFromType(type);
+			const schema : SpodTableSchema = buildTableSchemaFromType(type);
 			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			// Create it because it doesn't exist
@@ -353,14 +378,18 @@ package org.osflash.spod
 		 */
 		private function handleCreateSQLEventSchemaSignal(	event : SQLEvent, 
 															type : Class, 
-															ignoreIfExists : Boolean
+															ignoreIfExists : Boolean,
+															qname : String
 															) : void
 		{
+			// We're not interested in this signal
+			if(qname != _qname) return;
+			
 			_nativeSQLErrorEventSignal.remove(handleCreateSQLErrorEventSignal);
 			_nativeSQLEventSchemaSignal.remove(handleCreateSQLEventSchemaSignal);
 			
 			// This works out if there is a need to migrate a database or not!
-			const schema : SpodTableSchema = buildSchemaFromType(type);
+			const schema : SpodTableSchema = buildTableSchemaFromType(type);
 			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
@@ -408,7 +437,7 @@ package org.osflash.spod
 			_nativeSQLEventSchemaSignal.remove(handleLoadSQLEventSchemaSignal);
 			
 			// This works out if there is a need to migrate a database or not!
-			const schema : SpodTableSchema = buildSchemaFromType(type);
+			const schema : SpodTableSchema = buildTableSchemaFromType(type);
 			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
@@ -456,7 +485,7 @@ package org.osflash.spod
 			_nativeSQLEventSchemaSignal.remove(handleDeleteSQLEventSchemaSignal);
 			
 			// This works out if there is a need to migrate a database or not!
-			const schema : SpodTableSchema = buildSchemaFromType(type);
+			const schema : SpodTableSchema = buildTableSchemaFromType(type);
 			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
@@ -565,6 +594,16 @@ package org.osflash.spod
 		{
 			if(null == _deleteTableSignal) _deleteTableSignal = new Signal(SpodTable);
 			return _deleteTableSignal;
+		}
+		
+		protected function get nativeSQLErrorEventSignal() : IPrioritySignal
+		{
+			return _nativeSQLErrorEventSignal;
+		}
+		
+		protected function get nativeSQLEventSchemaSignal() : IPrioritySignal
+		{
+			return _nativeSQLEventSchemaSignal;
 		}
 	}
 }
