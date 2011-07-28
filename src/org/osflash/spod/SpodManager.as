@@ -194,7 +194,11 @@ package org.osflash.spod
 		
 		spod_namespace function releaseQueue() : void
 		{
-			if(_queue.active) throw new SpodError('Unable to release queue as already active');
+			if(_queuing) throw new SpodError('Unable to release as not in begin state');
+			if(_queue.active) throw new SpodError(	'Unable to release queue as ' + 
+																'already active'
+																);
+			_executioner.remove(_queue);
 			
 			_queue = null;
 			_queuing = false;
@@ -202,8 +206,9 @@ package org.osflash.spod
 		
 		spod_namespace function commitQueue() : void
 		{
-			if(!_queuing) throw new SpodError('Unable to commit as there is nothing to commit, ' + 
-																			'try calling begin()');
+			if(!_queuing) throw new SpodError(	'Unable to commit as there is nothing to commit, ' + 
+												'try calling begin()'
+												);
 			if(null == _queue) throw new SpodError('Invalid queue found');
 			if(_queue.length == 0) throw new SpodError('Queue can not be 0');
 			

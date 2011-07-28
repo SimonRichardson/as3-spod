@@ -48,27 +48,27 @@ package org.osflash.spod
 			_queues = new Vector.<SpodStatementQueue>();
 		}
 		
-		public function add(statement : SpodStatementQueue) : void
+		public function add(queue : SpodStatementQueue) : void
 		{
-			if(_queues.indexOf(statement) != -1) 
-				throw new ArgumentError('SpodStatement already exists');
+			if(_queues.indexOf(queue) != -1) 
+				throw new ArgumentError('SpodStatementQueue already exists');
 			
-			_queues.push(statement);
+			_queues.push(queue);
 			
 			if(!_running) advance();
 		}
 		
-		public function remove(statement : SpodStatementQueue) : void
+		public function remove(queue : SpodStatementQueue) : void
 		{
-			const index : int = _queues.indexOf(statement);
+			const index : int = _queues.indexOf(queue);
 			if(index == -1)
-				throw new ArgumentError('No such SpodStatement');
+				throw new ArgumentError('No such SpodStatementQueue');
 				
 			const removed : SpodStatementQueue = _queues.splice(index, 1)[0];
-			if(removed != statement)
-				throw new IllegalOperationError('SpodStatement mismatch');
+			if(removed != queue)
+				throw new IllegalOperationError('SpodStatementQueue mismatch');
 		}
-		
+				
 		/**
 		 * @private
 		 */
