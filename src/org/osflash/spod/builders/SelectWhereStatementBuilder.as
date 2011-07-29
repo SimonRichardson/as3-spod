@@ -5,6 +5,7 @@ package org.osflash.spod.builders
 	import org.osflash.spod.builders.expressions.SpodExpressionType;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
+	import org.osflash.spod.schema.types.SpodSchemaType;
 
 	import flash.errors.IllegalOperationError;
 	import flash.utils.getQualifiedClassName;
@@ -36,7 +37,8 @@ package org.osflash.spod.builders
 			if(null == schema) throw new ArgumentError('SpodTableSchema can not be null');
 			if(null == expressions) throw new ArgumentError('Expressions can not be null');
 			if(expressions.length == 0) throw new ArgumentError('Expressions can not be empty');
-			
+			if(_schema.schemaType != SpodSchemaType.TABLE) throw new ArgumentError('Schema ' + 
+																		'should be a table schema');
 			_schema = schema;
 			_expressions = expressions;
 			

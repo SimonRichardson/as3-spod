@@ -1,5 +1,6 @@
 package org.osflash.spod.builders
 {
+	import org.osflash.spod.schema.types.SpodSchemaType;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.ISpodSchema;
@@ -34,6 +35,9 @@ package org.osflash.spod.builders
 														)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
+			if(_schema.schemaType != SpodSchemaType.TABLE) throw new ArgumentError('Schema ' + 
+																		'should be a table schema');
+				
 			_schema = schema;
 			
 			_buffer = new Vector.<String>();
