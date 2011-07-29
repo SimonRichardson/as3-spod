@@ -37,7 +37,7 @@ package org.osflash.spod
 		private function handleOpenSignal(database : SpodTriggerDatabase) : void
 		{
 			database.createTriggerSignal.add(handleCreateSignal);
-			database.createTrigger(User);
+			database.createTrigger(User).update().before().where().execute();
 		}
 		
 		private function handleCreateSignal(table : SpodTable) : void
