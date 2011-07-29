@@ -27,11 +27,6 @@ package org.osflash.spod
 	{
 		
 		use namespace spod_namespace;
-		
-		/**
-		 * @private
-		 */
-		private var _qname : String;
 				
 		/**
 		 * @private
@@ -82,8 +77,6 @@ package org.osflash.spod
 			_name = name;
 			_manager = manager;
 			
-			_qname = getQualifiedClassName(this);
-			
 			if(null == manager.connection) throw new ArgumentError('SpodConnection required');
 			_nativeSQLErrorEventSignal = new NativeSignal(	_manager.connection, 
 															SQLErrorEvent.ERROR, 
@@ -131,7 +124,7 @@ package org.osflash.spod
 			
 			if(!active(type))
 			{
-				const params : Array = [type, ignoreIfExists, _qname];
+				const params : Array = [type, ignoreIfExists];
 				_nativeSQLErrorEventSignal.addOnceWithPriority(	handleCreateSQLErrorEventSignal, 
 																int.MAX_VALUE
 																).params = params;
@@ -172,7 +165,7 @@ package org.osflash.spod
 			if(active(type)) loadTableSignal.dispatch(getTable(type));
 			else
 			{
-				const params : Array = [type, _qname];
+				const params : Array = [type];
 				_nativeSQLErrorEventSignal.addOnceWithPriority(	handleLoadSQLErrorEventSignal, 
 																int.MAX_VALUE
 																).params = params;
@@ -296,13 +289,9 @@ package org.osflash.spod
 		 */
 		private function handleCreateSQLErrorEventSignal(	event : SQLErrorEvent, 
 															type : Class,
-															ignoreIfExists : Boolean,
-															qname : String
+															ignoreIfExists : Boolean
 															) : void
 		{
-			// We're not interested in this signal
-			if(qname != _qname) return;
-			
 			// Catch the database not found error, if anything else we just let it slip through!
 			if(event.errorID == 3115 && event.error.detailID == 1007)
 			{
@@ -316,13 +305,9 @@ package org.osflash.spod
 		 * @private
 		 */
 		private function handleLoadSQLErrorEventSignal(	event : SQLErrorEvent, 
-														type : Class, 
-														qname : String
+														type : Class
 														) : void
 		{
-			// We're not interested in this signal
-			if(qname != _qname) return;
-			
 			// Catch the database not found error, if anything else we just let it slip through!
 			if(event.errorID == 3115 && event.error.detailID == 1007)
 			{
@@ -337,13 +322,9 @@ package org.osflash.spod
 		 * @private
 		 */
 		private function handleDeleteSQLErrorEventSignal(	event : SQLErrorEvent, 
-															type : Class,
-															qname : String
+															type : Class
 															) : void
 		{
-			// We're not interested in this signal
-			if(qname != _qname) return;
-			
 			// Catch the database not found error, if anything else we just let it slip through!
 			if(event.errorID == 3115 && event.error.detailID == 1007)
 			{
@@ -378,13 +359,9 @@ package org.osflash.spod
 		 */
 		private function handleCreateSQLEventSchemaSignal(	event : SQLEvent, 
 															type : Class, 
-															ignoreIfExists : Boolean,
-															qname : String
+															ignoreIfExists : Boolean
 															) : void
 		{
-			// We're not interested in this signal
-			if(qname != _qname) return;
-			
 			_nativeSQLErrorEventSignal.remove(handleCreateSQLErrorEventSignal);
 			_nativeSQLEventSchemaSignal.remove(handleCreateSQLEventSchemaSignal);
 			

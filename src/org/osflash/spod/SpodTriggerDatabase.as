@@ -20,12 +20,7 @@ package org.osflash.spod
 	{
 		
 		use namespace spod_namespace;
-		
-		/**
-		 * @private
-		 */
-		private var _qname : String;
-		
+				
 		/**
 		 * @private
 		 */
@@ -40,14 +35,12 @@ package org.osflash.spod
 		{
 			super(name, manager);
 			
-			_qname = getQualifiedClassName(this);
-			
 			_manager = manager;
 		}
 		
 		public function createTrigger(type : Class, ignoreIfExists : Boolean = true) : void
 		{
-			const params : Array = [type, ignoreIfExists, _qname];
+			const params : Array = [type, ignoreIfExists];
 			
 			nativeSQLErrorEventSignal.addOnceWithPriority(	handleTriggerSQLErrorEventSignal, 
 															int.MAX_VALUE
@@ -102,13 +95,9 @@ package org.osflash.spod
 		 */
 		private function handleTriggerSQLErrorEventSignal(	event : SQLErrorEvent, 
 															type : Class,
-															ignoreIfExists : Boolean,
-															qname : String
+															ignoreIfExists : Boolean
 															) : void
 		{
-			// We're not interested in this signal
-			if(qname != _qname) return;
-			
 			// Catch the database not found error, if anything else we just let it slip through!
 			if(event.errorID == 3115 && event.error.detailID == 1007)
 			{
@@ -123,13 +112,9 @@ package org.osflash.spod
 		 */
 		private function handleTriggerSQLEventSchemaSignal(	event : SQLEvent, 
 															type : Class, 
-															ignoreIfExists : Boolean,
-															qname : String
+															ignoreIfExists : Boolean
 															) : void
 		{
-			// We're not interested in this signal
-			if(qname != _qname) return;
-			
 			nativeSQLErrorEventSignal.remove(handleTriggerSQLErrorEventSignal);
 			nativeSQLEventSchemaSignal.remove(handleTriggerSQLEventSchemaSignal);
 			
