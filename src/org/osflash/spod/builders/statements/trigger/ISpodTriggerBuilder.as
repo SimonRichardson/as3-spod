@@ -9,6 +9,8 @@ package org.osflash.spod.builders.statements.trigger
 		
 		function get type() : Class;
 		
+		function get head() : ISpodTriggerBuilder;
+		
 		function get executeSignal() : ISignal;
 	}
 }

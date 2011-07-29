@@ -7,28 +7,28 @@ package org.osflash.spod.builders.statements.trigger
 											implements ISpodTriggerActionBuilder
 	{
 		
-		public function SpodTriggerActionBuilder(type : Class)
+		public function SpodTriggerActionBuilder(type : Class, head : ISpodTriggerBuilder)
 		{
-			super(type);
+			super(type, head);
 		}
 
 		public function insert() : ISpodTriggerWithBuilder
 		{
-			const builder : ISpodTriggerWithBuilder = new SpodTriggerInsertBuilder(type);
+			const builder : ISpodTriggerWithBuilder = new SpodTriggerInsertBuilder(type, head);
 			builder.executeSignal.add(internalExecute);
 			return builder;
 		}
 		
 		public function update() : ISpodTriggerWithBuilder
 		{
-			const builder : ISpodTriggerWithBuilder = new SpodTriggerUpdateBuilder(type);
+			const builder : ISpodTriggerWithBuilder = new SpodTriggerUpdateBuilder(type, head);
 			builder.executeSignal.add(internalExecute);
 			return builder;
 		}
 		
 		public function remove() : ISpodTriggerWithBuilder
 		{
-			const builder : ISpodTriggerWithBuilder = new SpodTriggerRemoveBuilder(type);
+			const builder : ISpodTriggerWithBuilder = new SpodTriggerRemoveBuilder(type, head);
 			builder.executeSignal.add(internalExecute);
 			return builder;
 		}

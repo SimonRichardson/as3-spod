@@ -14,21 +14,21 @@ package org.osflash.spod.builders.statements.trigger
 
 		public function SpodTriggerWhenBuilder(type : Class, ignoreIfExists : Boolean = true)
 		{
-			super(type);
+			super(type, this);
 			
 			_ignoreIfExists = ignoreIfExists;
 		}
 		
 		public function before() : ISpodTriggerActionBuilder
 		{
-			const builder : ISpodTriggerActionBuilder = new SpodTriggerActionBuilder(type);
+			const builder : ISpodTriggerActionBuilder = new SpodTriggerActionBuilder(type, this);
 			builder.executeSignal.add(internalExecute);
 			return builder;
 		}
 
 		public function after() : ISpodTriggerActionBuilder
 		{
-			const builder : ISpodTriggerActionBuilder = new SpodTriggerActionBuilder(type);
+			const builder : ISpodTriggerActionBuilder = new SpodTriggerActionBuilder(type, this);
 			builder.executeSignal.add(internalExecute);
 			return builder;
 		}

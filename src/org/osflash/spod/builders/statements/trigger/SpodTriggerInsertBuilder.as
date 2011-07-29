@@ -7,9 +7,9 @@ package org.osflash.spod.builders.statements.trigger
 	public class SpodTriggerInsertBuilder extends SpodTriggerWithBuilder
 	{
 
-		public function SpodTriggerInsertBuilder(type : Class)
+		public function SpodTriggerInsertBuilder(type : Class, head : ISpodTriggerBuilder)
 		{
-			super(type, SpodTriggerActionType.INSERT);
+			super(type, head, SpodTriggerActionType.INSERT);
 		}
 	}
 }

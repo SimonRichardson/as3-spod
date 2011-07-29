@@ -15,24 +15,33 @@ package org.osflash.spod.builders.statements.trigger
 		/**
 		 * @private
 		 */
+		private var _head : ISpodTriggerBuilder;
+		
+		/**
+		 * @private
+		 */
 		private var _executeSignal : ISignal;
 
-		public function SpodTriggerBaseBuilder(type : Class)
+		public function SpodTriggerBaseBuilder(type : Class, head : ISpodTriggerBuilder)
 		{
 			if(null == type) throw new ArgumentError('Type can not be null');
+			if(null == head) throw new ArgumentError('Head can not be null');
 			
 			_type = type;
+			_head = head;
 		}
 		
 		/**
 		 * @private
 		 */
-		protected function internalExecute() : void
+		protected function internalExecute(builder : ISpodTriggerBuilder) : void
 		{
-			executeSignal.dispatch(this);
+			executeSignal.dispatch(builder);
 		}
 		
 		public function get type() : Class { return _type; }
+		
+		public function get head() : ISpodTriggerBuilder { return _head; }
 		
 		public function get executeSignal() : ISignal
 		{

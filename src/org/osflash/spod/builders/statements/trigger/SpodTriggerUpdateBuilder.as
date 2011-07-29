@@ -6,9 +6,9 @@ package org.osflash.spod.builders.statements.trigger
 	 */
 	public class SpodTriggerUpdateBuilder extends SpodTriggerWithBuilder
 	{
-		public function SpodTriggerUpdateBuilder(type : Class)
+		public function SpodTriggerUpdateBuilder(type : Class, head : ISpodTriggerBuilder)
 		{
-			super(type, SpodTriggerActionType.UPDATE);
+			super(type, head, SpodTriggerActionType.UPDATE);
 		}
 	}
 }

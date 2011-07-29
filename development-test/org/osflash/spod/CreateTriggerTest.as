@@ -37,8 +37,11 @@ package org.osflash.spod
 		
 		private function handleOpenSignal(database : SpodTriggerDatabase) : void
 		{
+			const now : Date = new Date();
+			now.date -= 50;
+			
 			database.createTriggerSignal.add(handleCreateSignal);
-			database.createTrigger(User).after().update().remove(new GreaterThanExpression('date', new Date()));
+			database.createTrigger(User).after().update().remove(new GreaterThanExpression('date', now));
 		}
 		
 		private function handleCreateSignal(table : SpodTable) : void

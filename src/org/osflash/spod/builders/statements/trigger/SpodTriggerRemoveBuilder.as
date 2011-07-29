@@ -7,9 +7,9 @@ package org.osflash.spod.builders.statements.trigger
 	public class SpodTriggerRemoveBuilder extends SpodTriggerWithBuilder
 	{
 
-		public function SpodTriggerRemoveBuilder(type : Class)
+		public function SpodTriggerRemoveBuilder(type : Class, head : ISpodTriggerBuilder)
 		{
-			super(type, SpodTriggerActionType.DELETE);
+			super(type, head, SpodTriggerActionType.DELETE);
 		}
 	}
 }
