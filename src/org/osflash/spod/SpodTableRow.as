@@ -1,17 +1,17 @@
 package org.osflash.spod
 {
+	import flash.errors.IllegalOperationError;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
-	import org.osflash.spod.builders.DeleteStatementBuilder;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
-	import org.osflash.spod.builders.SelectStatementBuilder;
-	import org.osflash.spod.builders.UpdateStatementBuilder;
+	import org.osflash.spod.builders.table.DeleteStatementBuilder;
+	import org.osflash.spod.builders.table.SelectStatementBuilder;
+	import org.osflash.spod.builders.table.UpdateStatementBuilder;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.types.SpodTypes;
 
-	import flash.errors.IllegalOperationError;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */

@@ -1,4 +1,4 @@
-package org.osflash.spod.builders
+package org.osflash.spod.builders.trigger
 {
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk

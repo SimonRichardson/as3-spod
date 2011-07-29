@@ -1,9 +1,10 @@
-package org.osflash.spod.builders
+package org.osflash.spod.builders.table
 {
+	import flash.utils.getQualifiedClassName;
 	import org.osflash.spod.SpodStatement;
+	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.utils.getClassNameFromQname;
 
-	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */

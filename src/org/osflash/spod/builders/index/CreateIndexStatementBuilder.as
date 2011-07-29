@@ -1,18 +1,19 @@
-package org.osflash.spod.builders
+package org.osflash.spod.builders.index
 {
-	import org.osflash.spod.schema.types.SpodSchemaType;
+	import flash.utils.getQualifiedClassName;
+	import org.osflash.spod.SpodIndexTable;
 	import org.osflash.spod.SpodStatement;
+	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.ISpodSchema;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
-	import org.osflash.spod.types.SpodTypes;
+	import org.osflash.spod.spod_namespace;
 
-	import flash.utils.getQualifiedClassName;
 	/**
-	 * @author Simon Richardson - simon@ustwo.co.uk
+	 * @author Simon Richardson - me@simonrichardson.info
 	 */
-	public class CreateTableStatementBuilder implements ISpodStatementBuilder
+	public class CreateIndexStatementBuilder implements ISpodStatementBuilder
 	{
 		
 		/**
@@ -30,14 +31,11 @@ package org.osflash.spod.builders
 		 */
 		private var _ignoreIfExists : Boolean;
 		
-		public function CreateTableStatementBuilder(	schema : ISpodSchema, 
+		public function CreateIndexStatementBuilder(	schema : ISpodSchema, 
 														ignoreIfExists : Boolean = true
 														)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
-			if(_schema.schemaType != SpodSchemaType.TABLE) throw new ArgumentError('Schema ' + 
-																		'should be a table schema');
-				
 			_schema = schema;
 			
 			_buffer = new Vector.<String>();
@@ -59,43 +57,31 @@ package org.osflash.spod.builders
 				
 				_buffer.length = 0;
 				
-				_buffer.push('CREATE TABLE ');
+				_buffer.push('CREATE UNIQUE INDEX ');
 				
 				if(_ignoreIfExists) _buffer.push('IF NOT EXISTS ');
 				
-				_buffer.push('`' + _schema.name + '` ');
-				_buffer.push('(');
-				
-				var indentifier : Boolean = false;
+				const length : int = _buffer.length;
 				
 				for(var i : int = 0; i<total; i++)
 				{
 					const column : SpodTableColumnSchema = columns[i];
-					const columnName : String = column.name;
 					
-					if(columnName == _schema.identifier)
+					if(column.name == _schema.identifier)
 					{
-						_buffer.push('`' + columnName + '` ');
-						_buffer.push(SpodTypes.getSQLName(column.type) + ' ');
-						_buffer.push('PRIMARY KEY ');
-						_buffer.push('NOT NULL');
-						_buffer.push(', ');
+						use namespace spod_namespace;
+						const indexName : String = SpodIndexTable.PREFIX + column.name;
 						
-						indentifier = true;
-					}
-					else
-					{
-						_buffer.push('`' + columnName + '` ');
-						_buffer.push(SpodTypes.getSQLName(column.type) + ' ');
-						_buffer.push('NOT NULL');
-						_buffer.push(', ');
+						_buffer.push('`' + indexName + '` ');
+						_buffer.push('ON ');
+						_buffer.push('`' + _schema.name + '` ');
+						_buffer.push('(');
+						_buffer.push('`' + column.name + '` ');
+						_buffer.push(')');
 					}
 				}
 				
-				if(!indentifier) throw new SpodError('No identifier found.');
-				
-				_buffer.pop();
-				_buffer.push(')');
+				if(length == _buffer.length) throw new SpodError('No identifier found.');
 						
 				const statement : SpodStatement = new SpodStatement(tableSchema.type);
 				statement.query = _buffer.join('');

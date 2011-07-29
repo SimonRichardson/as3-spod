@@ -1,16 +1,17 @@
-package org.osflash.spod.builders
+package org.osflash.spod.builders.table
 {
+	import flash.errors.IllegalOperationError;
+	import flash.utils.getQualifiedClassName;
 	import org.osflash.spod.SpodStatement;
+	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.schema.types.SpodSchemaType;
 
-	import flash.errors.IllegalOperationError;
-	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class DeleteTableStatementBuilder implements ISpodStatementBuilder
+	public class SelectAllStatementBuilder implements ISpodStatementBuilder
 	{
 
 		/**
@@ -22,24 +23,15 @@ package org.osflash.spod.builders
 		 * @private
 		 */
 		private var _buffer : Vector.<String>;
-		
-		/**
-		 * @private
-		 */
-		private var _ifExists : Boolean;
 
-		public function DeleteTableStatementBuilder(	schema : SpodTableSchema, 
-														ifExists : Boolean = true
-														)
+		public function SelectAllStatementBuilder(schema : SpodTableSchema)
 		{
 			if(null == schema) throw new ArgumentError('SpodTableSchema can not be null');
 			if(_schema.schemaType != SpodSchemaType.TABLE) throw new ArgumentError('Schema ' + 
 																		'should be a table schema');
-																		
 			_schema = schema;
 			
 			_buffer = new Vector.<String>();
-			_ifExists = ifExists;
 		}
 
 		public function build() : SpodStatement
@@ -54,10 +46,20 @@ package org.osflash.spod.builders
 				
 				_buffer.length = 0;
 				
-				_buffer.push('DROP TABLE ');
+				_buffer.push('SELECT ');
 				
-				if(_ifExists) _buffer.push('IF EXISTS ');
+				for(var i : int = 0; i<total; i++)
+				{
+					const column : SpodTableColumnSchema = columns[i];
+					const columnName : String = column.name;
+					
+					_buffer.push('`' + columnName + '`');
+					_buffer.push(', ');
+				}
 				
+				_buffer.pop();
+				
+				_buffer.push(' FROM ');
 				_buffer.push('`' + _schema.name + '`');
 				
 				const statement : SpodStatement = new SpodStatement(tableSchema.type);

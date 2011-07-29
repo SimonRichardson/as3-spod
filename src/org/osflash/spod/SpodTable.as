@@ -1,23 +1,23 @@
 package org.osflash.spod
 {
-	import org.osflash.spod.errors.SpodError;
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
-	import org.osflash.spod.builders.DeleteWhereStatementBuilder;
-	import org.osflash.spod.builders.ISpodStatementBuilder;
-	import org.osflash.spod.builders.InsertStatementBuilder;
-	import org.osflash.spod.builders.RawStatementBuilder;
-	import org.osflash.spod.builders.SelectAllStatementBuilder;
-	import org.osflash.spod.builders.SelectByIdStatementBuilder;
-	import org.osflash.spod.builders.SelectCountStatementBuilder;
-	import org.osflash.spod.builders.SelectWhereStatementBuilder;
-	import org.osflash.spod.builders.expressions.ISpodExpression;
-	import org.osflash.spod.errors.SpodErrorEvent;
-	import org.osflash.spod.schema.SpodTableSchema;
-
 	import flash.data.SQLResult;
 	import flash.errors.IllegalOperationError;
 	import flash.utils.Dictionary;
+	import org.osflash.signals.ISignal;
+	import org.osflash.signals.Signal;
+	import org.osflash.spod.builders.ISpodStatementBuilder;
+	import org.osflash.spod.builders.RawStatementBuilder;
+	import org.osflash.spod.builders.expressions.ISpodExpression;
+	import org.osflash.spod.builders.table.DeleteWhereStatementBuilder;
+	import org.osflash.spod.builders.table.InsertStatementBuilder;
+	import org.osflash.spod.builders.table.SelectAllStatementBuilder;
+	import org.osflash.spod.builders.table.SelectByIdStatementBuilder;
+	import org.osflash.spod.builders.table.SelectCountStatementBuilder;
+	import org.osflash.spod.builders.table.SelectWhereStatementBuilder;
+	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.errors.SpodErrorEvent;
+	import org.osflash.spod.schema.SpodTableSchema;
+
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */

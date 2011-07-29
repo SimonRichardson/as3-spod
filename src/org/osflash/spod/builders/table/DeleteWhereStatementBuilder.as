@@ -1,14 +1,15 @@
-package org.osflash.spod.builders
+package org.osflash.spod.builders.table
 {
+	import flash.errors.IllegalOperationError;
+	import flash.utils.getQualifiedClassName;
 	import org.osflash.spod.SpodStatement;
+	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
 	import org.osflash.spod.builders.expressions.SpodExpressionType;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.schema.types.SpodSchemaType;
 
-	import flash.errors.IllegalOperationError;
-	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */

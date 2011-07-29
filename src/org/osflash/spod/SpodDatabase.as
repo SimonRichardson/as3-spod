@@ -1,18 +1,5 @@
 package org.osflash.spod
 {
-	import org.osflash.signals.IPrioritySignal;
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
-	import org.osflash.signals.natives.NativeSignal;
-	import org.osflash.spod.builders.CreateTableStatementBuilder;
-	import org.osflash.spod.builders.DeleteTableStatementBuilder;
-	import org.osflash.spod.builders.ISpodStatementBuilder;
-	import org.osflash.spod.errors.SpodError;
-	import org.osflash.spod.errors.SpodErrorEvent;
-	import org.osflash.spod.schema.SpodTableSchema;
-	import org.osflash.spod.utils.buildTableSchemaFromType;
-	import org.osflash.spod.utils.getClassNameFromQname;
-
 	import flash.data.SQLSchemaResult;
 	import flash.data.SQLTableSchema;
 	import flash.errors.SQLError;
@@ -20,6 +7,19 @@ package org.osflash.spod
 	import flash.events.SQLEvent;
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
+	import org.osflash.signals.IPrioritySignal;
+	import org.osflash.signals.ISignal;
+	import org.osflash.signals.Signal;
+	import org.osflash.signals.natives.NativeSignal;
+	import org.osflash.spod.builders.ISpodStatementBuilder;
+	import org.osflash.spod.builders.table.CreateTableStatementBuilder;
+	import org.osflash.spod.builders.table.DeleteTableStatementBuilder;
+	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.errors.SpodErrorEvent;
+	import org.osflash.spod.schema.SpodTableSchema;
+	import org.osflash.spod.utils.buildTableSchemaFromType;
+	import org.osflash.spod.utils.getClassNameFromQname;
+
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
