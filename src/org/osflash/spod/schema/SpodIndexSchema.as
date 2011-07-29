@@ -1,5 +1,6 @@
 package org.osflash.spod.schema
 {
+	import org.osflash.spod.schema.types.SpodSchemaType;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.utils.validateString;
 	/**
@@ -67,5 +68,7 @@ package org.osflash.spod.schema
 				throw new SpodError('Invalid index identifier');
 			}
 		}
+
+		public function get schemaType() : SpodSchemaType { return SpodSchemaType.INDEX; }
 	}
 }

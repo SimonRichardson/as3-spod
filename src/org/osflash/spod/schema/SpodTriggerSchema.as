@@ -1,6 +1,7 @@
 package org.osflash.spod.schema
 {
 	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.schema.types.SpodSchemaType;
 	import org.osflash.spod.utils.validateString;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
@@ -67,5 +68,7 @@ package org.osflash.spod.schema
 				throw new SpodError('Invalid trigger identifier');
 			}
 		}
+		
+		public function get schemaType() : SpodSchemaType { return SpodSchemaType.TRIGGER; }
 	}
 }

@@ -1,6 +1,7 @@
 package org.osflash.spod.schema
 {
 	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.schema.types.SpodSchemaType;
 	import org.osflash.spod.types.SpodTypes;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -52,5 +53,7 @@ package org.osflash.spod.schema
 				_autoIncrement = value;
 			else throw new SpodError('Unable to autoIncrement on an invalid type');
 		}
+		
+		public function get schemaType() : SpodSchemaType { return SpodSchemaType.TABLE_COLUMN; }
 	}
 }

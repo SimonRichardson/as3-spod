@@ -1,5 +1,6 @@
 package org.osflash.spod.schema
 {
+	import org.osflash.spod.schema.types.SpodSchemaType;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.types.SpodTypes;
 	import org.osflash.spod.utils.validateString;
@@ -241,6 +242,7 @@ package org.osflash.spod.schema
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
 			
+			// TODO : we should implement a custom class for this!
 			registerClassAlias('Object', Object);
 			
 			_columns.push(new SpodTableColumnSchema(name, SpodTypes.OBJECT));
@@ -290,5 +292,7 @@ package org.osflash.spod.schema
 				throw new SpodError('Invalid identifier');
 			}
 		}
+
+		public function get schemaType() : SpodSchemaType { return SpodSchemaType.TABLE; }
 	}
 }
