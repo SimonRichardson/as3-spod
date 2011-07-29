@@ -6,8 +6,8 @@ package org.osflash.spod.builders.statements.trigger
 	public interface ISpodTriggerWhenBuilder extends ISpodTriggerBuilder
 	{
 		
-		function before() : ISpodTriggerWhereBuilder;
+		function before() : ISpodTriggerActionBuilder;
 		
-		function after() : ISpodTriggerWhereBuilder;
+		function after() : ISpodTriggerActionBuilder;
 	}
 }

@@ -4,38 +4,33 @@ package org.osflash.spod.builders.statements.trigger
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
 	public class SpodTriggerActionBuilder extends SpodTriggerBaseBuilder
+											implements ISpodTriggerActionBuilder
 	{
 		
-		private var _ignoreIfExists : Boolean;
-		
-		public function SpodTriggerActionBuilder(type : Class, ignoreIfExists : Boolean = true)
+		public function SpodTriggerActionBuilder(type : Class)
 		{
 			super(type);
-			
-			_ignoreIfExists = ignoreIfExists;
 		}
 
-		public function insert() : ISpodTriggerWhenBuilder
+		public function insert() : ISpodTriggerWithBuilder
 		{
-			const builder : ISpodTriggerWhenBuilder = new SpodTriggerInsertBuilder(type);
+			const builder : ISpodTriggerWithBuilder = new SpodTriggerInsertBuilder(type);
 			builder.executeSignal.add(internalExecute);
 			return builder;
 		}
 		
-		public function update() : ISpodTriggerWhenBuilder
+		public function update() : ISpodTriggerWithBuilder
 		{
-			const builder : ISpodTriggerWhenBuilder = new SpodTriggerUpdateBuilder(type);
+			const builder : ISpodTriggerWithBuilder = new SpodTriggerUpdateBuilder(type);
 			builder.executeSignal.add(internalExecute);
 			return builder;
 		}
 		
-		public function remove() : ISpodTriggerWhenBuilder
+		public function remove() : ISpodTriggerWithBuilder
 		{
-			const builder : ISpodTriggerWhenBuilder = new SpodTriggerRemoveBuilder(type);
+			const builder : ISpodTriggerWithBuilder = new SpodTriggerRemoveBuilder(type);
 			builder.executeSignal.add(internalExecute);
 			return builder;
 		}
-				
-		public function get ignoreIfExists() : Boolean { return _ignoreIfExists; }
 	}
 }

@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.spod.builders.expressions.where.GreaterThanExpression;
 	import org.osflash.logger.logs.debug;
 	import org.osflash.logger.logs.error;
 	import org.osflash.spod.errors.SpodErrorEvent;
@@ -37,7 +38,7 @@ package org.osflash.spod
 		private function handleOpenSignal(database : SpodTriggerDatabase) : void
 		{
 			database.createTriggerSignal.add(handleCreateSignal);
-			database.createTrigger(User).update().before().execute();
+			database.createTrigger(User).after().update().remove(new GreaterThanExpression('date', new Date()));
 		}
 		
 		private function handleCreateSignal(table : SpodTable) : void

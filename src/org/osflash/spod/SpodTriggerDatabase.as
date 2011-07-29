@@ -4,7 +4,8 @@ package org.osflash.spod
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerBuilder;
-	import org.osflash.spod.builders.statements.trigger.SpodTriggerActionBuilder;
+	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWhenBuilder;
+	import org.osflash.spod.builders.statements.trigger.SpodTriggerWhenBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.SpodTriggerSchema;
 	import org.osflash.spod.utils.buildTriggerSchemaFromType;
@@ -42,9 +43,9 @@ package org.osflash.spod
 		
 		public function createTrigger(	type : Class, 
 										ignoreIfExists : Boolean = true
-										) : SpodTriggerActionBuilder
+										) : ISpodTriggerWhenBuilder
 		{
-			const builder : SpodTriggerActionBuilder = new SpodTriggerActionBuilder(type, 
+			const builder : ISpodTriggerWhenBuilder = new SpodTriggerWhenBuilder(	type, 
 																					ignoreIfExists
 																					);
 			builder.executeSignal.add(internalBuildTrigger);
