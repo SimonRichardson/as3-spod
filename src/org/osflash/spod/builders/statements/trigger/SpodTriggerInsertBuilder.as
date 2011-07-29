@@ -1,5 +1,6 @@
 package org.osflash.spod.builders.statements.trigger
 {
+	import org.osflash.spod.schema.types.SpodTriggerActionType;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -8,7 +9,7 @@ package org.osflash.spod.builders.statements.trigger
 
 		public function SpodTriggerInsertBuilder(type : Class)
 		{
-			super(type);
+			super(type, SpodTriggerActionType.INSERT);
 		}
 
 	}

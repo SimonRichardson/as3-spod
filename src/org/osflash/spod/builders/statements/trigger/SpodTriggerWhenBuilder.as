@@ -1,5 +1,6 @@
 package org.osflash.spod.builders.statements.trigger
 {
+	import org.osflash.spod.schema.types.SpodTriggerActionType;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -7,9 +8,17 @@ package org.osflash.spod.builders.statements.trigger
 										implements ISpodTriggerWhenBuilder
 	{
 
-		public function SpodTriggerWhenBuilder(type : Class)
+		/**
+		 * @inheritDoc
+		 */
+		private var _action : SpodTriggerActionType;
+
+		public function SpodTriggerWhenBuilder(type : Class, action : SpodTriggerActionType)
 		{
 			super(type);
+			
+			if(null == action) throw new ArgumentError('Action can not be null');
+			_action = action;
 		}
 		
 		public function before() : ISpodTriggerWhereBuilder
@@ -25,5 +34,7 @@ package org.osflash.spod.builders.statements.trigger
 			builder.executeSignal.add(internalExecute);
 			return builder;
 		}
+
+		public function get action() : SpodTriggerActionType { return _action; }
 	}
 }

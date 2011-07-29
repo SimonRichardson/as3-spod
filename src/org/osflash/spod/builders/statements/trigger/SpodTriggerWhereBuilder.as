@@ -16,11 +16,21 @@ package org.osflash.spod.builders.statements.trigger
 		/**
 		 * @inheritDoc
 		 */
-		public function where(...rest) : ISpodTriggerExecuteBuilder
+		public function when(...rest) : ISpodTriggerExecuteBuilder
 		{
 			const builder : ISpodTriggerExecuteBuilder = new SpodTriggerExecuteBuilder(type);
 			builder.executeSignal.add(internalExecute);
 			return builder;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function execute(...rest) : void
+		{
+			const builder : ISpodTriggerExecuteBuilder = new SpodTriggerExecuteBuilder(type);
+			builder.executeSignal.add(internalExecute);
+			builder.execute.apply(null, rest);
 		}
 	}
 }
