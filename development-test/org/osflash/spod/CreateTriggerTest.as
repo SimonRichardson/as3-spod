@@ -41,7 +41,10 @@ package org.osflash.spod
 			now.date -= 50;
 			
 			database.createTriggerSignal.add(handleCreateSignal);
-			database.createTrigger(User).after().update().remove(new GreaterThanExpression('date', now));
+			database.createTrigger(User)
+							.after()
+							.update()
+							.remove(new GreaterThanExpression('date', now));
 		}
 		
 		private function handleCreateSignal(table : SpodTable) : void

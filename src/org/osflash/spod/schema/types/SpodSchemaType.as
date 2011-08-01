@@ -14,6 +14,8 @@ package org.osflash.spod.schema.types
 
 		public static const TABLE_COLUMN : SpodSchemaType = new SpodSchemaType('table_column');
 		
+		public static const TRIGGER_COLUMN : SpodSchemaType = new SpodSchemaType('trigger_column');
+		
 		private var _type : String;
 
 		public function SpodSchemaType(type : String)

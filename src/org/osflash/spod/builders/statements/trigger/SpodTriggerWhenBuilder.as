@@ -32,7 +32,7 @@ package org.osflash.spod.builders.statements.trigger
 			builder.executeSignal.add(internalExecute);
 			return builder;
 		}
-
+		
 		public function get ignoreIfExists() : Boolean { return _ignoreIfExists; }
 	}
 }

@@ -4,7 +4,6 @@ package org.osflash.spod.support.user
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	[Type(name='TableUser')]
 	public class User extends SpodObject
 	{
 		

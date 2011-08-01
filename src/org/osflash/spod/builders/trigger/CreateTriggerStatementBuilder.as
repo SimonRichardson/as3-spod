@@ -3,6 +3,8 @@ package org.osflash.spod.builders.trigger
 	import org.osflash.logger.logs.info;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
+	import org.osflash.spod.builders.statements.trigger.ISpodTriggerBuilder;
+	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWhenBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.ISpodSchema;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
@@ -30,19 +32,38 @@ package org.osflash.spod.builders.trigger
 		/**
 		 * @private
 		 */
+		private var _triggerBuilder : ISpodTriggerBuilder;
+		
+		/**
+		 * @private
+		 */
+		private var _triggerWhenBuilder : ISpodTriggerWhenBuilder;
+		
+		/**
+		 * @private
+		 */
 		private var _ignoreIfExists : Boolean;
 		
 		public function CreateTriggerStatementBuilder(	schema : ISpodSchema, 
-														ignoreIfExists : Boolean = true
+														triggerBuilder : ISpodTriggerBuilder
 														)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
-			if(_schema.schemaType != SpodSchemaType.TRIGGER) throw new ArgumentError('Schema ' + 
+			if(null == triggerBuilder) throw new ArgumentError('TriggerBuilder can not be null');
+			if(schema.schemaType != SpodSchemaType.TRIGGER) throw new ArgumentError('Schema ' + 
 																		'should be a index schema');
 			_schema = schema;
 			
 			_buffer = new Vector.<String>();
-			_ignoreIfExists = ignoreIfExists;
+			
+			_triggerBuilder = triggerBuilder;
+			
+			if(_triggerBuilder is ISpodTriggerWhenBuilder)
+			{
+				_triggerWhenBuilder = ISpodTriggerWhenBuilder(_triggerBuilder);
+				_ignoreIfExists = _triggerWhenBuilder.ignoreIfExists;
+			}
+			else _ignoreIfExists = true;
 		}
 		
 		/**
@@ -52,8 +73,8 @@ package org.osflash.spod.builders.trigger
 		{
 			if(_schema is SpodTriggerSchema)
 			{
-				const tableSchema : SpodTableSchema = SpodTableSchema(_schema);
-				const columns : Vector.<SpodTableColumnSchema> = tableSchema.columns.reverse();
+				const triggerSchema : SpodTriggerSchema = SpodTriggerSchema(_schema);
+				const columns : Vector.<SpodTableColumnSchema> = triggerSchema.columns.reverse();
 				const total : int = columns.length;
 				
 				if(total == 0) throw new SpodError('Invalid columns length');
@@ -68,10 +89,12 @@ package org.osflash.spod.builders.trigger
 				
 				if(length == _buffer.length) throw new SpodError('No identifier found.');
 						
-				const statement : SpodStatement = new SpodStatement(tableSchema.type);
+				const statement : SpodStatement = new SpodStatement(triggerSchema.type);
 				statement.query = _buffer.join('');
 				
 				info(statement.query);
+				
+				statement.query = '';
 				
 				return statement;
 				

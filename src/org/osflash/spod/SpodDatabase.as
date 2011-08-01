@@ -1,6 +1,5 @@
 package org.osflash.spod
 {
-	import org.osflash.logger.logs.debug;
 	import org.osflash.signals.IPrioritySignal;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;

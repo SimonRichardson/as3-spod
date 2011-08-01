@@ -42,7 +42,7 @@ package org.osflash.spod.builders.statements.trigger
 		public function get type() : Class { return _type; }
 		
 		public function get head() : ISpodTriggerBuilder { return _head; }
-		
+				
 		public function get executeSignal() : ISignal
 		{
 			if(null == _executeSignal) _executeSignal = new Signal(ISpodTriggerBuilder);

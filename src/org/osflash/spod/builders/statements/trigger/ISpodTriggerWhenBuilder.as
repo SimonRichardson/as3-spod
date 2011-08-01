@@ -9,5 +9,7 @@ package org.osflash.spod.builders.statements.trigger
 		function before() : ISpodTriggerActionBuilder;
 		
 		function after() : ISpodTriggerActionBuilder;
+		
+		function get ignoreIfExists() : Boolean;
 	}
 }

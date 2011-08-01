@@ -3,19 +3,22 @@ package org.osflash.spod
 	import org.osflash.logger.logs.info;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
+	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerBuilder;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWhenBuilder;
 	import org.osflash.spod.builders.statements.trigger.SpodTriggerWhenBuilder;
+	import org.osflash.spod.builders.trigger.CreateTriggerStatementBuilder;
 	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTriggerSchema;
 	import org.osflash.spod.utils.buildTriggerSchemaFromType;
-	import org.osflash.spod.utils.getClassNameFromQname;
+	import org.osflash.spod.utils.getTableName;
 
 	import flash.data.SQLTriggerSchema;
 	import flash.errors.SQLError;
 	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
-	import flash.utils.getQualifiedClassName;
+	import flash.utils.Dictionary;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -23,7 +26,12 @@ package org.osflash.spod
 	{
 		
 		use namespace spod_namespace;
-				
+		
+		/**
+		 * @private
+		 */
+		private var _triggers : Dictionary;
+		
 		/**
 		 * @private
 		 */
@@ -39,6 +47,8 @@ package org.osflash.spod
 			super(name, manager);
 			
 			_manager = manager;
+			
+			_triggers = new Dictionary();
 		}
 		
 		public function createTrigger(	type : Class, 
@@ -52,6 +62,9 @@ package org.osflash.spod
 			return builder;
 		}
 		
+		/**
+		 * @private
+		 */
 		private function internalBuildTrigger(builder : ISpodTriggerBuilder) : void
 		{
 			const params : Array = [builder];
@@ -61,7 +74,7 @@ package org.osflash.spod
 			nativeSQLEventSchemaSignal.addOnceWithPriority(	handleTriggerSQLEventSchemaSignal
 															).params = params;
 			
-			const name : String = getClassNameFromQname(getQualifiedClassName(builder.type));
+			const name : String = getTableName(builder.type);
 			try
 			{
 				_manager.connection.loadSchema(SQLTriggerSchema, name);
@@ -78,12 +91,25 @@ package org.osflash.spod
 		 * @private
 		 */
 		private function internalCreateTrigger(	schema : SpodTriggerSchema, 
-												builder : ISpodTriggerBuilder
+												triggerBuilder : ISpodTriggerBuilder
 												) : void
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
 			
-			info('Create trigger table', schema, builder);
+			const builder : ISpodStatementBuilder = new CreateTriggerStatementBuilder(
+																			schema, triggerBuilder);
+			const statement : SpodStatement = builder.build();
+			
+			if(null == statement) 
+				throw new SpodError('SpodStatement can not be null');
+			
+			_triggers[schema.type] = new SpodTrigger(schema, _manager);
+			
+			statement.completedSignal.add(handleCreateTriggerCompleteSignal);
+			statement.errorSignal.add(handleCreateTriggerErrorSignal);
+			
+			if(_manager.queuing) _manager.queue.add(statement);
+			else _manager.executioner.add(new SpodStatementQueue(statement));
 		}
 		
 		/**
@@ -132,6 +158,33 @@ package org.osflash.spod
 			nativeSQLEventSchemaSignal.remove(handleTriggerSQLEventSchemaSignal);
 			
 			info('Handle trigger sql event', ignoreIfExists );
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleCreateTriggerCompleteSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleCreateTriggerCompleteSignal);
+			statement.errorSignal.remove(handleCreateTriggerErrorSignal);
+			
+			const trigger : SpodTrigger = _triggers[statement.type];
+			if(null == trigger) throw new SpodError('SpodTable does not exist');
+			
+			createTriggerSignal.dispatch(trigger);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleCreateTriggerErrorSignal(	statement : SpodStatement, 
+															event : SpodErrorEvent
+															) : void
+		{
+			statement.completedSignal.remove(handleCreateTriggerCompleteSignal);
+			statement.errorSignal.remove(handleCreateTriggerErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
 		}
 		
 		public function get createTriggerSignal() : ISignal
