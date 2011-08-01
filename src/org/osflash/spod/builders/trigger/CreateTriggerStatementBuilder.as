@@ -117,6 +117,8 @@ package org.osflash.spod.builders.trigger
 						whereBuilder = new DeleteWhereStatementBuilder(triggerSchema, expressions);
 						whereStatement = whereBuilder.build();
 						break;
+					default:
+						throw new SpodError('Unknown with type');
 				}
 				
 				var whereQuery : String = whereStatement.query;
