@@ -1,74 +1,106 @@
 package org.osflash.spod.schema
 {
-	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.types.SpodSchemaType;
-	import org.osflash.spod.utils.validateString;
+	import org.osflash.spod.types.SpodTypes;
+
+	import flash.net.registerClassAlias;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */
-	public class SpodTriggerSchema implements ISpodSchema
+	public class SpodTriggerSchema extends SpodSchema
 	{
-		
-		/**
-		 * @private
-		 */
-		private var _type : Class;
-		
-		/**
-		 * @private
-		 */
-		private var _name : String;
-		
-		/**
-		 * @private
-		 */
-		private var _identifier : String;
-				
-		/**
-		 * @private
-		 */
-		private var _columns : Vector.<SpodTableColumnSchema>;
 		
 		public function SpodTriggerSchema(type : Class, name : String)
 		{
-			if(null == type) throw new ArgumentError('Type can not be null');
+			super(type, name);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function createInt(name : String) : void
+		{
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
-			if(!validateString(name)) throw new ArgumentError('Invalid name');
 			
-			_type = type;
-			_name = name;
-			_identifier = SpodSchemaIdentifier.DEFAULT;
-			
-			_columns = new Vector.<SpodTableColumnSchema>();
+			columns.push(new SpodTriggerColumnSchema(name, SpodTypes.INT));
 		}
 		
-		public function get columns() : Vector.<SpodTableColumnSchema> { return _columns; }
+		/**
+		 * @inheritDoc
+		 */
+		override public function createUInt(name : String) : void
+		{
+			if(null == name) throw new ArgumentError('Name can not be null');
+			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			
+			columns.push(new SpodTriggerColumnSchema(name, SpodTypes.UINT));
+		}
 		
-		public function get type() : Class { return _type; }
+		/**
+		 * @inheritDoc
+		 */
+		override public function createNumber(name : String) : void
+		{
+			if(null == name) throw new ArgumentError('Name can not be null');
+			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			
+			columns.push(new SpodTriggerColumnSchema(name, SpodTypes.NUMBER));
+		}
 		
-		public function get name() : String { return _name; }
+		/**
+		 * @inheritDoc
+		 */
+		override public function createString(name : String) : void
+		{
+			if(null == name) throw new ArgumentError('Name can not be null');
+			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			
+			columns.push(new SpodTriggerColumnSchema(name, SpodTypes.STRING));
+		}
 		
-		public function get identifier() : String { return _identifier; }
-		public function set identifier(value : String) : void 
+		/**
+		 * @inheritDoc
+		 */
+		override public function createDate(name : String) : void
+		{
+			if(null == name) throw new ArgumentError('Name can not be null');
+			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			
+			columns.push(new SpodTriggerColumnSchema(name, SpodTypes.DATE));
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function createBoolean(name : String) : void
+		{
+			if(null == name) throw new ArgumentError('Name can not be null');
+			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			
+			columns.push(new SpodTriggerColumnSchema(name, SpodTypes.BOOLEAN));
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function createObject(name : String) : void
+		{
+			if(null == name) throw new ArgumentError('Name can not be null');
+			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			
+			// TODO : we should implement a custom class for this!
+			registerClassAlias('Object', Object);
+			
+			columns.push(new SpodTriggerColumnSchema(name, SpodTypes.OBJECT));
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function get schemaType() : SpodSchemaType 
 		{ 
-			if(_identifier != value)
-			{
-				var index : int = _columns.length;
-				while(--index > -1)
-				{
-					const column : SpodTableColumnSchema = _columns[index];
-					if(column.name == value)
-					{
-						_identifier = value;
-						return;
-					}
-				}
-				
-				throw new SpodError('Invalid trigger identifier');
-			}
+			return SpodSchemaType.TRIGGER; 
 		}
-		
-		public function get schemaType() : SpodSchemaType { return SpodSchemaType.TRIGGER; }
 	}
 }

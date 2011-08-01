@@ -1,6 +1,5 @@
 package org.osflash.spod
 {
-	import flash.errors.IllegalOperationError;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
@@ -8,9 +7,11 @@ package org.osflash.spod
 	import org.osflash.spod.builders.table.SelectStatementBuilder;
 	import org.osflash.spod.builders.table.UpdateStatementBuilder;
 	import org.osflash.spod.errors.SpodErrorEvent;
-	import org.osflash.spod.schema.SpodTableColumnSchema;
+	import org.osflash.spod.schema.SpodColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.types.SpodTypes;
+
+	import flash.errors.IllegalOperationError;
 
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
@@ -183,7 +184,7 @@ package org.osflash.spod
 			if(total == 0) throw new IllegalOperationError('Invalid number of columns');
 			for(var i : int = 0; i<total; i++)
 			{
-				const column : SpodTableColumnSchema = schema.columns[i];
+				const column : SpodColumnSchema = schema.columns[i];
 				const columnName : String = column.name;
 				if(columnName == 'id' && column.type == SpodTypes.INT)
 				{

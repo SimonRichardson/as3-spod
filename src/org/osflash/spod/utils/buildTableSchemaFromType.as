@@ -2,8 +2,8 @@ package org.osflash.spod.utils
 {
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.schema.SpodColumnSchema;
 	import org.osflash.spod.schema.SpodSchemaIdentifier;
-	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 
 	import flash.utils.describeType;
@@ -98,7 +98,7 @@ package org.osflash.spod.utils
 		
 		if(schema.contains(identifier))
 		{
-			const identifierColumn : SpodTableColumnSchema = schema.getColumnByName(identifier);
+			const identifierColumn : SpodColumnSchema = schema.getColumnByName(identifier);
 			
 			if(null != identifierColumn) identifierColumn.autoIncrement = true;
 			else throw new SpodError('Invalid table column schema identifier');
