@@ -4,6 +4,7 @@ package org.osflash.spod.support.user
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
+	[Type(name='TableUser')]
 	public class User extends SpodObject
 	{
 		
@@ -12,7 +13,7 @@ package org.osflash.spod.support.user
 		public var name : String;
 		
 		private var _date : Date;
-
+				
 		public function User(name : String = null, date : Date = null)
 		{
 			this.name = name;

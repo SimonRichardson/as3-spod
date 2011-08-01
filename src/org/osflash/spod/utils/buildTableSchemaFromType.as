@@ -1,8 +1,8 @@
 package org.osflash.spod.utils
 {
-	import org.osflash.spod.schema.SpodSchemaIdentifier;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.schema.SpodSchemaIdentifier;
 	import org.osflash.spod.schema.SpodTableColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 
@@ -16,8 +16,8 @@ package org.osflash.spod.utils
 		if(null == type) throw new ArgumentError('Type can not be null');
 		
 		const description : XML = describeType(type);
-		const tableName : String = getClassNameFromQname(description.@name);
 		
+		const tableName : String = getTableName(type);
 		const schema : SpodTableSchema = new SpodTableSchema(type, tableName);
 		const defaultId : String = SpodSchemaIdentifier.DEFAULT;
 		
@@ -39,7 +39,8 @@ package org.osflash.spod.utils
 			if(null != variableMetadata && variableMetadata.length() > 0)
 			{
 				const variableArg : XMLList = variableMetadata.arg.(	@key == 'identifier' 
-																		&& @value == 'true'
+																		&& 
+																		@value == 'true'
 																		);
 				if(null != variableArg && variableArg.length() > 0)
 				{

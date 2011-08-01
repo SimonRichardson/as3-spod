@@ -33,7 +33,7 @@ package org.osflash.spod.builders.table
 		{
 			if(null == schema) throw new ArgumentError('SpodTableSchema can not be null');
 			if(isNaN(id)) throw new ArgumentError('id can not be NaN');
-			if(_schema.schemaType != SpodSchemaType.TABLE) throw new ArgumentError('Schema ' + 
+			if(schema.schemaType != SpodSchemaType.TABLE) throw new ArgumentError('Schema ' + 
 																		'should be a table schema');
 			_schema = schema;
 			_id = id;

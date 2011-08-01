@@ -4,7 +4,7 @@ package org.osflash.spod
 	import org.osflash.logger.logs.error;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;
-	import org.osflash.spod.utils.getClassNameFromQname;
+	import org.osflash.spod.utils.getTableName;
 
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -75,7 +75,7 @@ package org.osflash.spod
 		
 		protected function handleCountSignal(table : SpodTable, total : int) : void
 		{
-			const name : String = getClassNameFromQname(getQualifiedClassName(table.schema.type));
+			const name : String = getTableName(table.schema.type);
 			debug(total + " " + name + "s in table " + name);
 			
 			debug(getTimer() - _timer, 'ms');

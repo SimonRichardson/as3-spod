@@ -34,7 +34,7 @@ package org.osflash.spod.builders.table
 														)
 		{
 			if(null == schema) throw new ArgumentError('SpodTableSchema can not be null');
-			if(_schema.schemaType != SpodSchemaType.TABLE) throw new ArgumentError('Schema ' + 
+			if(schema.schemaType != SpodSchemaType.TABLE) throw new ArgumentError('Schema ' + 
 																		'should be a table schema');
 																		
 			_schema = schema;

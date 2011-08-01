@@ -1,12 +1,6 @@
 package org.osflash.spod
 {
-	import flash.data.SQLSchemaResult;
-	import flash.data.SQLTableSchema;
-	import flash.errors.SQLError;
-	import flash.events.SQLErrorEvent;
-	import flash.events.SQLEvent;
-	import flash.utils.Dictionary;
-	import flash.utils.getQualifiedClassName;
+	import org.osflash.logger.logs.debug;
 	import org.osflash.signals.IPrioritySignal;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
@@ -18,7 +12,14 @@ package org.osflash.spod
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.utils.buildTableSchemaFromType;
-	import org.osflash.spod.utils.getClassNameFromQname;
+	import org.osflash.spod.utils.getTableName;
+
+	import flash.data.SQLSchemaResult;
+	import flash.data.SQLTableSchema;
+	import flash.errors.SQLError;
+	import flash.events.SQLErrorEvent;
+	import flash.events.SQLEvent;
+	import flash.utils.Dictionary;
 
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -131,7 +132,7 @@ package org.osflash.spod
 				_nativeSQLEventSchemaSignal.addOnceWithPriority(	handleCreateSQLEventSchemaSignal
 																	).params = params;
 				
-				const name : String = getClassNameFromQname(getQualifiedClassName(type));
+				const name : String = getTableName(type);
 				try
 				{
 					_manager.connection.loadSchema(SQLTableSchema, name);
@@ -172,7 +173,7 @@ package org.osflash.spod
 				_nativeSQLEventSchemaSignal.addOnceWithPriority(	handleLoadSQLEventSchemaSignal
 																	).params = params;
 				
-				const name : String = getClassNameFromQname(getQualifiedClassName(type));
+				const name : String = getTableName(type);
 				try
 				{
 					_manager.connection.loadSchema(SQLTableSchema, name);
@@ -203,7 +204,7 @@ package org.osflash.spod
 				_nativeSQLEventSchemaSignal.addOnceWithPriority(	handleDeleteSQLEventSchemaSignal
 																	).params = params;
 				
-				const name : String = getClassNameFromQname(getQualifiedClassName(type));
+				const name : String = getTableName(type);
 				try
 				{
 					_manager.connection.loadSchema(SQLTableSchema, name);
