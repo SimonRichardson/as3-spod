@@ -1,16 +1,18 @@
 package org.osflash.spod.builders.trigger
 {
-	import org.osflash.spod.schema.ISpodColumnSchema;
 	import org.osflash.logger.logs.info;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
-	import org.osflash.spod.builders.statements.trigger.ISpodTriggerBuilder;
+	import org.osflash.spod.builders.statements.trigger.ISpodTriggerActionBuilder;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWhenBuilder;
 	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.schema.ISpodColumnSchema;
 	import org.osflash.spod.schema.ISpodSchema;
-	import org.osflash.spod.schema.SpodTriggerColumnSchema;
 	import org.osflash.spod.schema.SpodTriggerSchema;
 	import org.osflash.spod.schema.types.SpodSchemaType;
+	import org.osflash.spod.schema.types.SpodTriggerActionType;
+	import org.osflash.spod.schema.types.SpodTriggerWhenType;
+	import org.osflash.spod.spod_namespace;
 
 	import flash.utils.getQualifiedClassName;
 	/**
@@ -18,6 +20,8 @@ package org.osflash.spod.builders.trigger
 	 */
 	public class CreateTriggerStatementBuilder implements ISpodStatementBuilder
 	{
+		
+		use namespace spod_namespace;
 		
 		/**
 		 * @private
@@ -32,12 +36,7 @@ package org.osflash.spod.builders.trigger
 		/**
 		 * @private
 		 */
-		private var _triggerBuilder : ISpodTriggerBuilder;
-		
-		/**
-		 * @private
-		 */
-		private var _triggerWhenBuilder : ISpodTriggerWhenBuilder;
+		private var _triggerBuilder : ISpodTriggerWhenBuilder;
 		
 		/**
 		 * @private
@@ -45,7 +44,7 @@ package org.osflash.spod.builders.trigger
 		private var _ignoreIfExists : Boolean;
 		
 		public function CreateTriggerStatementBuilder(	schema : ISpodSchema, 
-														triggerBuilder : ISpodTriggerBuilder
+														triggerBuilder : ISpodTriggerWhenBuilder
 														)
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
@@ -57,13 +56,7 @@ package org.osflash.spod.builders.trigger
 			_buffer = new Vector.<String>();
 			
 			_triggerBuilder = triggerBuilder;
-			
-			if(_triggerBuilder is ISpodTriggerWhenBuilder)
-			{
-				_triggerWhenBuilder = ISpodTriggerWhenBuilder(_triggerBuilder);
-				_ignoreIfExists = _triggerWhenBuilder.ignoreIfExists;
-			}
-			else _ignoreIfExists = true;
+			_ignoreIfExists = _triggerBuilder.ignoreIfExists;
 		}
 		
 		/**
@@ -85,7 +78,24 @@ package org.osflash.spod.builders.trigger
 				
 				if(_ignoreIfExists) _buffer.push('IF NOT EXISTS ');
 				
+				const whenType : SpodTriggerWhenType = _triggerBuilder.whenType;
 				
+				_buffer.push(triggerSchema.tableName + '_' + whenType.type);
+				_buffer.push(' ');
+				_buffer.push(whenType.name);
+				_buffer.push(' ');
+				
+				const actionBuilder : ISpodTriggerActionBuilder = _triggerBuilder.actionBuilder;
+				const actionType : SpodTriggerActionType = actionBuilder.actionType;
+				
+				_buffer.push(actionType.name);
+				_buffer.push(' ON ');
+				_buffer.push(triggerSchema.name);
+				_buffer.push(' BEGIN ');
+				
+				// implement the update, insert, delete statements
+				
+				_buffer.push(' END ');
 				
 				if(length == _buffer.length) throw new SpodError('No identifier found.');
 						
@@ -94,7 +104,7 @@ package org.osflash.spod.builders.trigger
 				
 				info(statement.query);
 				
-				statement.query = '';
+				statement.query = '      ';
 				
 				return statement;
 				

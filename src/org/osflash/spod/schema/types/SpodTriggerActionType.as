@@ -22,5 +22,7 @@ package org.osflash.spod.schema.types
 		}
 
 		public function get type() : String { return _type; }
+		
+		public function get name() : String { return type.toUpperCase(); }
 	}
 }

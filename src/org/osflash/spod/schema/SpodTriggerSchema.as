@@ -97,6 +97,11 @@ package org.osflash.spod.schema
 		
 		/**
 		 * @inheritDoc
+		 */	
+		override public function get tableName() : String { return 'Trigger' + name; }
+		
+		/**
+		 * @inheritDoc
 		 */
 		override public function get schemaType() : SpodSchemaType 
 		{ 

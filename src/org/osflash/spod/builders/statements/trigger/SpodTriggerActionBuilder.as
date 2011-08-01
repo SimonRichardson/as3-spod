@@ -1,5 +1,7 @@
 package org.osflash.spod.builders.statements.trigger
 {
+	import org.osflash.spod.schema.types.SpodTriggerActionType;
+	import org.osflash.spod.schema.types.SpodTriggerWhenType;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -7,30 +9,75 @@ package org.osflash.spod.builders.statements.trigger
 											implements ISpodTriggerActionBuilder
 	{
 		
+		/**
+		 * @private
+		 */
+		private var _builder : ISpodTriggerWithBuilder;
+		
 		public function SpodTriggerActionBuilder(type : Class, head : ISpodTriggerBuilder)
 		{
 			super(type, head);
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		public function insert() : ISpodTriggerWithBuilder
 		{
-			const builder : ISpodTriggerWithBuilder = new SpodTriggerInsertBuilder(type, head);
-			builder.executeSignal.add(internalExecute);
-			return builder;
+			if(null != _builder)
+			{
+				_builder.executeSignal.remove(internalExecute);
+				_builder = null;
+			}
+			
+			_builder = new SpodTriggerInsertBuilder(type, head);
+			_builder.executeSignal.add(internalExecute);
+			return _builder;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function update() : ISpodTriggerWithBuilder
 		{
-			const builder : ISpodTriggerWithBuilder = new SpodTriggerUpdateBuilder(type, head);
-			builder.executeSignal.add(internalExecute);
-			return builder;
+			if(null != _builder)
+			{
+				_builder.executeSignal.remove(internalExecute);
+				_builder = null;
+			}
+			
+			_builder = new SpodTriggerUpdateBuilder(type, head);
+			_builder.executeSignal.add(internalExecute);
+			return _builder;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function remove() : ISpodTriggerWithBuilder
 		{
-			const builder : ISpodTriggerWithBuilder = new SpodTriggerRemoveBuilder(type, head);
-			builder.executeSignal.add(internalExecute);
-			return builder;
+			if(null != _builder)
+			{
+				_builder.executeSignal.remove(internalExecute);
+				_builder = null;
+			}
+			
+			_builder = new SpodTriggerRemoveBuilder(type, head);
+			_builder.executeSignal.add(internalExecute);
+			return _builder;
 		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get whenType() : SpodTriggerWhenType
+		{
+			throw new Error('Abstract method error');
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get actionType() : SpodTriggerActionType { return _builder.actionType; }
 	}
 }

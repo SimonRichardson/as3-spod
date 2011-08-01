@@ -248,6 +248,8 @@ package org.osflash.spod.schema
 		
 		public function get name() : String { return _name; }
 		
+		public function get tableName() : String { return _name; }
+		
 		public function get identifier() : String { return _identifier; }
 		public function set identifier(value : String) : void 
 		{ 

@@ -1,5 +1,7 @@
 package org.osflash.spod.builders.statements.trigger
 {
+	import org.osflash.spod.schema.types.SpodTriggerActionType;
+	import org.osflash.spod.schema.types.SpodTriggerWhenType;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -11,5 +13,9 @@ package org.osflash.spod.builders.statements.trigger
 		function update() : ISpodTriggerWithBuilder;
 		
 		function remove() : ISpodTriggerWithBuilder;
+		
+		function get whenType() : SpodTriggerWhenType;
+		
+		function get actionType() : SpodTriggerActionType;
 	}
 }

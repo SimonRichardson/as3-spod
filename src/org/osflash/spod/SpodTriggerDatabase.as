@@ -5,7 +5,6 @@ package org.osflash.spod
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.schemas.TriggerSchemaBuilder;
-	import org.osflash.spod.builders.statements.trigger.ISpodTriggerBuilder;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWhenBuilder;
 	import org.osflash.spod.builders.statements.trigger.SpodTriggerWhenBuilder;
 	import org.osflash.spod.builders.trigger.CreateTriggerStatementBuilder;
@@ -72,7 +71,7 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function internalBuildTrigger(builder : ISpodTriggerBuilder) : void
+		private function internalBuildTrigger(builder : ISpodTriggerWhenBuilder) : void
 		{
 			const params : Array = [builder];
 			nativeSQLErrorEventSignal.addOnceWithPriority(	handleTriggerSQLErrorEventSignal, 
@@ -98,7 +97,7 @@ package org.osflash.spod
 		 * @private
 		 */
 		private function internalCreateTrigger(	schema : SpodTriggerSchema, 
-												triggerBuilder : ISpodTriggerBuilder
+												triggerBuilder : ISpodTriggerWhenBuilder
 												) : void
 		{
 			if(null == schema) throw new ArgumentError('Schema can not be null');
@@ -122,7 +121,7 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleTriggerSQLError(builder : ISpodTriggerBuilder) : void
+		private function handleTriggerSQLError(builder : ISpodTriggerWhenBuilder) : void
 		{
 			nativeSQLErrorEventSignal.remove(handleTriggerSQLErrorEventSignal);
 			nativeSQLEventSchemaSignal.remove(handleTriggerSQLEventSchemaSignal);
@@ -141,7 +140,7 @@ package org.osflash.spod
 		 * @private
 		 */
 		private function handleTriggerSQLErrorEventSignal(	event : SQLErrorEvent, 
-															builder : ISpodTriggerBuilder
+															builder : ISpodTriggerWhenBuilder
 															) : void
 		{
 			// Catch the database not found error, if anything else we just let it slip through!

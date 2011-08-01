@@ -1,5 +1,6 @@
 package org.osflash.spod.builders.statements.trigger
 {
+	import org.osflash.spod.schema.types.SpodTriggerActionType;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -11,5 +12,7 @@ package org.osflash.spod.builders.statements.trigger
 		function update(...rest) : void;
 		
 		function remove(...rest) : void;
+		
+		function get actionType() : SpodTriggerActionType;
 	}
 }
