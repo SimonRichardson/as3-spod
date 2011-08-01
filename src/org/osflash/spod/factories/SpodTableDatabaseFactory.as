@@ -5,7 +5,7 @@ package org.osflash.spod.factories
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class SpodDatabaseFactory implements ISpodDatabaseFactory
+	public class SpodTableDatabaseFactory implements ISpodDatabaseFactory
 	{
 		
 		public function create(name : String, manager : SpodManager) : SpodDatabase

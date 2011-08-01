@@ -5,12 +5,12 @@ package org.osflash.spod
 	import org.osflash.signals.Signal;
 	import org.osflash.signals.natives.NativeSignal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
+	import org.osflash.spod.builders.schemas.TableSchemaBuilder;
 	import org.osflash.spod.builders.table.CreateTableStatementBuilder;
 	import org.osflash.spod.builders.table.DeleteTableStatementBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
-	import org.osflash.spod.utils.buildTableSchemaFromType;
 	import org.osflash.spod.utils.getTableName;
 
 	import flash.data.SQLSchemaResult;
@@ -37,6 +37,11 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _manager : SpodManager;
+		
+		/**
+		 * @private
+		 */
+		private var _schemaBuilder : TableSchemaBuilder;
 		
 		/**
 		 * @private
@@ -76,6 +81,8 @@ package org.osflash.spod
 			
 			_name = name;
 			_manager = manager;
+			
+			_schemaBuilder = new TableSchemaBuilder();
 			
 			if(null == manager.connection) throw new ArgumentError('SpodConnection required');
 			_nativeSQLErrorEventSignal = new NativeSignal(	_manager.connection, 
@@ -347,7 +354,7 @@ package org.osflash.spod
 			
 			if(null == type) throw new SpodError('Type can not be null');
 			
-			const schema : SpodTableSchema = buildTableSchemaFromType(type);
+			const schema : SpodTableSchema = _schemaBuilder.buildTable(type);
 			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			// Create it because it doesn't exist
@@ -366,7 +373,7 @@ package org.osflash.spod
 			_nativeSQLEventSchemaSignal.remove(handleCreateSQLEventSchemaSignal);
 			
 			// This works out if there is a need to migrate a database or not!
-			const schema : SpodTableSchema = buildTableSchemaFromType(type);
+			const schema : SpodTableSchema = _schemaBuilder.buildTable(type);
 			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
@@ -414,7 +421,7 @@ package org.osflash.spod
 			_nativeSQLEventSchemaSignal.remove(handleLoadSQLEventSchemaSignal);
 			
 			// This works out if there is a need to migrate a database or not!
-			const schema : SpodTableSchema = buildTableSchemaFromType(type);
+			const schema : SpodTableSchema = _schemaBuilder.buildTable(type);
 			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
@@ -462,7 +469,7 @@ package org.osflash.spod
 			_nativeSQLEventSchemaSignal.remove(handleDeleteSQLEventSchemaSignal);
 			
 			// This works out if there is a need to migrate a database or not!
-			const schema : SpodTableSchema = buildTableSchemaFromType(type);
+			const schema : SpodTableSchema = _schemaBuilder.buildTable(type);
 			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();

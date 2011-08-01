@@ -1,6 +1,6 @@
 package org.osflash.spod
 {
-	import org.osflash.spod.factories.SpodDatabaseFactory;
+	import org.osflash.spod.factories.SpodTableDatabaseFactory;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.signals.natives.NativeSignal;
@@ -119,7 +119,7 @@ package org.osflash.spod
 			_connection = new SQLConnection();
 			_executioner = new SpodExecutioner(this);
 			
-			_databaseFactory = databaseFactory || new SpodDatabaseFactory();
+			_databaseFactory = databaseFactory || new SpodTableDatabaseFactory();
 			
 			_nativeOpenSignal = new NativeSignal(_connection, SQLEvent.OPEN, SQLEvent);
 			_nativeErrorSignal = new NativeSignal(_connection, SQLErrorEvent.ERROR, SQLErrorEvent);

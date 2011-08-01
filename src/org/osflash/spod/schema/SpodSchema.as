@@ -33,7 +33,7 @@ package org.osflash.spod.schema
 		/**
 		 * @private
 		 */
-		private var _columns : Vector.<SpodColumnSchema>;
+		private var _columns : Vector.<ISpodColumnSchema>;
 		
 		public function SpodSchema(type : Class, name : String)
 		{
@@ -46,7 +46,7 @@ package org.osflash.spod.schema
 			_name = name;
 			_identifier = SpodSchemaIdentifier.DEFAULT;
 			
-			_columns = new Vector.<SpodColumnSchema>();
+			_columns = new Vector.<ISpodColumnSchema>();
 		}
 		
 		public function contains(name : String) : Boolean
@@ -54,7 +54,7 @@ package org.osflash.spod.schema
 			var index : int = _columns.length;
 			while(--index > -1)
 			{
-				const column : SpodColumnSchema = _columns[index];
+				const column : ISpodColumnSchema = _columns[index];
 				if(column.name == name) return true;
 			}
 			
@@ -68,7 +68,7 @@ package org.osflash.spod.schema
 			var index : int = _columns.length;
 			while(--index > -1)
 			{
-				const column : SpodColumnSchema = _columns[index];
+				const column : ISpodColumnSchema = _columns[index];
 				if(column.name == name)
 				{
 					if(type == 'int' && column.type == SpodTypes.INT) return true;
@@ -108,7 +108,7 @@ package org.osflash.spod.schema
 			}
 			else
 			{
-				var column : SpodColumnSchema;
+				var column : ISpodColumnSchema;
 				var columnName : String;
 				var dataType : String;
 				
@@ -223,12 +223,12 @@ package org.osflash.spod.schema
 			throw new Error('Abstract method error'); 
 		}
 		
-		public function getColumnByName(value : String) : SpodColumnSchema
+		public function getColumnByName(value : String) : ISpodColumnSchema
 		{
 			var index : int = _columns.length;
 			while(--index > -1)
 			{
-				const column : SpodColumnSchema = _columns[index];
+				const column : ISpodColumnSchema = _columns[index];
 				if(column.name == value) return column;
 			}
 			
@@ -237,12 +237,12 @@ package org.osflash.spod.schema
 		
 		public function isValidSelectIdentifier() : Boolean
 		{
-			const column : SpodColumnSchema = getColumnByName(_identifier);
+			const column : ISpodColumnSchema = getColumnByName(_identifier);
 			if(null == column) throw new SpodError('Invalid column identifier');
 			return column.type == SpodTypes.INT || column.type == SpodTypes.UINT;
 		}
 		
-		public function get columns() : Vector.<SpodColumnSchema> { return _columns; }
+		public function get columns() : Vector.<ISpodColumnSchema> { return _columns; }
 		
 		public function get type() : Class { return _type; }
 		
@@ -256,7 +256,7 @@ package org.osflash.spod.schema
 				var index : int = _columns.length;
 				while(--index > -1)
 				{
-					const column : SpodColumnSchema = _columns[index];
+					const column : ISpodColumnSchema = _columns[index];
 					if(column.name == value)
 					{
 						_identifier = value;

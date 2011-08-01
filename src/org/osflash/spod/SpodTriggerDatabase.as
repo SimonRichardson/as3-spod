@@ -4,6 +4,7 @@ package org.osflash.spod
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
+	import org.osflash.spod.builders.schemas.TriggerSchemaBuilder;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerBuilder;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWhenBuilder;
 	import org.osflash.spod.builders.statements.trigger.SpodTriggerWhenBuilder;
@@ -11,7 +12,6 @@ package org.osflash.spod
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTriggerSchema;
-	import org.osflash.spod.utils.buildTriggerSchemaFromType;
 	import org.osflash.spod.utils.getTableName;
 
 	import flash.data.SQLTriggerSchema;
@@ -26,6 +26,11 @@ package org.osflash.spod
 	{
 		
 		use namespace spod_namespace;
+		
+		/**
+		 * @private
+		 */
+		private var _schemaBuilder : TriggerSchemaBuilder;
 		
 		/**
 		 * @private
@@ -47,6 +52,8 @@ package org.osflash.spod
 			super(name, manager);
 			
 			_manager = manager;
+			
+			_schemaBuilder = new TriggerSchemaBuilder();
 			
 			_triggers = new Dictionary();
 		}
@@ -123,7 +130,7 @@ package org.osflash.spod
 			const type : Class = builder.type;
 			if(null == type) throw new SpodError('Type can not be null');
 			
-			const schema : SpodTriggerSchema = buildTriggerSchemaFromType(type);
+			const schema : SpodTriggerSchema = _schemaBuilder.buildTrigger(type);
 			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			// Create it because it doesn't exist

@@ -6,7 +6,7 @@ package org.osflash.spod.schema
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class SpodColumnSchema implements ISpodSchema
+	public class SpodColumnSchema implements ISpodColumnSchema
 	{
 		/**
 		 * @private

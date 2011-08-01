@@ -3,7 +3,7 @@ package org.osflash.spod.utils
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.SpodTable;
 	import org.osflash.spod.SpodTableRow;
-	import org.osflash.spod.schema.SpodColumnSchema;
+	import org.osflash.spod.schema.ISpodColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.spod_namespace;
 	import org.osflash.spod.types.SpodTypes;
@@ -19,7 +19,7 @@ package org.osflash.spod.utils
 		const schema : SpodTableSchema = table.schema;
 		if(null == schema) throw new ArgumentError('Table is not initialised correctly');
 		
-		const columns : Vector.<SpodColumnSchema> = schema.columns;
+		const columns : Vector.<ISpodColumnSchema> = schema.columns;
 		if(columns.length == 0) throw new ArgumentError('Table has no columns');
 		
 		const schemaXML : XML = <schema />;
@@ -29,7 +29,7 @@ package org.osflash.spod.utils
 		var total : int = columns.length;
 		for(var i : int = 0; i<total; i++)
 		{
-			const column : SpodColumnSchema = columns[i];
+			const column : ISpodColumnSchema = columns[i];
 			const sqlType : String = SpodTypes.getSQLName(column.type);
 			const columnXML : XML = <column name={column.name} type={sqlType} />;
 			

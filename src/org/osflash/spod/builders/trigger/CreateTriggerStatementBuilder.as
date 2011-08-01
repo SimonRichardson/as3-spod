@@ -1,5 +1,6 @@
 package org.osflash.spod.builders.trigger
 {
+	import org.osflash.spod.schema.ISpodColumnSchema;
 	import org.osflash.logger.logs.info;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
@@ -7,8 +8,7 @@ package org.osflash.spod.builders.trigger
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWhenBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.ISpodSchema;
-	import org.osflash.spod.schema.SpodTableColumnSchema;
-	import org.osflash.spod.schema.SpodTableSchema;
+	import org.osflash.spod.schema.SpodTriggerColumnSchema;
 	import org.osflash.spod.schema.SpodTriggerSchema;
 	import org.osflash.spod.schema.types.SpodSchemaType;
 
@@ -74,7 +74,7 @@ package org.osflash.spod.builders.trigger
 			if(_schema is SpodTriggerSchema)
 			{
 				const triggerSchema : SpodTriggerSchema = SpodTriggerSchema(_schema);
-				const columns : Vector.<SpodTableColumnSchema> = triggerSchema.columns.reverse();
+				const columns : Vector.<ISpodColumnSchema> = triggerSchema.columns;
 				const total : int = columns.length;
 				
 				if(total == 0) throw new SpodError('Invalid columns length');
