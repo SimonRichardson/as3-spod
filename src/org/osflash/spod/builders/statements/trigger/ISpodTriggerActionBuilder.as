@@ -17,5 +17,7 @@ package org.osflash.spod.builders.statements.trigger
 		function get whenType() : SpodTriggerWhenType;
 		
 		function get actionType() : SpodTriggerActionType;
+		
+		function get withBuilder() : ISpodTriggerWithBuilder;
 	}
 }

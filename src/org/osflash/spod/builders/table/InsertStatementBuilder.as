@@ -4,6 +4,7 @@ package org.osflash.spod.builders.table
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.schema.ISpodColumnSchema;
+	import org.osflash.spod.schema.ISpodSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.schema.types.SpodSchemaType;
 	import org.osflash.spod.types.SpodTypes;
@@ -20,7 +21,7 @@ package org.osflash.spod.builders.table
 		/**
 		 * @private
 		 */
-		private var _schema : SpodTableSchema;
+		private var _schema : ISpodSchema;
 		
 		/**
 		 * @private
@@ -32,10 +33,10 @@ package org.osflash.spod.builders.table
 		 */
 		private var _buffer : Vector.<String>;
 
-		public function InsertStatementBuilder(schema : SpodTableSchema, object : SpodObject)
+		public function InsertStatementBuilder(schema : ISpodSchema, object : SpodObject)
 		{
-			if(null == schema) throw new ArgumentError('SpodTableSchema can not be null');
-			if(null == object) throw new ArgumentError('SpodObject can not be null');
+			if(null == schema) throw new ArgumentError('Schema can not be null');
+			if(null == object) throw new ArgumentError('Object can not be null');
 			if(schema.schemaType != SpodSchemaType.TABLE) throw new ArgumentError('Schema ' + 
 																		'should be a table schema');
 			_schema = schema;

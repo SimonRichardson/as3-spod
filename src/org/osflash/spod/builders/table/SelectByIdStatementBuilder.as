@@ -3,6 +3,7 @@ package org.osflash.spod.builders.table
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.schema.ISpodColumnSchema;
+	import org.osflash.spod.schema.ISpodSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.schema.types.SpodSchemaType;
 
@@ -18,7 +19,7 @@ package org.osflash.spod.builders.table
 		/**
 		 * @private
 		 */
-		private var _schema : SpodTableSchema;
+		private var _schema : ISpodSchema;
 		
 		/**
 		 * @private
@@ -30,9 +31,9 @@ package org.osflash.spod.builders.table
 		 */
 		private var _buffer : Vector.<String>;
 
-		public function SelectByIdStatementBuilder(schema : SpodTableSchema, id : int)
+		public function SelectByIdStatementBuilder(schema : ISpodSchema, id : int)
 		{
-			if(null == schema) throw new ArgumentError('SpodTableSchema can not be null');
+			if(null == schema) throw new ArgumentError('Schema can not be null');
 			if(isNaN(id)) throw new ArgumentError('id can not be NaN');
 			if(schema.schemaType != SpodSchemaType.TABLE) throw new ArgumentError('Schema ' + 
 																		'should be a table schema');

@@ -1,10 +1,14 @@
 package org.osflash.spod.builders.trigger
 {
+	import org.osflash.spod.builders.table.DeleteWhereStatementBuilder;
 	import org.osflash.logger.logs.info;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
+	import org.osflash.spod.builders.expressions.ISpodExpression;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerActionBuilder;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWhenBuilder;
+	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWithBuilder;
+	import org.osflash.spod.builders.table.SelectWhereStatementBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.ISpodColumnSchema;
 	import org.osflash.spod.schema.ISpodSchema;
@@ -12,6 +16,7 @@ package org.osflash.spod.builders.trigger
 	import org.osflash.spod.schema.types.SpodSchemaType;
 	import org.osflash.spod.schema.types.SpodTriggerActionType;
 	import org.osflash.spod.schema.types.SpodTriggerWhenType;
+	import org.osflash.spod.schema.types.SpodTriggerWithType;
 	import org.osflash.spod.spod_namespace;
 
 	import flash.utils.getQualifiedClassName;
@@ -93,18 +98,47 @@ package org.osflash.spod.builders.trigger
 				_buffer.push(triggerSchema.name);
 				_buffer.push(' BEGIN ');
 				
-				// implement the update, insert, delete statements
+				const statement : SpodStatement = new SpodStatement(triggerSchema.type);
 				
+				// implement the update, insert, delete statements
+				const withBuilder : ISpodTriggerWithBuilder = actionBuilder.withBuilder;
+				const withType : SpodTriggerWithType = withBuilder.withType;
+				
+				const expressions : Vector.<ISpodExpression> = withBuilder.withExpressions;
+				
+				var whereBuilder : ISpodStatementBuilder;
+				var whereStatement : SpodStatement;
+				switch(withType)
+				{
+					case SpodTriggerWithType.SELECT:
+						whereBuilder = new SelectWhereStatementBuilder(triggerSchema, expressions);
+						whereStatement = whereBuilder.build();
+						break;
+					case SpodTriggerWithType.DELETE:
+						whereBuilder = new DeleteWhereStatementBuilder(triggerSchema, expressions);
+						whereStatement = whereBuilder.build();
+						break;
+				}
+				
+				var whereQuery : String = whereStatement.query;
+				for(var key : String in whereStatement.parameters)
+				{
+					const pattern : RegExp = new RegExp(key, 'g');
+					info(key, whereQuery.match(pattern));
+					if(whereQuery.match(pattern))
+					{
+						const replacement : String = "'" + whereStatement.parameters[key] + "'";
+						whereQuery = whereQuery.replace(pattern, replacement);
+					}
+				}
+				
+				_buffer.push(whereQuery);				
+				_buffer.push(';');
 				_buffer.push(' END ');
 				
-				if(length == _buffer.length) throw new SpodError('No identifier found.');
-						
-				const statement : SpodStatement = new SpodStatement(triggerSchema.type);
 				statement.query = _buffer.join('');
 				
 				info(statement.query);
-				
-				statement.query = '      ';
 				
 				return statement;
 				

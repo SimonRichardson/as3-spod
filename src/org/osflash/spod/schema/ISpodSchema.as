@@ -7,6 +7,10 @@ package org.osflash.spod.schema
 	public interface ISpodSchema
 	{
 		
+		function contains(key : String) : Boolean;
+		
+		function match(name : String, implementation : *) : Boolean;
+		
 		function get name() : String;
 				
 		function get identifier() : String;

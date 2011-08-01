@@ -35,21 +35,31 @@ package org.osflash.spod
 			manager.open(resource, true);
 		}
 		
-		private function handleOpenSignal(database : SpodTriggerDatabase) : void
+		private function handleOpenSignal(database : SpodDatabase) : void
 		{
+			database.createTableSignal.add(handleTableCreateSignal);
+			database.createTable(User);
+		}
+		
+		private function handleTableCreateSignal(table : SpodTable) : void
+		{
+			debug('Table created!', table);
+			
 			const now : Date = new Date();
 			now.date -= 50;
 			
-			database.createTriggerSignal.add(handleCreateSignal);
+			const database : SpodTriggerDatabase = SpodTriggerDatabase(table.manager.database);
+			
+			database.createTriggerSignal.add(handleTriggerCreateSignal);
 			database.createTrigger(User)
 							.after()
 							.update()
-							.remove(new GreaterThanExpression('date', now));
+							.select(new GreaterThanExpression('date', now));
 		}
 		
-		private function handleCreateSignal(table : SpodTable) : void
+		private function handleTriggerCreateSignal(trigger : SpodTrigger) : void
 		{
-			debug('Table created!', table);
+			debug('Trigger created!', trigger);
 		}
 		
 		private function handleErrorSignal(event : SpodErrorEvent) : void

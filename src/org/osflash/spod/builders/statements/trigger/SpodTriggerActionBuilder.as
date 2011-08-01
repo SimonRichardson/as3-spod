@@ -79,5 +79,7 @@ package org.osflash.spod.builders.statements.trigger
 		 * @inheritDoc
 		 */
 		public function get actionType() : SpodTriggerActionType { return _builder.actionType; }
+		
+		public function get withBuilder() : ISpodTriggerWithBuilder { return _builder; }
 	}
 }

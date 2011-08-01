@@ -43,12 +43,40 @@ package org.osflash.spod.schema
 			_columns = new Vector.<SpodTableColumnSchema>();
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
+		public function contains(name : String) : Boolean
+		{
+			throw new Error('Missing implementation');
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function match(name : String, implementation : *) : Boolean
+		{
+			throw new Error('Missing implementation');
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function get columns() : Vector.<SpodTableColumnSchema> { return _columns; }
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function get type() : Class { return _type; }
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function get name() : String { return _name; }
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function get identifier() : String { return _identifier; }
 		public function set identifier(value : String) : void 
 		{ 

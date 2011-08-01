@@ -156,14 +156,13 @@ package org.osflash.spod
 		 * @private
 		 */
 		private function handleTriggerSQLEventSchemaSignal(	event : SQLEvent, 
-															type : Class, 
-															ignoreIfExists : Boolean
+															triggerBuilder : ISpodTriggerWhenBuilder
 															) : void
 		{
 			nativeSQLErrorEventSignal.remove(handleTriggerSQLErrorEventSignal);
 			nativeSQLEventSchemaSignal.remove(handleTriggerSQLEventSchemaSignal);
 			
-			info('Handle trigger sql event', ignoreIfExists );
+			info('Handle trigger sql event', triggerBuilder);
 		}
 		
 		/**
@@ -195,7 +194,7 @@ package org.osflash.spod
 		
 		public function get createTriggerSignal() : ISignal
 		{
-			if(null == _createTriggerSignal) _createTriggerSignal = new Signal();
+			if(null == _createTriggerSignal) _createTriggerSignal = new Signal(SpodTrigger);
 			return _createTriggerSignal;
 		}
 	}

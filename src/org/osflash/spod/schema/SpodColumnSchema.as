@@ -35,15 +35,46 @@ package org.osflash.spod.schema
 			
 			_autoIncrement = false;
 		}
-
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function contains(name : String) : Boolean
+		{
+			throw new Error('Missing implementation');
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function match(name : String, implementation : *) : Boolean
+		{
+			throw new Error('Missing implementation');
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function get name() : String { return _name; }
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function get identifier() : String { return _name; }
 
+		/**
+		 * @inheritDoc
+		 */
 		public function get type() : int { return _type; }
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function get autoIncrement() : Boolean { return _autoIncrement; }
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function set autoIncrement(value : Boolean) : void 
 		{ 
 			// TODO : don't allow if the table has already been created, or if it has been provide
@@ -53,6 +84,9 @@ package org.osflash.spod.schema
 			else throw new SpodError('Unable to autoIncrement on an invalid type');
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function get schemaType() : SpodSchemaType 
 		{ 
 			throw new Error('Abstract method error'); 

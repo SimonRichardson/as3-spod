@@ -563,6 +563,8 @@ package org.osflash.spod
 		public function get schema() : SpodTableSchema { return _schema; }
 		
 		public function get name() : String { return _schema.name; }
+		
+		public function get manager() : SpodManager { return _manager; }
 
 		spod_namespace function get rows() : Dictionary { return _rows; }
 		
