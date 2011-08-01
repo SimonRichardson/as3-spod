@@ -1,13 +1,12 @@
 package org.osflash.spod.builders.trigger
 {
-	import org.osflash.spod.builders.table.DeleteWhereStatementBuilder;
-	import org.osflash.logger.logs.info;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerActionBuilder;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWhenBuilder;
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWithBuilder;
+	import org.osflash.spod.builders.table.DeleteWhereStatementBuilder;
 	import org.osflash.spod.builders.table.SelectWhereStatementBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.ISpodColumnSchema;
@@ -124,7 +123,6 @@ package org.osflash.spod.builders.trigger
 				for(var key : String in whereStatement.parameters)
 				{
 					const pattern : RegExp = new RegExp(key, 'g');
-					info(key, whereQuery.match(pattern));
 					if(whereQuery.match(pattern))
 					{
 						const replacement : String = "'" + whereStatement.parameters[key] + "'";
@@ -137,8 +135,6 @@ package org.osflash.spod.builders.trigger
 				_buffer.push(' END ');
 				
 				statement.query = _buffer.join('');
-				
-				info(statement.query);
 				
 				return statement;
 				
