@@ -17,6 +17,7 @@ package org.osflash.spod.builders.trigger
 	import org.osflash.spod.schema.types.SpodTriggerWhenType;
 	import org.osflash.spod.schema.types.SpodTriggerWithType;
 	import org.osflash.spod.spod_namespace;
+	import org.osflash.spod.utils.getTriggerName;
 
 	import flash.utils.getQualifiedClassName;
 	/**
@@ -84,7 +85,7 @@ package org.osflash.spod.builders.trigger
 				
 				const whenType : SpodTriggerWhenType = _triggerBuilder.whenType;
 				
-				_buffer.push(triggerSchema.tableName);
+				_buffer.push(getTriggerName(triggerSchema.type));
 				_buffer.push(' ');
 				_buffer.push(whenType.name);
 				_buffer.push(' ');

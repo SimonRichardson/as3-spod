@@ -1,8 +1,12 @@
 package org.osflash.spod.schema
 {
+	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.types.SpodSchemaType;
 	import org.osflash.spod.types.SpodTypes;
+	import org.osflash.spod.utils.getTableNameFromTriggerName;
 
+	import flash.data.SQLSchema;
+	import flash.data.SQLTriggerSchema;
 	import flash.net.registerClassAlias;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
@@ -13,6 +17,30 @@ package org.osflash.spod.schema
 		public function SpodTriggerSchema(type : Class, name : String)
 		{
 			super(type, name);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */	
+		override public function validate(sql : SQLSchema) : void
+		{
+			if(sql is SQLTriggerSchema)
+			{
+				const sqlTrigger : SQLTriggerSchema = SQLTriggerSchema(sql);
+				if(name != sqlTrigger.name)
+				{
+					throw new SpodError('Unexpected trigger name, expected ' + name + 
+																	' got ' + sqlTrigger.name);
+				}
+				
+				const tableName : String = getTableNameFromTriggerName(name);
+				if(tableName != sqlTrigger.table)
+				{
+					throw new SpodError('Unexpected trigger name, expected ' + name + 
+																	' got ' + sqlTrigger.name);
+				}
+			}
+			else throw new ArgumentError('SQLSchema not supported ' + sql);
 		}
 		
 		/**
@@ -94,12 +122,7 @@ package org.osflash.spod.schema
 			
 			columns.push(new SpodTriggerColumnSchema(name, SpodTypes.OBJECT));
 		}
-		
-		/**
-		 * @inheritDoc
-		 */	
-		override public function get tableName() : String { return 'Trigger' + name; }
-		
+				
 		/**
 		 * @inheritDoc
 		 */

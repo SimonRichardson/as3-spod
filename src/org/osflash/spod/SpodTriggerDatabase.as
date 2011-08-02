@@ -8,11 +8,13 @@ package org.osflash.spod
 	import org.osflash.spod.builders.statements.trigger.ISpodTriggerWhenBuilder;
 	import org.osflash.spod.builders.statements.trigger.SpodTriggerWhenBuilder;
 	import org.osflash.spod.builders.trigger.CreateTriggerStatementBuilder;
+	import org.osflash.spod.builders.trigger.DeleteTriggerStatementBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTriggerSchema;
-	import org.osflash.spod.utils.getTableName;
-
+	import org.osflash.spod.utils.getTriggerName;
+	import flash.data.SQLSchemaResult;
+	import flash.data.SQLTableSchema;
 	import flash.data.SQLTriggerSchema;
 	import flash.errors.SQLError;
 	import flash.events.SQLErrorEvent;
@@ -73,11 +75,75 @@ package org.osflash.spod
 			return builder;
 		}
 		
-		public function removeTrigger(	type : Class,
-										ignoreIfExists : Boolean = true
+		public function deleteTrigger(	type : Class,
+										ifExists : Boolean = true
 										) : void
 		{
-			
+			if(null == type) throw new ArgumentError('Type can not be null');
+			if(!activeTrigger(type))
+			{
+				const params : Array = [type];
+				nativeSQLErrorEventSignal.addOnceWithPriority(	handleDeleteSQLErrorEventSignal, 
+																int.MAX_VALUE
+																).params = params;
+				nativeSQLEventSchemaSignal.addOnceWithPriority(	handleDeleteSQLEventSchemaSignal
+																	).params = params;
+				
+				const name : String = getTriggerName(type);
+				try
+				{
+					_manager.connection.loadSchema(SQLTableSchema, name);
+				}
+				catch(error : SQLError)
+				{
+					deleteTableSignal.dispatch(null);
+				}
+			}
+			else
+			{
+				const trigger : SpodTrigger = getTrigger(type);
+				const schema : SpodTriggerSchema = trigger.schema;
+				
+				if(null == schema) throw new SpodError('SpodTriggerSchema can not be null');
+				
+				const builder : ISpodStatementBuilder = new DeleteTriggerStatementBuilder(
+																				schema, ifExists);
+				const statement : SpodStatement = builder.build();
+				
+				if(null == statement) 
+					throw new SpodError('SpodStatement can not be null');
+								
+				statement.completedSignal.add(handleDeleteTableCompleteSignal);
+				statement.errorSignal.add(handleDeleteTableErrorSignal);
+				
+				if(_manager.queuing) _manager.queue.add(statement);
+				else _manager.executioner.add(new SpodStatementQueue(statement));
+			}
+		}
+		
+		
+		/**
+		 * Work out if the trigger with the type of class is active or not. Active being in memory,
+		 * this doesn't check the database. Consider calling createTrigger for now to load it into
+		 * memory.
+		 * 
+		 * @param type of Class to work out if it's active
+		 * @return Boolean state of the trigger memory
+		 */
+		public function activeTrigger(type : Class) : Boolean
+		{
+			return null != _triggers[type];
+		}
+		
+		/**
+		 * Return the trigger of type of class. 
+		 * 
+		 * @param type of Class to work out if it's active
+		 * @return the trigger as a SpodTrigger.
+		 */
+		public function getTrigger(type : Class) : SpodTrigger
+		{
+			return active(type) ? _triggers[type] : null; 
 		}
 		
 		/**
@@ -92,7 +158,7 @@ package org.osflash.spod
 			nativeSQLEventSchemaSignal.addOnceWithPriority(	handleTriggerSQLEventSchemaSignal
 															).params = params;
 			
-			const name : String = getTableName(builder.type);
+			const name : String = getTriggerName(builder.type);
 			try
 			{
 				_manager.connection.loadSchema(SQLTriggerSchema, name);
@@ -204,15 +270,110 @@ package org.osflash.spod
 			_manager.errorSignal.dispatch(event);
 		}
 		
+		
+		/**
+		 * @private
+		 */
+		private function handleDeleteSQLErrorEventSignal(	event : SQLErrorEvent, 
+															type : Class
+															) : void
+		{
+			// Catch the database not found error, if anything else we just let it slip through!
+			if(event.errorID == 3115 && event.error.detailID == 1007)
+			{
+				event.stopImmediatePropagation();
+				
+				// we should state no spod table exists.
+				deleteTriggerSignal.dispatch(null);
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleDeleteSQLEventSchemaSignal(	event : SQLEvent, 
+															type : Class
+															) : void
+		{
+			nativeSQLErrorEventSignal.remove(handleDeleteSQLErrorEventSignal);
+			nativeSQLEventSchemaSignal.remove(handleDeleteSQLEventSchemaSignal);
+			
+			// This works out if there is a need to migrate a database or not!
+			const schema : SpodTriggerSchema = _schemaBuilder.buildTrigger(type);
+			if(null == schema) throw new SpodError('Schema can not be null');
+			
+			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
+			if(null == result || null == result.triggers) deleteTableSignal.dispatch(null);
+			else
+			{
+				const triggers : Array = result.triggers;
+				const total : int = triggers.length;
+				
+				if(total == 0) deleteTriggerSignal.dispatch(null);
+				else if(total == 1)
+				{
+					 const sqlTrigger : SQLTriggerSchema = result.triggers[0];
+					
+					// This throws a lot of errors, we should wrap it up in try...catch... and 
+					// broadcast it to the error message
+					try { schema.validate(sqlTrigger); }
+					catch(error : SpodError)
+					{
+						_manager.errorSignal.dispatch(new SpodErrorEvent(error.message, error));
+					}
+										
+					if(null != schema)
+					{
+						// We don't need to make a new table as we've already got one!
+						const trigger : SpodTrigger = new SpodTrigger(schema, _manager);
+						
+						_triggers[type] = trigger;
+						
+						deleteTable(type);
+					}
+				}
+				else throw new SpodError('Invalid trigger count, expected 1 got ' + total);
+			}
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleDeleteTableCompleteSignal(statement : SpodStatement) : void
+		{
+			statement.completedSignal.remove(handleDeleteTableCompleteSignal);
+			statement.errorSignal.remove(handleDeleteTableErrorSignal);
+			
+			const trigger : SpodTrigger = _triggers[statement.type];
+			
+			_triggers[statement.type] = null;
+			delete _triggers[statement.type];
+			
+			deleteTableSignal.dispatch(trigger);
+		}
+		
+		/**
+		 * @private
+		 */
+		private function handleDeleteTableErrorSignal(	statement : SpodStatement, 
+														event : SpodErrorEvent
+														) : void
+		{
+			statement.completedSignal.remove(handleDeleteTableCompleteSignal);
+			statement.errorSignal.remove(handleDeleteTableErrorSignal);
+			
+			_manager.errorSignal.dispatch(event);
+		}
+		
 		public function get createTriggerSignal() : ISignal
 		{
 			if(null == _createTriggerSignal) _createTriggerSignal = new Signal(SpodTrigger);
 			return _createTriggerSignal;
 		}
 		
-		public function get removeTriggerSignal() : ISignal
+		public function get deleteTriggerSignal() : ISignal
 		{
-			if(null == _removeTriggerSignal) _removeTriggerSignal = new Signal();
+			if(null == _removeTriggerSignal) _removeTriggerSignal = new Signal(SpodTrigger);
 			return _removeTriggerSignal;
 		}
 	}

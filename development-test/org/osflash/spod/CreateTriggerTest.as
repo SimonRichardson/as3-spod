@@ -47,8 +47,8 @@ package org.osflash.spod
 			
 			const database : SpodTriggerDatabase = SpodTriggerDatabase(table.manager.database);
 			
-			database.removeTriggerSignal.add(handleTriggerDropSignal).params = [database];
-			database.removeTrigger(User);
+			database.deleteTriggerSignal.add(handleTriggerDropSignal).params = [database];
+			database.deleteTrigger(User);
 		}
 		
 		private function handleTriggerDropSignal(database : SpodTriggerDatabase) : void
