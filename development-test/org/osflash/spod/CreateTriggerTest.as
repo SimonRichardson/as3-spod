@@ -1,8 +1,8 @@
 package org.osflash.spod
 {
-	import org.osflash.spod.builders.expressions.where.GreaterThanExpression;
 	import org.osflash.logger.logs.debug;
 	import org.osflash.logger.logs.error;
+	import org.osflash.spod.builders.expressions.where.GreaterThanExpression;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.factories.ISpodDatabaseFactory;
 	import org.osflash.spod.factories.SpodTriggerDatabaseFactory;
@@ -56,20 +56,44 @@ package org.osflash.spod
 			debug('Trigger removed!');
 			
 			const now : Date = new Date();
-			now.date -= 50;
 			
-			database.createTriggerSignal.add(handleTriggerCreateSignal);
+			database.createTriggerSignal.add(handleTriggerCreateSignal).params = [database];
 			database.createTrigger(User)
 							.after()
-							.update()
-							.select(new GreaterThanExpression('date', now));
+							.insert()
+							.remove(new GreaterThanExpression('date', now));
 			
 			trigger;
 		}
 		
-		private function handleTriggerCreateSignal(trigger : SpodTrigger) : void
+		private function handleTriggerCreateSignal(trigger : SpodTrigger, database : SpodTriggerDatabase) : void
 		{
 			debug('Trigger created!', trigger);
+			
+			const table : SpodTable = database.getTable(User);
+			
+			// flood the database with rows
+			const total : int = 10;
+			for(var i : int = 0; i < total; i++)
+			{
+				const user : User = new User("User - " + i);
+				if(i < 5) user.date = new Date(2012, 1, 1);
+				else 
+				{
+					user.date = new Date();
+					user.date.minutes -= 1;
+				}
+				
+				if(i == total - 1) user.insertSignal.add(handleInsertSignal);
+				table.insert(user);
+			}
+		}
+		
+		private function handleInsertSignal(object : SpodObject) : void
+		{
+			debug('User created');
+			
+			object;
 		}
 		
 		private function handleErrorSignal(event : SpodErrorEvent) : void

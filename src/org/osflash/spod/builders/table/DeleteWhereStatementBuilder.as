@@ -9,6 +9,7 @@ package org.osflash.spod.builders.table
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.schema.SpodTriggerSchema;
 	import org.osflash.spod.schema.types.SpodSchemaType;
+	import org.osflash.spod.utils.getTableNameFromTriggerName;
 
 	import flash.errors.IllegalOperationError;
 	import flash.utils.getQualifiedClassName;
@@ -58,17 +59,20 @@ package org.osflash.spod.builders.table
 		public function build() : SpodStatement
 		{
 			var schemaType : Class;
+			var schemaName : String;
 			var schemaColumns : Vector.<ISpodColumnSchema>;
 			if(_schema is SpodTableSchema)
 			{
 				const tableSchema : SpodTableSchema = SpodTableSchema(_schema);
 				schemaType = tableSchema.type;
+				schemaName = tableSchema.name;
 				schemaColumns = tableSchema.columns;
 			}
 			else if(_schema is SpodTriggerSchema)
 			{
 				const triggerSchema : SpodTriggerSchema = SpodTriggerSchema(_schema);
 				schemaType = triggerSchema.type;
+				schemaName = getTableNameFromTriggerName(triggerSchema.name);
 				schemaColumns = triggerSchema.columns;
 			}
 			else throw new ArgumentError(getQualifiedClassName(_schema) + ' is not supported');
@@ -80,7 +84,7 @@ package org.osflash.spod.builders.table
 			_buffer.length = 0;
 			
 			_buffer.push('DELETE FROM ');
-			_buffer.push('`' + _schema.name + '`');
+			_buffer.push('`' + schemaName + '`');
 			
 			const statement : SpodStatement = new SpodStatement(schemaType);
 			

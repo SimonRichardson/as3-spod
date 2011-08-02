@@ -1,7 +1,6 @@
 package org.osflash.spod.builders.trigger
 {
 	import org.osflash.spod.utils.getTableNameFromTriggerName;
-	import org.osflash.logger.logs.info;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
@@ -122,7 +121,7 @@ package org.osflash.spod.builders.trigger
 						whereStatement = whereBuilder.build();
 						break;
 					default:
-						throw new SpodError('Unknown with type');
+						throw new SpodError('Unknown with type ' + withType);
 				}
 				
 				var whereQuery : String = whereStatement.query;
@@ -131,7 +130,14 @@ package org.osflash.spod.builders.trigger
 					const pattern : RegExp = new RegExp(key, 'g');
 					if(whereQuery.match(pattern))
 					{
-						const replacement : String = "'" + whereStatement.parameters[key] + "'";
+						var replacement : String;
+						if(whereStatement.parameters[key] is Date)
+						{
+							const date  : Date = whereStatement.parameters[key];
+							replacement = "strftime('%J', '" + toSqlDate(date) + "')";
+						}
+						else replacement = "'" + whereStatement.parameters[key] + "'";
+						
 						whereQuery = whereQuery.replace(pattern, replacement);
 					}
 				}
@@ -142,11 +148,33 @@ package org.osflash.spod.builders.trigger
 				
 				statement.query = _buffer.join('');
 				
-				info(statement.query);
-				
 				return statement;
 				
 			} else throw new ArgumentError(getQualifiedClassName(_schema) + ' is not supported');
+		}
+		
+		/**
+		 * @private
+		 */
+		private function lpad(original : Object, length : int, pad : String) : String
+		{
+			var padded : String = null == original ? "" : String(original);
+			while (padded.length < length) 
+				padded = pad + padded;
+			return padded;
+		}
+		
+		/**
+		 * @private
+		 */
+		private function toSqlDate(dateVal : Date) : String
+		{
+			return dateVal == null ? null : dateVal.fullYear
+									+ "-" + lpad(dateVal.month + 1, 2, '0')
+									+ "-" + lpad(dateVal.date, 2, '0')
+									+ " " + lpad(dateVal.hours, 2, '0')
+									+ ":" + lpad(dateVal.minutes, 2, '0')
+									+ ":" + lpad(dateVal.seconds, 2, '0');
 		}
 	}
 }
