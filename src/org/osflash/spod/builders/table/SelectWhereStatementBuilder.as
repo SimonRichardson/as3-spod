@@ -1,5 +1,6 @@
 package org.osflash.spod.builders.table
 {
+	import org.osflash.spod.utils.getTableNameFromTriggerName;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
@@ -58,17 +59,20 @@ package org.osflash.spod.builders.table
 		public function build() : SpodStatement
 		{
 			var schemaType : Class;
+			var schemaName : String;
 			var schemaColumns : Vector.<ISpodColumnSchema>;
 			if(_schema is SpodTableSchema)
 			{
 				const tableSchema : SpodTableSchema = SpodTableSchema(_schema);
 				schemaType = tableSchema.type;
+				schemaName = tableSchema.name;
 				schemaColumns = tableSchema.columns;
 			}
 			else if(_schema is SpodTriggerSchema)
 			{
 				const triggerSchema : SpodTriggerSchema = SpodTriggerSchema(_schema);
 				schemaType = triggerSchema.type;
+				schemaName = getTableNameFromTriggerName(triggerSchema.name);
 				schemaColumns = triggerSchema.columns;
 			}
 			else throw new ArgumentError(getQualifiedClassName(_schema) + ' is not supported');
@@ -93,7 +97,7 @@ package org.osflash.spod.builders.table
 			_buffer.pop();
 			
 			_buffer.push(' FROM ');
-			_buffer.push('`' + _schema.name + '`');
+			_buffer.push('`' + schemaName + '`');
 			
 			const statement : SpodStatement = new SpodStatement(schemaType);
 			

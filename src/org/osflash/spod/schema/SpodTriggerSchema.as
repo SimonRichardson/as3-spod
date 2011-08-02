@@ -1,5 +1,6 @@
 package org.osflash.spod.schema
 {
+	import org.osflash.spod.utils.getTriggerName;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.types.SpodSchemaType;
 	import org.osflash.spod.types.SpodTypes;
@@ -14,9 +15,16 @@ package org.osflash.spod.schema
 	public class SpodTriggerSchema extends SpodSchema
 	{
 		
+		/**
+		 * @private
+		 */
+		private var _name : String;
+		
 		public function SpodTriggerSchema(type : Class, name : String)
 		{
 			super(type, name);
+			
+			_name = getTriggerName(type);
 		}
 		
 		/**
@@ -36,7 +44,7 @@ package org.osflash.spod.schema
 				const tableName : String = getTableNameFromTriggerName(name);
 				if(tableName != sqlTrigger.table)
 				{
-					throw new SpodError('Unexpected trigger name, expected ' + name + 
+					throw new SpodError('Unexpected table name, expected ' + name + 
 																	' got ' + sqlTrigger.name);
 				}
 			}
@@ -122,6 +130,11 @@ package org.osflash.spod.schema
 			
 			columns.push(new SpodTriggerColumnSchema(name, SpodTypes.OBJECT));
 		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function get name() : String { return _name; }
 				
 		/**
 		 * @inheritDoc

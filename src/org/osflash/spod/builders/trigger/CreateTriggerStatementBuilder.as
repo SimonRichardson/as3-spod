@@ -1,5 +1,7 @@
 package org.osflash.spod.builders.trigger
 {
+	import org.osflash.spod.utils.getTableNameFromTriggerName;
+	import org.osflash.logger.logs.info;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
@@ -17,7 +19,6 @@ package org.osflash.spod.builders.trigger
 	import org.osflash.spod.schema.types.SpodTriggerWhenType;
 	import org.osflash.spod.schema.types.SpodTriggerWithType;
 	import org.osflash.spod.spod_namespace;
-	import org.osflash.spod.utils.getTriggerName;
 
 	import flash.utils.getQualifiedClassName;
 	/**
@@ -85,7 +86,7 @@ package org.osflash.spod.builders.trigger
 				
 				const whenType : SpodTriggerWhenType = _triggerBuilder.whenType;
 				
-				_buffer.push(getTriggerName(triggerSchema.type));
+				_buffer.push(triggerSchema.name);
 				_buffer.push(' ');
 				_buffer.push(whenType.name);
 				_buffer.push(' ');
@@ -93,9 +94,11 @@ package org.osflash.spod.builders.trigger
 				const actionBuilder : ISpodTriggerActionBuilder = _triggerBuilder.actionBuilder;
 				const actionType : SpodTriggerActionType = actionBuilder.actionType;
 				
+				const tableName : String = getTableNameFromTriggerName(triggerSchema.name);
+				
 				_buffer.push(actionType.name);
 				_buffer.push(' ON ');
-				_buffer.push(triggerSchema.name);
+				_buffer.push(tableName);
 				_buffer.push(' BEGIN ');
 				
 				const statement : SpodStatement = new SpodStatement(triggerSchema.type);
@@ -138,6 +141,8 @@ package org.osflash.spod.builders.trigger
 				_buffer.push(' END ');
 				
 				statement.query = _buffer.join('');
+				
+				info(statement.query);
 				
 				return statement;
 				

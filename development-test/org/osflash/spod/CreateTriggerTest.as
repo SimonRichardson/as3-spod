@@ -47,11 +47,11 @@ package org.osflash.spod
 			
 			const database : SpodTriggerDatabase = SpodTriggerDatabase(table.manager.database);
 			
-			database.deleteTriggerSignal.add(handleTriggerDropSignal).params = [database];
+			database.deleteTriggerSignal.add(handleTriggerDeleteSignal).params = [database];
 			database.deleteTrigger(User);
 		}
 		
-		private function handleTriggerDropSignal(database : SpodTriggerDatabase) : void
+		private function handleTriggerDeleteSignal(trigger : SpodTrigger, database : SpodTriggerDatabase) : void
 		{
 			debug('Trigger removed!');
 			
@@ -63,6 +63,8 @@ package org.osflash.spod
 							.after()
 							.update()
 							.select(new GreaterThanExpression('date', now));
+			
+			trigger;
 		}
 		
 		private function handleTriggerCreateSignal(trigger : SpodTrigger) : void
@@ -72,7 +74,7 @@ package org.osflash.spod
 		
 		private function handleErrorSignal(event : SpodErrorEvent) : void
 		{
-			error(event.event.error);
+			error(event.event);
 		}
 	}
 }

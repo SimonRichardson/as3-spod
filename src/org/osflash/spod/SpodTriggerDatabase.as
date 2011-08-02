@@ -13,8 +13,8 @@ package org.osflash.spod
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTriggerSchema;
 	import org.osflash.spod.utils.getTriggerName;
+
 	import flash.data.SQLSchemaResult;
-	import flash.data.SQLTableSchema;
 	import flash.data.SQLTriggerSchema;
 	import flash.errors.SQLError;
 	import flash.events.SQLErrorEvent;
@@ -51,7 +51,7 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private var _removeTriggerSignal : ISignal;
+		private var _deleteTriggerSignal : ISignal;
 				
 		public function SpodTriggerDatabase(name : String, manager : SpodManager)
 		{
@@ -92,11 +92,11 @@ package org.osflash.spod
 				const name : String = getTriggerName(type);
 				try
 				{
-					_manager.connection.loadSchema(SQLTableSchema, name);
+					_manager.connection.loadSchema(SQLTriggerSchema, name);
 				}
 				catch(error : SQLError)
 				{
-					deleteTableSignal.dispatch(null);
+					deleteTriggerSignal.dispatch(null);
 				}
 			}
 			else
@@ -113,8 +113,8 @@ package org.osflash.spod
 				if(null == statement) 
 					throw new SpodError('SpodStatement can not be null');
 								
-				statement.completedSignal.add(handleDeleteTableCompleteSignal);
-				statement.errorSignal.add(handleDeleteTableErrorSignal);
+				statement.completedSignal.add(handleDeleteTriggerCompleteSignal);
+				statement.errorSignal.add(handleDeleteTriggerErrorSignal);
 				
 				if(_manager.queuing) _manager.queue.add(statement);
 				else _manager.executioner.add(new SpodStatementQueue(statement));
@@ -252,7 +252,7 @@ package org.osflash.spod
 			statement.errorSignal.remove(handleCreateTriggerErrorSignal);
 			
 			const trigger : SpodTrigger = _triggers[statement.type];
-			if(null == trigger) throw new SpodError('SpodTable does not exist');
+			if(null == trigger) throw new SpodError('SpodTrigger does not exist');
 			
 			createTriggerSignal.dispatch(trigger);
 		}
@@ -283,7 +283,7 @@ package org.osflash.spod
 			{
 				event.stopImmediatePropagation();
 				
-				// we should state no spod table exists.
+				// we should state no spod trigger exists.
 				deleteTriggerSignal.dispatch(null);
 			}
 		}
@@ -303,7 +303,7 @@ package org.osflash.spod
 			if(null == schema) throw new SpodError('Schema can not be null');
 			
 			const result : SQLSchemaResult = _manager.connection.getSchemaResult();
-			if(null == result || null == result.triggers) deleteTableSignal.dispatch(null);
+			if(null == result || null == result.triggers) deleteTriggerSignal.dispatch(null);
 			else
 			{
 				const triggers : Array = result.triggers;
@@ -324,12 +324,12 @@ package org.osflash.spod
 										
 					if(null != schema)
 					{
-						// We don't need to make a new table as we've already got one!
+						// We don't need to make a new trigger as we've already got one!
 						const trigger : SpodTrigger = new SpodTrigger(schema, _manager);
 						
 						_triggers[type] = trigger;
 						
-						deleteTable(type);
+						deleteTrigger(type);
 					}
 				}
 				else throw new SpodError('Invalid trigger count, expected 1 got ' + total);
@@ -339,28 +339,28 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
-		private function handleDeleteTableCompleteSignal(statement : SpodStatement) : void
+		private function handleDeleteTriggerCompleteSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleDeleteTableCompleteSignal);
-			statement.errorSignal.remove(handleDeleteTableErrorSignal);
+			statement.completedSignal.remove(handleDeleteTriggerCompleteSignal);
+			statement.errorSignal.remove(handleDeleteTriggerErrorSignal);
 			
 			const trigger : SpodTrigger = _triggers[statement.type];
 			
 			_triggers[statement.type] = null;
 			delete _triggers[statement.type];
 			
-			deleteTableSignal.dispatch(trigger);
+			deleteTriggerSignal.dispatch(trigger);
 		}
 		
 		/**
 		 * @private
 		 */
-		private function handleDeleteTableErrorSignal(	statement : SpodStatement, 
-														event : SpodErrorEvent
-														) : void
+		private function handleDeleteTriggerErrorSignal(	statement : SpodStatement, 
+															event : SpodErrorEvent
+															) : void
 		{
-			statement.completedSignal.remove(handleDeleteTableCompleteSignal);
-			statement.errorSignal.remove(handleDeleteTableErrorSignal);
+			statement.completedSignal.remove(handleDeleteTriggerCompleteSignal);
+			statement.errorSignal.remove(handleDeleteTriggerErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -373,8 +373,8 @@ package org.osflash.spod
 		
 		public function get deleteTriggerSignal() : ISignal
 		{
-			if(null == _removeTriggerSignal) _removeTriggerSignal = new Signal(SpodTrigger);
-			return _removeTriggerSignal;
+			if(null == _deleteTriggerSignal) _deleteTriggerSignal = new Signal(SpodTrigger);
+			return _deleteTriggerSignal;
 		}
 	}
 }
