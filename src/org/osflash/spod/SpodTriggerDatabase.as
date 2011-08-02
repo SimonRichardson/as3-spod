@@ -45,6 +45,11 @@ package org.osflash.spod
 		 * @private
 		 */
 		private var _createTriggerSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
+		private var _removeTriggerSignal : ISignal;
 				
 		public function SpodTriggerDatabase(name : String, manager : SpodManager)
 		{
@@ -66,6 +71,13 @@ package org.osflash.spod
 																					);
 			builder.executeSignal.add(internalBuildTrigger);
 			return builder;
+		}
+		
+		public function removeTrigger(	type : Class,
+										ignoreIfExists : Boolean = true
+										) : void
+		{
+			
 		}
 		
 		/**
@@ -196,6 +208,12 @@ package org.osflash.spod
 		{
 			if(null == _createTriggerSignal) _createTriggerSignal = new Signal(SpodTrigger);
 			return _createTriggerSignal;
+		}
+		
+		public function get removeTriggerSignal() : ISignal
+		{
+			if(null == _removeTriggerSignal) _removeTriggerSignal = new Signal();
+			return _removeTriggerSignal;
 		}
 	}
 }

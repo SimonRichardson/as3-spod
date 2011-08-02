@@ -84,7 +84,7 @@ package org.osflash.spod.builders.trigger
 				
 				const whenType : SpodTriggerWhenType = _triggerBuilder.whenType;
 				
-				_buffer.push(triggerSchema.tableName + '_' + whenType.type);
+				_buffer.push(triggerSchema.tableName);
 				_buffer.push(' ');
 				_buffer.push(whenType.name);
 				_buffer.push(' ');

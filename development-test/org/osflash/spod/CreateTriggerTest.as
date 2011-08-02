@@ -45,10 +45,18 @@ package org.osflash.spod
 		{
 			debug('Table created!', table);
 			
+			const database : SpodTriggerDatabase = SpodTriggerDatabase(table.manager.database);
+			
+			database.removeTriggerSignal.add(handleTriggerDropSignal).params = [database];
+			database.removeTrigger(User);
+		}
+		
+		private function handleTriggerDropSignal(database : SpodTriggerDatabase) : void
+		{
+			debug('Trigger removed!');
+			
 			const now : Date = new Date();
 			now.date -= 50;
-			
-			const database : SpodTriggerDatabase = SpodTriggerDatabase(table.manager.database);
 			
 			database.createTriggerSignal.add(handleTriggerCreateSignal);
 			database.createTrigger(User)
