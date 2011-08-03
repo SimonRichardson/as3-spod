@@ -1,4 +1,4 @@
-<project name="as3-uisignals" basedir="." default="swc">
+<project name="as3-spod" basedir="." default="swc">
 
 	<!-- Set up a prefix for all environment variables. -->
 	<property environment="env."/>
@@ -134,6 +134,7 @@
 			<arg line="-doc-sources ${src.dir}/${package.dir}"/>
 			<arg line="-source-path ${src.dir}"/>
 			<arg line="-library-path+=${libs.dir}"/>
+			<arg line="-external-library-path+=${FLEX_HOME}/frameworks/libs/air"/>
 			<arg line="-output ${docs.dir}"/>
 			<arg line="-window-title '${project.title} ${ver.num}'"/>
 			<arg line="-main-title '${project.title} ${ver.num}'"/>
