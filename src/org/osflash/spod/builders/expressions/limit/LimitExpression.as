@@ -18,6 +18,7 @@ package org.osflash.spod.builders.expressions.limit
 		public function LimitExpression(amount : int)
 		{
 			if(isNaN(amount)) throw new ArgumentError('Amount can not be null');
+			if(amount < 0) throw new ArgumentError('Amount can not be less than 0');
 			
 			_amount = amount;
 		}
@@ -37,5 +38,11 @@ package org.osflash.spod.builders.expressions.limit
 		 * @inheritDoc
 		 */
 		public function get type() : int { return SpodExpressionType.LIMIT; }
+		
+		/**
+		 * Get the amount to limit the expression by
+		 * @return int
+		 */
+		public function get amount() : int { return _amount; }
 	}
 }

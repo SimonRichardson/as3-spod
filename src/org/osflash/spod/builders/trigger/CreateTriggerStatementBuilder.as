@@ -1,6 +1,6 @@
 package org.osflash.spod.builders.trigger
 {
-	import org.osflash.spod.utils.getTableNameFromTriggerName;
+	import org.osflash.spod.builders.expressions.limit.LimitExpression;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
@@ -18,6 +18,7 @@ package org.osflash.spod.builders.trigger
 	import org.osflash.spod.schema.types.SpodTriggerWhenType;
 	import org.osflash.spod.schema.types.SpodTriggerWithType;
 	import org.osflash.spod.spod_namespace;
+	import org.osflash.spod.utils.getTableNameFromTriggerName;
 
 	import flash.utils.getQualifiedClassName;
 	/**
@@ -118,6 +119,12 @@ package org.osflash.spod.builders.trigger
 						break;
 					case SpodTriggerWithType.DELETE:
 						whereBuilder = new DeleteWhereStatementBuilder(triggerSchema, expressions);
+						whereStatement = whereBuilder.build();
+						break;
+					case SpodTriggerWithType.LIMIT:
+						expressions.unshift(new LimitExpression(withBuilder.withLimitTotal));
+						
+						whereBuilder = new LimitDeleteStatementBuilder(triggerSchema, expressions);
 						whereStatement = whereBuilder.build();
 						break;
 					default:

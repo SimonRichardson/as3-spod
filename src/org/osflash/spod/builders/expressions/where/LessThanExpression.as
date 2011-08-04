@@ -22,14 +22,20 @@ package org.osflash.spod.builders.expressions.where
 		 * @private
 		 */
 		private var _value : *; 
+		
+		/**
+		 * @private
+		 */
+		private var _strict : Boolean;
 
-		public function LessThanExpression(key : String, value : *)
+		public function LessThanExpression(key : String, value : *, strict : Boolean = true)
 		{
 			if(null == key) throw new ArgumentError('Key can not be null');
 			if(key.length < 1) throw new ArgumentError('Key can not be empty');
 			
 			_key = key;
 			_value = value;
+			_strict = strict;
 		}
 		
 		/**
@@ -40,11 +46,19 @@ package org.osflash.spod.builders.expressions.where
 			if(null == schema) throw new ArgumentError('Schema can not be null');
 			if(null == statement) throw new ArgumentError('Statement can not be null');
 			
-			if(schema.match(_key, _value))
+			if(!_strict)
 			{
 				statement.parameters[':' + _key] = _value;
-				return '`' + _key + '` < :' + _key + ''; 
-			} else throw new IllegalOperationError('Invalid key');
+				return '`' + _key + '` < :' + _key + '';
+			}
+			else
+			{
+				if(schema.match(_key, _value))
+				{
+					statement.parameters[':' + _key] = _value;
+					return '`' + _key + '` < :' + _key + ''; 
+				} else throw new IllegalOperationError('Invalid key');
+			}
 		}
 		
 		/**

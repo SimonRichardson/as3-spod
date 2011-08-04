@@ -9,11 +9,16 @@ package org.osflash.spod.builders.statements.trigger
 	public class SpodTriggerWithBuilder extends SpodTriggerBaseBuilder 
 													implements ISpodTriggerWithBuilder
 	{
-
+		
 		/**
 		 * @private
 		 */
 		private var _withType : SpodTriggerWithType;
+		
+		/**
+		 * @private
+		 */
+		private var _withLimitTotal : int;
 		
 		/**
 		 * @private
@@ -35,6 +40,8 @@ package org.osflash.spod.builders.statements.trigger
 			if(null == actionType) throw new ArgumentError('ActionType can not be null');
 			
 			_actionType = actionType;
+			
+			_withLimitTotal = 0;
 			_withExpressions = new Vector.<ISpodExpression>();
 		}
 		
@@ -109,12 +116,39 @@ package org.osflash.spod.builders.statements.trigger
 		/**
 		 * @inheritDoc
 		 */
+		public function limit(total : int, ...rest) : void
+		{
+			if(isNaN(total)) throw new ArgumentError('Total can not be a NaN');
+			if(total < 0) throw new ArgumentError('Total can not be less than 0');
+			
+			_withType = SpodTriggerWithType.LIMIT;
+			
+			_withLimitTotal = total;
+			
+			var index : int = rest.length;
+			if(index == 0) throw new ArgumentError('Arguments can not be empty');
+			while(--index > -1)
+			{
+				_withExpressions.push(rest[index]);
+			}
+			
+			internalExecute(head);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function get actionType() : SpodTriggerActionType { return _actionType; }
 		
 		/**
 		 * @inheritDoc
 		 */
 		public function get withType() : SpodTriggerWithType { return _withType; }
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get withLimitTotal() : int { return _withLimitTotal; }
 		
 		/**
 		 * @inheritDoc

@@ -14,6 +14,8 @@ package org.osflash.spod.schema.types
 		
 		public static const DELETE : SpodTriggerWithType = new SpodTriggerWithType('delete');
 		
+		public static const LIMIT : SpodTriggerWithType = new SpodTriggerWithType('limit');
+		
 		private var _type : String;
 
 		public function SpodTriggerWithType(type : String)

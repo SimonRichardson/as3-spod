@@ -17,9 +17,13 @@ package org.osflash.spod.builders.statements.trigger
 		
 		function remove(...rest) : void;
 		
+		function limit(total : int, ...rest) : void;
+		
 		function get actionType() : SpodTriggerActionType;
 		
 		function get withType() : SpodTriggerWithType;
+		
+		function get withLimitTotal() : int;
 		
 		function get withExpressions() : Vector.<ISpodExpression>;
 	}

@@ -17,13 +17,19 @@ package org.osflash.spod.builders.expressions.order
 		 * @private
 		 */
 		private var _key : String;
+		
+		/**
+		 * @private
+		 */
+		private var _strict : Boolean;
 
-		public function AscOrderExpression(key : String)
+		public function AscOrderExpression(key : String, strict : Boolean = true)
 		{
 			if(null == key) throw new ArgumentError('Key can not be null');
 			if(key.length < 1) throw new ArgumentError('Key can not be empty');
 			
 			_key = key;
+			_strict = strict;
 		}
 
 		/**
@@ -34,11 +40,18 @@ package org.osflash.spod.builders.expressions.order
 			if(null == schema) throw new ArgumentError('Schema can not be null');
 			if(null == statement) throw new ArgumentError('Statement can not be null');
 			
-			if(schema.contains(_key))
+			if(!_strict)
 			{
 				return '`' + _key + '` ASC';
-				
-			} else throw new IllegalOperationError('Invalid key');
+			}
+			else
+			{
+				if(schema.contains(_key))
+				{
+					return '`' + _key + '` ASC';
+					
+				} else throw new IllegalOperationError('Invalid key');
+			}
 		}
 
 		/**
