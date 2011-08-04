@@ -1,12 +1,10 @@
 package org.osflash.spod.builders.trigger
 {
-	import org.osflash.logger.logs.info;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
 	import org.osflash.spod.builders.expressions.SpodExpressionType;
 	import org.osflash.spod.builders.expressions.limit.LimitExpression;
-	import org.osflash.spod.builders.expressions.where.GreaterThanExpression;
 	import org.osflash.spod.schema.ISpodColumnSchema;
 	import org.osflash.spod.schema.ISpodSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
@@ -21,6 +19,8 @@ package org.osflash.spod.builders.trigger
 	 */
 	public class LimitDeleteStatementBuilder implements ISpodStatementBuilder
 	{
+		
+		public static const DEFAULT_LIMIT_NUMBER : int = 999999;
 
 		/**
 		 * @private
@@ -61,6 +61,8 @@ package org.osflash.spod.builders.trigger
 			_expressions = expressions;
 			_limitedExpression = _expressions[0] is LimitExpression;
 			
+			if(!_limitedExpression) throw new ArgumentError('Invalid limit found');
+			
 			_buffer = new Vector.<String>();
 		}
 
@@ -91,47 +93,32 @@ package org.osflash.spod.builders.trigger
 			
 			_buffer.length = 0;
 			
-			_buffer.push('DELETE ');
+			_buffer.push('DELETE FROM ');
+			_buffer.push('`' + schemaName + '` ');
 			
-			if(_limitedExpression)
-			{
-				_buffer.push('*, ');
-				_buffer.push('COUNT(*) as numObjects ');
-			}
+			const statement : SpodStatement = new SpodStatement(schemaType);
 			
+			const limitExpression : LimitExpression = _expressions.shift();
+			const amount : int = limitExpression.amount;
+			
+			_buffer.push('WHERE ');
+			_buffer.push('`' + _schema.identifier + '` ');
+			_buffer.push('IN ');
+			
+			// BEGIN INNER SELECT
+			_buffer.push('(');
+			_buffer.push('SELECT ');
+			_buffer.push('`' + _schema.identifier + '` ');
 			_buffer.push('FROM ');
+			_buffer.push('`' + schemaName + '` ');
 			
-			_buffer.push('`' + schemaName + '`');
-			
-			const statementType : Class = _limitedExpression ? Object : schemaType;
-			const statement : SpodStatement = new SpodStatement(statementType);
-			
-			const whereBuffer : Array = [];
 			const orderBuffer : Array = [];
-			
-			// Swizzle the limit expression for a where expression.
-			if(_limitedExpression)
-			{
-				const limitExpression : LimitExpression = _expressions.shift();
-				const amount : int = limitExpression.amount;
-				
-				const limitWhereExpression : ISpodExpression = new GreaterThanExpression(
-																			'numObjects', 
-																			amount,
-																			true);
-				_expressions.unshift(limitWhereExpression);
-			}
 			
 			const numExpressions : int = _expressions.length;				
 			for(var i : int = 0; i<numExpressions; i++)
 			{
 				const expression : ISpodExpression = _expressions[i];
-				if(expression.type == SpodExpressionType.WHERE)
-				{
-					if(whereBuffer.length > 0) whereBuffer.push(' AND ');
-					whereBuffer.push(expression.build(_schema, statement));
-				}
-				else if(expression.type == SpodExpressionType.ORDER)
+				if(expression.type == SpodExpressionType.ORDER)
 				{
 					if(orderBuffer.length > 0) orderBuffer.push(' AND ');
 					orderBuffer.push(expression.build(_schema, statement));
@@ -139,22 +126,19 @@ package org.osflash.spod.builders.trigger
 				else throw new IllegalOperationError('Unknown expression type');
 			}
 			
-			if(whereBuffer.length > 0)
-			{
-				_buffer.push(' WHERE ');
-				_buffer.push.apply(null, whereBuffer);
-			}
-			
 			if(orderBuffer.length > 0)
 			{
-				_buffer.push(' ORDER BY ');
+				_buffer.push('ORDER BY ');
 				_buffer.push.apply(null, orderBuffer);
 			}
 			
+			_buffer.push(' LIMIT ' + DEFAULT_LIMIT_NUMBER + ' ');
+			_buffer.push('OFFSET ' + amount);
+			_buffer.push(')');
+			// END INNER SELECT
+			
 			// Make the query
-			info(_buffer.join(''));
-			statement.query = '     ';
-			//statement.query = _buffer.join('');
+			statement.query = _buffer.join('');
 			
 			return statement;
 		}

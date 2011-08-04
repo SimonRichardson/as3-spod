@@ -2,7 +2,7 @@ package org.osflash.spod
 {
 	import org.osflash.logger.logs.debug;
 	import org.osflash.logger.logs.error;
-	import org.osflash.spod.builders.expressions.where.GreaterThanExpression;
+	import org.osflash.spod.builders.expressions.order.AscOrderExpression;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.factories.ISpodDatabaseFactory;
 	import org.osflash.spod.factories.SpodTriggerDatabaseFactory;
@@ -61,7 +61,7 @@ package org.osflash.spod
 			database.createTrigger(User)
 							.after()
 							.insert()
-							.remove(new GreaterThanExpression('date', now));
+							.limit(5, new AscOrderExpression('date'));
 			
 			trigger;
 		}
