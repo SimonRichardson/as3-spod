@@ -61,6 +61,7 @@
 			
 			<!-- Include classes from SWCs in this folder, but only the ones we use. -->
 			
+			<arg value="-library-path+=${FLEX_HOME}/frameworks/libs/air"/>
 			<arg value="-library-path+=${libs.dir}"/>
 						
 			<arg value="-verbose-stacktraces=true"/>
