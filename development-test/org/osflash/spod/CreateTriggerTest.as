@@ -55,8 +55,6 @@ package org.osflash.spod
 		{
 			debug('Trigger removed!');
 			
-			const now : Date = new Date();
-			
 			database.createTriggerSignal.add(handleTriggerCreateSignal).params = [database];
 			database.createTrigger(User)
 							.after()

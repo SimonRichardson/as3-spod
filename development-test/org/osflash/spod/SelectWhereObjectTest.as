@@ -4,6 +4,7 @@ package org.osflash.spod
 	import org.osflash.logger.logs.error;
 	import org.osflash.spod.builders.expressions.limit.LimitExpression;
 	import org.osflash.spod.builders.expressions.order.DescOrderExpression;
+	import org.osflash.spod.builders.expressions.where.GreaterThanExpression;
 	import org.osflash.spod.builders.expressions.where.LessThanExpression;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.support.user.User;
@@ -62,7 +63,8 @@ package org.osflash.spod
 			debug('SELECT : ', date);
 			
 			object.tableRow.table.selectWhereSignal.add(handleSelectWhereSignal);
-			object.tableRow.table.selectWhere(	new LessThanExpression('date', date), 
+			object.tableRow.table.selectWhere(	new LessThanExpression('date', date),
+												new GreaterThanExpression('id', 0),
 												new DescOrderExpression('date'),
 												new LimitExpression(28)
 												);

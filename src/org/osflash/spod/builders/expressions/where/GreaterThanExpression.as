@@ -2,6 +2,7 @@ package org.osflash.spod.builders.expressions.where
 {
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
+	import org.osflash.spod.builders.expressions.SpodExpressionOperatorType;
 	import org.osflash.spod.builders.expressions.SpodExpressionType;
 	import org.osflash.spod.schema.ISpodSchema;
 
@@ -26,10 +27,16 @@ package org.osflash.spod.builders.expressions.where
 		/**
 		 * @private
 		 */
+		private var _operator : SpodExpressionOperatorType;
+		
+		/**
+		 * @private
+		 */
 		private var _strict : Boolean;
 
 		public function GreaterThanExpression(	key : String, 
-												value : *, 
+												value : *,
+												operator : SpodExpressionOperatorType = null, 
 												strict : Boolean = true
 												)
 		{
@@ -38,6 +45,7 @@ package org.osflash.spod.builders.expressions.where
 			
 			_key = key;
 			_value = value;
+			_operator = operator || SpodExpressionOperatorType.AND;
 			_strict = strict;
 		}
 		
@@ -68,5 +76,10 @@ package org.osflash.spod.builders.expressions.where
 		 * @inheritDoc
 		 */
 		public function get type() : int { return SpodExpressionType.WHERE; }
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get operator() : SpodExpressionOperatorType { return _operator; }
 	}
 }

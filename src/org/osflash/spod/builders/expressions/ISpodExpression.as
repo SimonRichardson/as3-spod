@@ -11,5 +11,7 @@ package org.osflash.spod.builders.expressions
 		function build(schema : ISpodSchema, statement : SpodStatement) : String;
 		
 		function get type() : int;
+		
+		function get operator() : SpodExpressionOperatorType;
 	}
 }

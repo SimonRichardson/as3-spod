@@ -1,15 +1,17 @@
 package org.osflash.spod.builders.table
 {
-	import org.osflash.spod.utils.getTableNameFromTriggerName;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
+	import org.osflash.spod.builders.expressions.SpodExpressionOperatorType;
 	import org.osflash.spod.builders.expressions.SpodExpressionType;
 	import org.osflash.spod.schema.ISpodColumnSchema;
 	import org.osflash.spod.schema.ISpodSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 	import org.osflash.spod.schema.SpodTriggerSchema;
 	import org.osflash.spod.schema.types.SpodSchemaType;
+	import org.osflash.spod.utils.getNextWhereExpression;
+	import org.osflash.spod.utils.getTableNameFromTriggerName;
 
 	import flash.errors.IllegalOperationError;
 	import flash.utils.getQualifiedClassName;
@@ -111,7 +113,16 @@ package org.osflash.spod.builders.table
 				const expression : ISpodExpression = _expressions[i];
 				if(expression.type == SpodExpressionType.WHERE)
 				{
-					if(whereBuffer.length > 0) whereBuffer.push(' AND ');
+					if(whereBuffer.length > 0) 
+					{
+						const nextExpr : ISpodExpression = getNextWhereExpression(_expressions, i);
+						if(null != nextExpr)
+						{
+							const operator : SpodExpressionOperatorType = nextExpr.operator;
+							whereBuffer.push(' ' + operator.name + ' ');
+						}
+					}
+					
 					whereBuffer.push(expression.build(_schema, statement));
 				}
 				else if(expression.type == SpodExpressionType.ORDER)

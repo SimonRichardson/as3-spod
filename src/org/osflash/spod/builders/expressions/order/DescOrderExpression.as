@@ -2,7 +2,9 @@ package org.osflash.spod.builders.expressions.order
 {
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
+	import org.osflash.spod.builders.expressions.SpodExpressionOperatorType;
 	import org.osflash.spod.builders.expressions.SpodExpressionType;
+	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.schema.ISpodSchema;
 
 	import flash.errors.IllegalOperationError;
@@ -59,5 +61,13 @@ package org.osflash.spod.builders.expressions.order
 		 * @inheritDoc
 		 */
 		public function get type() : int { return SpodExpressionType.ORDER; }
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get operator() : SpodExpressionOperatorType 
+		{ 
+			throw new SpodError('Missing implementation');
+		}
 	}
 }

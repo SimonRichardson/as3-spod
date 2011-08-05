@@ -70,6 +70,11 @@ package org.osflash.spod
 		/**
 		 * @private
 		 */
+		private var _queryUpdateSignal : ISignal;
+		
+		/**
+		 * @private
+		 */
 		private var _nativeCompletedSignal : ISignal;
 		
 		/**
@@ -192,6 +197,8 @@ package org.osflash.spod
 		{ 
 			if(null == value || value.length < 1) throw new ArgumentError('Invalid query');
 			_statement.text = value;
+			
+			if(null != _queryUpdateSignal) queryUpdateSignal.dispatch(value);
 		}
 		
 		public function get parameters() : Object { return _statement.parameters; }
@@ -224,6 +231,12 @@ package org.osflash.spod
 		{
 			if(null == _errorSignal) _errorSignal = new Signal(SpodStatement, SpodErrorEvent);
 			return _errorSignal;
+		}
+		
+		public function get queryUpdateSignal() : ISignal
+		{
+			if(null == _queryUpdateSignal) _queryUpdateSignal = new Signal(String);
+			return _queryUpdateSignal;
 		}
 	}
 }

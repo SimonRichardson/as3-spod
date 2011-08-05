@@ -2,6 +2,7 @@ package org.osflash.spod.builders.expressions.where
 {
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
+	import org.osflash.spod.builders.expressions.SpodExpressionOperatorType;
 	import org.osflash.spod.builders.expressions.SpodExpressionType;
 	import org.osflash.spod.schema.ISpodSchema;
 
@@ -26,15 +27,24 @@ package org.osflash.spod.builders.expressions.where
 		/**
 		 * @private
 		 */
+		private var _operator : SpodExpressionOperatorType;
+		
+		/**
+		 * @private
+		 */
 		private var _strict : Boolean;
 
-		public function LessThanExpression(key : String, value : *, strict : Boolean = true)
+		public function LessThanExpression(	key : String, 
+											value : *, 
+											operator : SpodExpressionOperatorType = null,
+											strict : Boolean = true)
 		{
 			if(null == key) throw new ArgumentError('Key can not be null');
 			if(key.length < 1) throw new ArgumentError('Key can not be empty');
-			
+						
 			_key = key;
 			_value = value;
+			_operator = operator || SpodExpressionOperatorType.AND;
 			_strict = strict;
 		}
 		
@@ -65,5 +75,10 @@ package org.osflash.spod.builders.expressions.where
 		 * @inheritDoc
 		 */
 		public function get type() : int { return SpodExpressionType.WHERE; }
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get operator() : SpodExpressionOperatorType { return _operator; }
 	}
 }

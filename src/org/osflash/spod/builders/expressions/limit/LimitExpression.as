@@ -1,5 +1,7 @@
 package org.osflash.spod.builders.expressions.limit
 {
+	import org.osflash.spod.errors.SpodError;
+	import org.osflash.spod.builders.expressions.SpodExpressionOperatorType;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.expressions.ISpodExpression;
 	import org.osflash.spod.builders.expressions.SpodExpressionType;
@@ -44,5 +46,13 @@ package org.osflash.spod.builders.expressions.limit
 		 * @return int
 		 */
 		public function get amount() : int { return _amount; }
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get operator() : SpodExpressionOperatorType 
+		{ 
+			throw new SpodError('Missing implementation');
+		}
 	}
 }
