@@ -78,8 +78,6 @@ package org.osflash.spod.builders.table
 					customName = column.customColumnName;
 					columnName = customName ? column.alternativeName : column.name;
 					
-					columnName = column.name;
-					
 					if(	columnName == _schema.identifier && 
 						column.type == SpodTypes.INT &&
 						column.autoIncrement
