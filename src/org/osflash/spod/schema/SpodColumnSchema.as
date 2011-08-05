@@ -21,19 +21,34 @@ package org.osflash.spod.schema
 		/**
 		 * @private
 		 */
+		private var _alternativeName : String;
+		
+		/**
+		 * @private
+		 */
+		private var _customColumnName : Boolean;
+		
+		/**
+		 * @private
+		 */
 		private var _autoIncrement : Boolean;
 
-		public function SpodColumnSchema(name : String, type : int)
+		public function SpodColumnSchema(name : String, altName : String, type : int)
 		{
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			if(null == altName) throw new ArgumentError('AltName can not be null');
+			if(altName.length < 1) throw new ArgumentError('AltName can not be emtpy');
 			if(isNaN(type)) throw new ArgumentError('Type can not be NaN');
 			if(!SpodTypes.valid(type)) throw new ArgumentError('Type is not a valid type');
 			
 			_name = name;
+			_alternativeName = altName;
 			_type = type;
 			
 			_autoIncrement = false;
+			
+			_customColumnName = _name != _alternativeName;
 		}
 		
 		/**
@@ -56,6 +71,11 @@ package org.osflash.spod.schema
 		 * @inheritDoc
 		 */
 		public function get name() : String { return _name; }
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get alternativeName() : String { return _alternativeName; }
 		
 		/**
 		 * @inheritDoc
@@ -83,6 +103,11 @@ package org.osflash.spod.schema
 				_autoIncrement = value;
 			else throw new SpodError('Unable to autoIncrement on an invalid type');
 		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get customColumnName() : Boolean { return _customColumnName; }
 		
 		/**
 		 * @inheritDoc

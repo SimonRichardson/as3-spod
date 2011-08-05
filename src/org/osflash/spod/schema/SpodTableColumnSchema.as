@@ -7,9 +7,9 @@ package org.osflash.spod.schema
 	public class SpodTableColumnSchema extends SpodColumnSchema
 	{
 
-		public function SpodTableColumnSchema(name : String, type : int)
+		public function SpodTableColumnSchema(name : String, altName : String, type : int)
 		{
-			super(name, type);
+			super(name, altName, type);
 		}
 
 		/**

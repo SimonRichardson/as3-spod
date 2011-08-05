@@ -53,6 +53,8 @@ package org.osflash.spod.builders.schemas
 			{
 				const variableName : String = variable.@name;
 				const variableType : String = variable.@type;
+				
+				var variableAltName : String = variableName;
 
 				const variableMetadata : XMLList = variable..metadata.(@name == 'Type');
 				if (null != variableMetadata && variableMetadata.length() > 0)
@@ -67,10 +69,16 @@ package org.osflash.spod.builders.schemas
 						identifierFound = true;
 					}
 					else if (variableName == defaultId) identifierFound = true;
+					
+					const variableAltNameArg : XMLList = variableMetadata.arg.(@key == 'name');
+					if(null != variableAltNameArg && variableAltNameArg.length() > 0)
+					{
+						variableAltName = variableAltNameArg.(@key == 'name').@value;
+					}
 				}
 				else if (variableName == defaultId) identifierFound = true;
-
-				schema.createByType(variableName, variableType);
+				
+				schema.createByType(variableName, variableAltName, variableType);
 			}
 
 			const spodObjectQName : String = getQualifiedClassName(SpodObject);
@@ -78,14 +86,16 @@ package org.osflash.spod.builders.schemas
 			{
 				const accessorName : String = accessor.@name;
 				const accessorType : String = accessor.@type;
-
+				
+				var accessorAltName : String = accessorName;
+				
 				if (accessor.@declaredBy == spodObjectQName) continue;
 				if (accessor.@access != 'readwrite')
 				{
 					throw new ArgumentError('Accessor (getter & setter) needs to be \'readwrite\'' +
 																	 ' to work with SQLStatement');
 				}
-
+				
 				const accessorMetadata : XMLList = accessor..metadata.(@name == 'Type');
 				if (null != accessorMetadata && accessorMetadata.length() > 0)
 				{
@@ -103,10 +113,17 @@ package org.osflash.spod.builders.schemas
 						identifierFound = true;
 					}
 					else if (accessorName == defaultId) identifierFound = true;
+					
+					const accessorAltNameArg : XMLList = variableMetadata.arg.(@key == 'name');
+					if(null != accessorAltNameArg && accessorAltNameArg.length() > 0)
+					{
+						accessorAltName = accessorAltNameArg.(@key == 'name').@value;
+					}
 				}
 				else if (accessorName == defaultId) identifierFound = true;
 
-				if (!schema.contains(accessorName)) schema.createByType(accessorName, accessorType);
+				if (!schema.contains(accessorName)) 
+					schema.createByType(accessorName, accessorAltName, accessorType);
 			}
 
 			if (!identifierFound) throw new ArgumentError('Type needs identifier variable to work');

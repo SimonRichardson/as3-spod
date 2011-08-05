@@ -9,6 +9,7 @@ package org.osflash.spod.support.user
 		
 		public var id : int;
 		
+		[Type(name="username")]
 		public var name : String;
 		
 		private var _date : Date;

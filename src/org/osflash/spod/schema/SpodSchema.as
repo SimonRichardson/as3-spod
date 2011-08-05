@@ -28,6 +28,11 @@ package org.osflash.spod.schema
 		 * @private
 		 */
 		private var _identifier : String;
+		
+		/**
+		 * @private
+		 */
+		private var _customColumnNames : Boolean;
 			
 		/**
 		 * @private
@@ -46,6 +51,8 @@ package org.osflash.spod.schema
 			_identifier = SpodSchemaIdentifier.DEFAULT;
 			
 			_columns = new Vector.<ISpodColumnSchema>();
+			
+			_customColumnNames = false;
 		}
 		
 		public function contains(name : String) : Boolean
@@ -96,58 +103,62 @@ package org.osflash.spod.schema
 			throw new Error('Abstract method error');
 		}
 		
-		public function createByType(name : String, type : String) : void
+		public function createByType(name : String, altName : String, type : String) : void
 		{
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			if(null == altName) throw new ArgumentError('Alternative name can not be null');
+			if(altName.length < 1) throw new ArgumentError('Alternative name can not be emtpy');
 			if(null == type) throw new ArgumentError('Type can not be null');
 			if(type.length < 1) throw new ArgumentError('Type can not be emtpy');
 			
+			if(name != altName) _customColumnNames = true;
+			
 			switch(type.toLowerCase())
 			{
-				case 'int': createInt(name); break;
-				case 'uint': createUInt(name); break;
-				case 'number': createNumber(name); break;
-				case 'string': createString(name); break;
-				case 'date': createDate(name); break;
-				case 'boolean': createBoolean(name); break;
-				case 'object': createObject(name); break;
+				case 'int': createInt(name, altName); break;
+				case 'uint': createUInt(name, altName); break;
+				case 'number': createNumber(name, altName); break;
+				case 'string': createString(name, altName); break;
+				case 'date': createDate(name, altName); break;
+				case 'boolean': createBoolean(name, altName); break;
+				case 'object': createObject(name, altName); break;
 				default:
 					throw new ArgumentError('Unknown type');
 			}
 		}
 		
-		public function createInt(name : String) : void
+		public function createInt(name : String, altName : String) : void
 		{
 			throw new Error('Abstract method error'); 
 		}
 		
-		public function createUInt(name : String) : void
+		public function createUInt(name : String, altName : String) : void
 		{
 			throw new Error('Abstract method error'); 
 		}
 		
-		public function createNumber(name : String) : void
+		public function createNumber(name : String, altName : String) : void
 		{
 			throw new Error('Abstract method error'); 
 		}
 		
-		public function createString(name : String) : void
+		public function createString(name : String, altName : String) : void
 		{
 			throw new Error('Abstract method error'); 
 		}
 		
-		public function createDate(name : String) : void
+		public function createDate(name : String, altName : String) : void
 		{
 			throw new Error('Abstract method error'); 
 		}
 		
-		public function createBoolean(name : String) : void
+		public function createBoolean(name : String, altName : String) : void
 		{
 			throw new Error('Abstract method error'); 
 		}
 		
-		public function createObject(name : String) : void
+		public function createObject(name : String, altName : String) : void
 		{
 			throw new Error('Abstract method error'); 
 		}
@@ -172,6 +183,8 @@ package org.osflash.spod.schema
 		}
 		
 		public function get columns() : Vector.<ISpodColumnSchema> { return _columns; }
+		
+		public function get customColumnNames() : Boolean { return _customColumnNames; }
 		
 		public function get type() : Class { return _type; }
 		

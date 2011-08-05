@@ -105,81 +105,95 @@ package org.osflash.spod.schema
 		/**
 		 * @inheritDoc
 		 */
-		override public function createInt(name : String) : void
+		override public function createInt(name : String, altName : String) : void
 		{
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			if(null == altName) throw new ArgumentError('AltName can not be null');
+			if(altName.length < 1) throw new ArgumentError('AltName can not be emtpy');
 			
-			columns.push(new SpodTableColumnSchema(name, SpodTypes.INT));
+			columns.push(new SpodTableColumnSchema(name, altName, SpodTypes.INT));
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function createUInt(name : String) : void
+		override public function createUInt(name : String, altName : String) : void
 		{
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			if(null == altName) throw new ArgumentError('AltName can not be null');
+			if(altName.length < 1) throw new ArgumentError('AltName can not be emtpy');
 			
-			columns.push(new SpodTableColumnSchema(name, SpodTypes.UINT));
+			columns.push(new SpodTableColumnSchema(name, altName, SpodTypes.UINT));
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function createNumber(name : String) : void
+		override public function createNumber(name : String, altName : String) : void
 		{
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			if(null == altName) throw new ArgumentError('AltName can not be null');
+			if(altName.length < 1) throw new ArgumentError('AltName can not be emtpy');
 			
-			columns.push(new SpodTableColumnSchema(name, SpodTypes.NUMBER));
+			columns.push(new SpodTableColumnSchema(name, altName, SpodTypes.NUMBER));
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function createString(name : String) : void
+		override public function createString(name : String, altName : String) : void
 		{
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			if(null == altName) throw new ArgumentError('AltName can not be null');
+			if(altName.length < 1) throw new ArgumentError('AltName can not be emtpy');
 			
-			columns.push(new SpodTableColumnSchema(name, SpodTypes.STRING));
+			columns.push(new SpodTableColumnSchema(name, altName, SpodTypes.STRING));
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function createDate(name : String) : void
+		override public function createDate(name : String, altName : String) : void
 		{
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			if(null == altName) throw new ArgumentError('AltName can not be null');
+			if(altName.length < 1) throw new ArgumentError('AltName can not be emtpy');
 			
-			columns.push(new SpodTableColumnSchema(name, SpodTypes.DATE));
+			columns.push(new SpodTableColumnSchema(name, altName, SpodTypes.DATE));
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function createBoolean(name : String) : void
+		override public function createBoolean(name : String, altName : String) : void
 		{
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			if(null == altName) throw new ArgumentError('AltName can not be null');
+			if(altName.length < 1) throw new ArgumentError('AltName can not be emtpy');
 			
-			columns.push(new SpodTableColumnSchema(name, SpodTypes.BOOLEAN));
+			columns.push(new SpodTableColumnSchema(name, altName, SpodTypes.BOOLEAN));
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function createObject(name : String) : void
+		override public function createObject(name : String, altName : String) : void
 		{
 			if(null == name) throw new ArgumentError('Name can not be null');
 			if(name.length < 1) throw new ArgumentError('Name can not be emtpy');
+			if(null == altName) throw new ArgumentError('AltName can not be null');
+			if(altName.length < 1) throw new ArgumentError('AltName can not be emtpy');
 			
 			// TODO : we should implement a custom class for this!
 			registerClassAlias('Object', Object);
 			
-			columns.push(new SpodTableColumnSchema(name, SpodTypes.OBJECT));
+			columns.push(new SpodTableColumnSchema(name, altName, SpodTypes.OBJECT));
 		}
 		
 		/**
