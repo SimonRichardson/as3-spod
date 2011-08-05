@@ -186,9 +186,9 @@ package org.osflash.spod
 			{
 				const column : ISpodColumnSchema = schema.columns[i];
 				const columnName : String = column.name;
-				if(columnName == 'id' && column.type == SpodTypes.INT)
+				if(columnName == schema.identifier && column.type == SpodTypes.INT)
 				{
-					if(_object['id'] != object['id']) 
+					if(_object[schema.identifier] != object[schema.identifier]) 
 						throw new IllegalOperationError('Object id mismatch');
 				}
 				else

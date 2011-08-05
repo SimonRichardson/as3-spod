@@ -175,11 +175,25 @@ package org.osflash.spod.schema
 			return null;
 		}
 		
+		public function getColumnByCustomName(value : String) : ISpodColumnSchema
+		{
+			var index : int = _columns.length;
+			while(--index > -1)
+			{
+				const column : ISpodColumnSchema = _columns[index];
+				if(column.alternativeName == value) return column;
+			}
+			
+			return null;
+		}
+		
 		public function isValidSelectIdentifier() : Boolean
 		{
 			const column : ISpodColumnSchema = getColumnByName(_identifier);
 			if(null == column) throw new SpodError('Invalid column identifier');
-			return column.type == SpodTypes.INT || column.type == SpodTypes.UINT;
+			return 	column.type == SpodTypes.INT || 
+					column.type == SpodTypes.UINT || 
+					column.type == SpodTypes.NUMBER;
 		}
 		
 		public function get columns() : Vector.<ISpodColumnSchema> { return _columns; }

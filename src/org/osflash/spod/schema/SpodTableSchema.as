@@ -43,6 +43,7 @@ package org.osflash.spod.schema
 				{
 					var column : ISpodColumnSchema;
 					var columnName : String;
+					var customName : Boolean;
 					var dataType : String;
 					
 					// This validates the schema of the database and the class!
@@ -58,7 +59,9 @@ package org.osflash.spod.schema
 						while(--index > -1)
 						{
 							column = columns[index];
-							columnName = column.name;
+							
+							customName = column.customColumnName;
+							columnName = customName ? column.alternativeName : column.name;
 							dataType = SpodTypes.getSQLName(column.type);
 							
 							if(sqlColumnName == columnName && sqlDataType == dataType)
@@ -74,7 +77,9 @@ package org.osflash.spod.schema
 							while(--index > -1)
 							{
 								column = columns[index];
-								columnName = column.name;
+								
+								customName = column.customColumnName;
+								columnName = customName ? column.alternativeName : column.name;
 								dataType = SpodTypes.getSQLName(column.type);
 								
 								if(sqlColumnName == columnName && sqlDataType != dataType)
@@ -90,8 +95,10 @@ package org.osflash.spod.schema
 							}
 							
 							// Database has really changed
+							customName = columns[i].customColumnName;
+							columnName = customName ? columns[i].alternativeName : columns[i].name;
 							throw new SpodError('Invalid table schema, expected ' + 
-										columns[i].name + ' and ' + 
+										columnName + ' and ' + 
 										SpodTypes.getSQLName(columns[i].type) + ' got ' +
 										sqlColumnName + ' and ' + sqlDataType
 										);

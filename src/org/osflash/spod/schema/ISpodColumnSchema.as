@@ -8,8 +8,11 @@ package org.osflash.spod.schema
 		
 		function get type() : int;
 		
-		function get autoIncrement() : Boolean;
+		function get alternativeName() : String;
 		
+		function get customColumnName() : Boolean;
+		
+		function get autoIncrement() : Boolean;
 		function set autoIncrement(value : Boolean) : void;
 	}
 }

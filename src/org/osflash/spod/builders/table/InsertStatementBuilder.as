@@ -62,6 +62,7 @@ package org.osflash.spod.builders.table
 				
 				var i : int;
 				var column : ISpodColumnSchema;
+				var customName : Boolean;
 				var columnName : String;
 				
 				// Get the names
@@ -69,7 +70,9 @@ package org.osflash.spod.builders.table
 				for(i=0; i<total; i++)
 				{
 					column = columns[i];
-					columnName = column.name;
+					
+					customName = column.customColumnName;
+					columnName = customName ? column.alternativeName : column.name;
 					
 					if(	columnName == _schema.identifier && 
 						column.type == SpodTypes.INT &&
@@ -86,14 +89,18 @@ package org.osflash.spod.builders.table
 				
 				_buffer.push(' VALUES ');
 				
-				const statement : SpodStatement = new SpodStatement(tableSchema.type, _object);
+				const customColumnNames : Boolean = tableSchema.customColumnNames;
+				const statementType : Class = customColumnNames ? Object : tableSchema.type;
+				const statement : SpodStatement = new SpodStatement(statementType, _object);
 				
 				// Insert the values
 				_buffer.push('(');
 				for(i=0; i<total; i++)
 				{
 					column = columns[i];
-					columnName = column.name;
+					
+					customName = column.customColumnName;
+					columnName = customName ? column.alternativeName : column.name;
 					
 					if(	columnName == _schema.identifier && 
 						column.type == SpodTypes.INT &&
@@ -104,7 +111,7 @@ package org.osflash.spod.builders.table
 					_buffer.push(':' + columnName + '');
 					_buffer.push(', ');
 					
-					statement.parameters[':' + columnName] = _object[columnName];
+					statement.parameters[':' + columnName] = _object[column.name];
 				}
 				
 				_buffer.pop();

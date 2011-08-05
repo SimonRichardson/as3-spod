@@ -1,8 +1,7 @@
 package org.osflash.spod
 {
-	import flash.data.SQLResult;
-	import flash.errors.IllegalOperationError;
-	import flash.utils.Dictionary;
+	import org.osflash.spod.schema.ISpodColumnSchema;
+	import org.osflash.logger.logs.debug;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
@@ -17,6 +16,10 @@ package org.osflash.spod
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
 	import org.osflash.spod.schema.SpodTableSchema;
+
+	import flash.data.SQLResult;
+	import flash.errors.IllegalOperationError;
+	import flash.utils.Dictionary;
 
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
@@ -266,11 +269,37 @@ package org.osflash.spod
 			const total : int = result.data.length;
 			for(var i : int = 0; i<total; i++)
 			{
-				const object : SpodObject = result.data[i] as SpodObject;
+				var object : SpodObject;
+				if(_schema.customColumnNames)
+				{
+					const rawObject : Object = result.data[i];
+					
+					object = new type();
+					for(var j : String in rawObject)
+					{
+						if(j in object) object[j] = rawObject[j];
+						else 
+						{
+							// This is what maps back to the original name!
+							const columnSchema : ISpodColumnSchema = 
+																_schema.getColumnByCustomName(j);
+							if(null != columnSchema)
+							{
+								const columnName : String = columnSchema.name;
+								if(columnName in object) object[columnName] = rawObject[j];
+							}
+						}
+					}
+				}
+				else
+				{
+					object = result.data[i] as SpodObject;
+				}
+				
 				if(null == object) throw new IllegalOperationError('Invalid SpodObject');
 				if(!(object is type)) throw new IllegalOperationError('Invalid type');
 				
-				const id : int = object['id'];					
+				const id : int = object[_schema.identifier];					
 				if(isNaN(id)) throw new IllegalOperationError('Invalid identifier');
 				
 				const row : SpodTableRow = new SpodTableRow(this, type, object, _manager);
@@ -304,11 +333,12 @@ package org.osflash.spod
 			
 			const object : SpodObject = statement.object;
 			if(null == object) throw new IllegalOperationError('Invalid statement object');
-
+			
 			const row : SpodTableRow = new SpodTableRow(this, _schema.type, object, _manager);
 			
-			// Inject the correct id
-			if('id' in object) object['id'] = rowId;
+			// Inject the correct identifier
+			if(_schema.isValidSelectIdentifier() && _schema.identifier in object)
+				object[_schema.identifier] = rowId;
 			
 			// Create the correct inject references
 			object.tableRow = row;

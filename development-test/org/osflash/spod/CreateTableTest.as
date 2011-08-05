@@ -45,7 +45,7 @@ package org.osflash.spod
 		
 		private function handleErrorSignal(event : SpodErrorEvent) : void
 		{
-			error(event.event.error);
+			error(event);
 		}
 	}
 }
