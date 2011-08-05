@@ -1,7 +1,5 @@
 package org.osflash.spod
 {
-	import org.osflash.spod.schema.ISpodColumnSchema;
-	import org.osflash.logger.logs.debug;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
@@ -15,6 +13,7 @@ package org.osflash.spod
 	import org.osflash.spod.builders.table.SelectWhereStatementBuilder;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.errors.SpodErrorEvent;
+	import org.osflash.spod.schema.ISpodColumnSchema;
 	import org.osflash.spod.schema.SpodTableSchema;
 
 	import flash.data.SQLResult;

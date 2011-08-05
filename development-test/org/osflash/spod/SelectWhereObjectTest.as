@@ -80,7 +80,7 @@ package org.osflash.spod
 				{
 					const object : SpodObject = objects[i]; 
 					const user : User = object as User;
-					debug('User id :', user.id, user.date);
+					debug('User id :', user.id, user.date, user.name);
 				}
 				debug(describeTable(user.tableRow.table));
 			}

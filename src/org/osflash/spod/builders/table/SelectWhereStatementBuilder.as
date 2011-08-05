@@ -90,7 +90,8 @@ package org.osflash.spod.builders.table
 			for(var i : int = 0; i<total; i++)
 			{
 				const column : ISpodColumnSchema = schemaColumns[i];
-				const columnName : String = column.name;
+				const customName : Boolean = column.customColumnName;
+				const columnName : String = customName ? column.alternativeName : column.name;
 				
 				_buffer.push('`' + columnName + '`');
 				_buffer.push(', ');
@@ -101,7 +102,9 @@ package org.osflash.spod.builders.table
 			_buffer.push(' FROM ');
 			_buffer.push('`' + schemaName + '`');
 			
-			const statement : SpodStatement = new SpodStatement(schemaType);
+			const customColumnNames : Boolean = tableSchema.customColumnNames;
+			const statementType : Class = customColumnNames ? Object : schemaType;
+			const statement : SpodStatement = new SpodStatement(statementType);
 			
 			const whereBuffer : Array = [];
 			const orderBuffer : Array = [];

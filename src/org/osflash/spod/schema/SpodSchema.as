@@ -61,9 +61,10 @@ package org.osflash.spod.schema
 			while(--index > -1)
 			{
 				const column : ISpodColumnSchema = _columns[index];
-				if(column.name == name) return true;
+				const customName : Boolean = column.customColumnName;
+				const columnName : String = customName ? column.alternativeName : column.name; 
+				if(columnName == name) return true;
 			}
-			
 			return false;
 		}
 		
@@ -75,7 +76,9 @@ package org.osflash.spod.schema
 			while(--index > -1)
 			{
 				const column : ISpodColumnSchema = _columns[index];
-				if(column.name == name)
+				const customName : Boolean = column.customColumnName;
+				const columnName : String = customName ? column.alternativeName : column.name; 
+				if(columnName == name)
 				{
 					if(type == 'int' && column.type == SpodTypes.INT) return true;
 					else if(type == 'uint' && column.type == SpodTypes.UINT) return true;
