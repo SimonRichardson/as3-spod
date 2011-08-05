@@ -175,7 +175,30 @@ package org.osflash.spod
 			const schema : SpodTableSchema = table.schema;
 			if(null == schema) throw new IllegalOperationError('Invalid table schema');
 			
-			const object : SpodObject = data[0] as SpodObject;
+			var object : SpodObject;
+			if(schema.customColumnNames)
+			{
+				const rawObject : Object = data[0];
+				
+				const type : Class = schema.type;
+				object = new type();
+				for(var j : String in rawObject)
+				{
+					if(j in object) object[j] = rawObject[j];
+					else 
+					{
+						// This is what maps back to the original name!
+						const columnSchema : ISpodColumnSchema = schema.getColumnByCustomName(j);
+						if(null != columnSchema)
+						{
+							const columnRealName : String = columnSchema.name;
+							if(columnRealName in object) object[columnRealName] = rawObject[j];
+						}
+					}
+				}
+			}
+			else object = data[0] as SpodObject;
+			
 			if(null == object) throw new IllegalOperationError('Object mismatch');
 			
 			var updated : Boolean = false;

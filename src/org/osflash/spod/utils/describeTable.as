@@ -25,15 +25,19 @@ package org.osflash.spod.utils
 		const schemaXML : XML = <schema />;
 		
 		const accessors : Vector.<String> = new Vector.<String>();
+		const variables : Vector.<String> = new Vector.<String>();
 		
 		var total : int = columns.length;
 		for(var i : int = 0; i<total; i++)
 		{
 			const column : ISpodColumnSchema = columns[i];
 			const sqlType : String = SpodTypes.getSQLName(column.type);
-			const columnXML : XML = <column name={column.name} type={sqlType} />;
+			const customName : Boolean = column.customColumnName;
+			const columnName : String = customName ? column.alternativeName : column.name;
+			const columnXML : XML = <column name={columnName} type={sqlType} />;
 			
-			accessors.push(column.name);
+			accessors.push(columnName);
+			variables.push(column.name);
 			
 			schemaXML.appendChild(columnXML);
 		}
@@ -52,7 +56,8 @@ package org.osflash.spod.utils
 			for(i=0; i<total; i++)
 			{
 				const key : String = accessors[i];
-				objectXML[key] = object[key];
+				const variable : String = variables[i];
+				objectXML[key] = object[variable];
 			}
 			
 			dataXML.appendChild(objectXML);

@@ -74,6 +74,13 @@ package org.osflash.spod.builders.schemas
 					if(null != variableAltNameArg && variableAltNameArg.length() > 0)
 					{
 						variableAltName = variableAltNameArg.(@key == 'name').@value;
+						
+						// We need to patch the identifier name with alternative name!
+						if(identifier == variableName)
+						{
+							identifier = variableAltName;
+							identifierFound = true;
+						}
 					}
 				}
 				else if (variableName == defaultId) identifierFound = true;
@@ -118,6 +125,13 @@ package org.osflash.spod.builders.schemas
 					if(null != accessorAltNameArg && accessorAltNameArg.length() > 0)
 					{
 						accessorAltName = accessorAltNameArg.(@key == 'name').@value;
+						
+						// We need to patch the identifier name with alternative name!
+						if(identifier == accessorName)
+						{
+							identifier = accessorAltName;
+							identifierFound = true;
+						}
 					}
 				}
 				else if (accessorName == defaultId) identifierFound = true;

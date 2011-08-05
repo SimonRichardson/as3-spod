@@ -290,10 +290,7 @@ package org.osflash.spod
 						}
 					}
 				}
-				else
-				{
-					object = result.data[i] as SpodObject;
-				}
+				else object = result.data[i] as SpodObject;
 				
 				if(null == object) throw new IllegalOperationError('Invalid SpodObject');
 				if(!(object is type)) throw new IllegalOperationError('Invalid type');
