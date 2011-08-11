@@ -172,24 +172,14 @@ package org.osflash.spod.schema
 			while(--index > -1)
 			{
 				const column : ISpodColumnSchema = _columns[index];
-				if(column.name == value) return column;
+				const customName : Boolean = column.customColumnName;
+				const columnName : String = customName ? column.alternativeName : column.name;
+				if(columnName == value) return column;
 			}
 			
 			return null;
 		}
-		
-		public function getColumnByCustomName(value : String) : ISpodColumnSchema
-		{
-			var index : int = _columns.length;
-			while(--index > -1)
-			{
-				const column : ISpodColumnSchema = _columns[index];
-				if(column.alternativeName == value) return column;
-			}
-			
-			return null;
-		}
-		
+				
 		public function isValidSelectIdentifier() : Boolean
 		{
 			const column : ISpodColumnSchema = getColumnByName(_identifier);
@@ -216,7 +206,9 @@ package org.osflash.spod.schema
 				while(--index > -1)
 				{
 					const column : ISpodColumnSchema = _columns[index];
-					if(column.name == value)
+					const customName : Boolean = column.customColumnName;
+					const columnName : String = customName ? column.alternativeName : column.name;
+					if(columnName == value)
 					{
 						_identifier = value;
 						return;

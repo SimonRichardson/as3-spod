@@ -188,7 +188,7 @@ package org.osflash.spod
 					else 
 					{
 						// This is what maps back to the original name!
-						const columnSchema : ISpodColumnSchema = schema.getColumnByCustomName(j);
+						const columnSchema : ISpodColumnSchema = schema.getColumnByName(j);
 						if(null != columnSchema)
 						{
 							const columnRealName : String = columnSchema.name;

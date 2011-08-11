@@ -31,6 +31,13 @@ package org.osflash.spod.types
 					type == OBJECT;
 		}
 		
+		public static function validIdentifier(type : int) : Boolean
+		{
+			return 	type == INT || 
+					type == UINT ||
+					type == NUMBER;
+		}
+		
 		public static function getSQLName(type : int) : String
 		{
 			switch(type)

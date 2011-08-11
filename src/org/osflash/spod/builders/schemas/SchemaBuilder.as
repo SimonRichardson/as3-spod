@@ -1,5 +1,6 @@
 package org.osflash.spod.builders.schemas
 {
+	import org.osflash.spod.types.SpodTypes;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.errors.SpodError;
 	import org.osflash.spod.factories.ISpodSchemaFactory;
@@ -149,7 +150,11 @@ package org.osflash.spod.builders.schemas
 			{
 				const identifierColumn : ISpodColumnSchema = schema.getColumnByName(identifier);
 
-				if (null != identifierColumn) identifierColumn.autoIncrement = true;
+				if (null != identifierColumn) 
+				{
+					const identifierType : int = identifierColumn.type;
+					identifierColumn.autoIncrement = SpodTypes.validIdentifier(identifierType);
+				}
 				else throw new SpodError('Invalid table column schema identifier');
 			}
 			else throw new SpodError('Invalid table schema identifier');

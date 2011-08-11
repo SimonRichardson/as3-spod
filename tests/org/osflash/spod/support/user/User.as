@@ -7,6 +7,7 @@ package org.osflash.spod.support.user
 	public class User extends SpodObject
 	{
 		
+		[Type(name="uid",identifier="true")]
 		public var id : int;
 		
 		[Type(name="username")]

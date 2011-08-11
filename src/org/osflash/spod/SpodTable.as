@@ -280,8 +280,7 @@ package org.osflash.spod
 						else 
 						{
 							// This is what maps back to the original name!
-							const columnSchema : ISpodColumnSchema = 
-																_schema.getColumnByCustomName(j);
+							const columnSchema : ISpodColumnSchema = _schema.getColumnByName(j);
 							if(null != columnSchema)
 							{
 								const columnName : String = columnSchema.name;
@@ -295,7 +294,9 @@ package org.osflash.spod
 				if(null == object) throw new IllegalOperationError('Invalid SpodObject');
 				if(!(object is type)) throw new IllegalOperationError('Invalid type');
 				
-				const id : int = object[_schema.identifier];					
+				const identifierColumn : ISpodColumnSchema = _schema.getColumnByName(_schema.identifier);
+				const identifierName : String = identifierColumn.name;
+				const id : int = object[identifierName];
 				if(isNaN(id)) throw new IllegalOperationError('Invalid identifier');
 				
 				const row : SpodTableRow = new SpodTableRow(this, type, object, _manager);
