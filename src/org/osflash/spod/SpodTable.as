@@ -334,8 +334,12 @@ package org.osflash.spod
 			const row : SpodTableRow = new SpodTableRow(this, _schema.type, object, _manager);
 			
 			// Inject the correct identifier
-			if(_schema.isValidSelectIdentifier() && _schema.identifier in object)
-				object[_schema.identifier] = rowId;
+			const identifierAltName : String = _schema.identifier;
+			const identifierColumn : ISpodColumnSchema = _schema.getColumnByName(identifierAltName);
+			const identifierName : String = identifierColumn.name;
+			
+			if(_schema.isValidSelectIdentifier() && identifierName in object)
+				object[identifierName] = rowId;
 			
 			// Create the correct inject references
 			object.tableRow = row;

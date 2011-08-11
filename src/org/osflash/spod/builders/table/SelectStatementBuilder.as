@@ -1,5 +1,6 @@
 package org.osflash.spod.builders.table
 {
+	import org.osflash.logger.logs.info;
 	import org.osflash.spod.SpodObject;
 	import org.osflash.spod.SpodStatement;
 	import org.osflash.spod.builders.ISpodStatementBuilder;
@@ -79,8 +80,15 @@ package org.osflash.spod.builders.table
 				const customColumnNames : Boolean = tableSchema.customColumnNames;
 				const statementType : Class = customColumnNames ? Object : tableSchema.type;
 				const statement : SpodStatement = new SpodStatement(statementType, _object);
+				
+				const identifierColumn : ISpodColumnSchema = tableSchema.getColumnByName(
+																				_schema.identifier);
+				const identifierName : String = identifierColumn.name;
+				
+				info(_object[identifierName]);
+				
 				statement.parameters[':id'] = getIdentifierValueFromObject(	_object, 
-																			_schema.identifier
+																			identifierName
 																			);
 								
 				// Make the query

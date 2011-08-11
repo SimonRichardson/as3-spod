@@ -97,8 +97,12 @@ package org.osflash.spod.builders.table
 				_buffer.push(' WHERE ');
 				_buffer.push('`' + _schema.identifier + '`=:id');
 				
+				const identifierColumn : ISpodColumnSchema = tableSchema.getColumnByName(
+																				_schema.identifier);
+				const identifierName : String = identifierColumn.name;
+				
 				statement.parameters[':id'] = getIdentifierValueFromObject(	_object, 
-																			_schema.identifier
+																			identifierName
 																			);
 				
 				// Make the query

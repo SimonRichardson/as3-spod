@@ -64,7 +64,7 @@ package org.osflash.spod
 			
 			object.tableRow.table.selectWhereSignal.add(handleSelectWhereSignal);
 			object.tableRow.table.selectWhere(	new LessThanExpression('date', date),
-												new GreaterThanExpression('id', 0),
+												new GreaterThanExpression('uid', 0),
 												new DescOrderExpression('date'),
 												new LimitExpression(28)
 												);

@@ -59,7 +59,7 @@ package org.osflash.spod
 			{			
 				user.syncSignal.add(handleSyncSignal);
 				user.sync();
-			}, 10000);
+			}, 5000);
 		}
 		
 		protected function handleSyncSignal(object : SpodObject, updated : Boolean) : void
