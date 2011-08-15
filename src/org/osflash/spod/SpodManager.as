@@ -181,6 +181,7 @@ package org.osflash.spod
 		
 		spod_namespace function beginQueue() : void
 		{
+			if(!_async) throw new SpodError('Unable to run queueing in sync mode, try Async mode');
 			if(_queuing) throw new SpodError('Unable to begin as already in begin state');
 			
 			_queuing = true;
@@ -189,6 +190,7 @@ package org.osflash.spod
 		
 		spod_namespace function releaseQueue() : void
 		{
+			if(!_async) throw new SpodError('Unable to run queueing in sync mode, try Async mode');
 			if(_queuing) throw new SpodError('Unable to release as not in begin state');
 			if(_queue.active) throw new SpodError(	'Unable to release queue as ' + 
 																'already active'
@@ -201,6 +203,7 @@ package org.osflash.spod
 		
 		spod_namespace function commitQueue() : void
 		{
+			if(!_async) throw new SpodError('Unable to run queueing in sync mode, try Async mode');
 			if(!_queuing) throw new SpodError(	'Unable to commit as there is nothing to commit, ' + 
 												'try calling begin()'
 												);
