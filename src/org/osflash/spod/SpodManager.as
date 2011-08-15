@@ -137,7 +137,7 @@ package org.osflash.spod
 			if(null == resource) throw new ArgumentError('Resource should not null');
 			_resource = resource;
 			
-			_nativeOpenSignal.add(handleNativeOpenSignal);
+			_nativeOpenSignal.addOnce(handleNativeOpenSignal);
 			
 			_async = async;
 			
@@ -240,8 +240,6 @@ package org.osflash.spod
 		 */
 		private function handleNativeOpenSignal(event : SQLEvent) : void
 		{
-			_nativeOpenSignal.remove(handleNativeOpenSignal);
-			
 			opened();
 		}
 		

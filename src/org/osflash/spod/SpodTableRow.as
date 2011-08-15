@@ -99,8 +99,8 @@ package org.osflash.spod
 			const builder : ISpodStatementBuilder = new UpdateStatementBuilder(schema, object);
 			const statement : SpodStatement = builder.build();
 			
-			statement.completedSignal.add(handleUpdateCompletedSignal);
-			statement.errorSignal.add(handleUpdateErrorSignal);
+			statement.completedSignal.addOnce(handleUpdateCompletedSignal);
+			statement.errorSignal.addOnce(handleUpdateErrorSignal);
 			
 			if(_manager.queuing) _manager.queue.add(statement);
 			else _manager.executioner.add(new SpodStatementQueue(statement));
@@ -112,8 +112,8 @@ package org.osflash.spod
 			const builder : ISpodStatementBuilder = new SelectStatementBuilder(schema, object);
 			const statement : SpodStatement = builder.build();
 			
-			statement.completedSignal.add(handleSyncCompletedSignal);
-			statement.errorSignal.add(handleSyncErrorSignal);
+			statement.completedSignal.addOnce(handleSyncCompletedSignal);
+			statement.errorSignal.addOnce(handleSyncErrorSignal);
 			
 			if(_manager.queuing) _manager.queue.add(statement);
 			else _manager.executioner.add(new SpodStatementQueue(statement));
@@ -125,8 +125,8 @@ package org.osflash.spod
 			const builder : ISpodStatementBuilder = new DeleteStatementBuilder(schema, object);
 			const statement : SpodStatement = builder.build();
 			
-			statement.completedSignal.add(handleRemoveCompletedSignal);
-			statement.errorSignal.add(handleRemoveErrorSignal);
+			statement.completedSignal.addOnce(handleRemoveCompletedSignal);
+			statement.errorSignal.addOnce(handleRemoveErrorSignal);
 			
 			if(_manager.queuing) _manager.queue.add(statement);
 			else _manager.executioner.add(new SpodStatementQueue(statement));
@@ -137,7 +137,6 @@ package org.osflash.spod
 		 */
 		private function handleUpdateCompletedSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleUpdateCompletedSignal);
 			statement.errorSignal.remove(handleUpdateErrorSignal);
 			
 			if(object != statement.object) throw new IllegalOperationError('SpodObject mismatch');
@@ -153,7 +152,6 @@ package org.osflash.spod
 													) : void
 		{
 			statement.completedSignal.remove(handleUpdateCompletedSignal);
-			statement.errorSignal.remove(handleUpdateErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -163,7 +161,6 @@ package org.osflash.spod
 		 */
 		private function handleSyncCompletedSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleSyncCompletedSignal);
 			statement.errorSignal.remove(handleSyncErrorSignal);
 			
 			if(null == statement.result) throw new IllegalOperationError('Result is null');
@@ -268,7 +265,6 @@ package org.osflash.spod
 												) : void
 		{
 			statement.completedSignal.remove(handleSyncCompletedSignal);
-			statement.errorSignal.remove(handleSyncErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -278,7 +274,6 @@ package org.osflash.spod
 		 */
 		private function handleRemoveCompletedSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleRemoveCompletedSignal);
 			statement.errorSignal.remove(handleRemoveErrorSignal);
 			
 			if(object != statement.object) throw new IllegalOperationError('SpodObject mismatch');
@@ -298,7 +293,6 @@ package org.osflash.spod
 													) : void
 		{
 			statement.completedSignal.remove(handleRemoveCompletedSignal);
-			statement.errorSignal.remove(handleRemoveErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}

@@ -6,11 +6,14 @@ package org.osflash.spod.builders.expressions
 	public final class SpodExpressionOperatorType
 	{
 		
-		public static const AND : SpodExpressionOperatorType = new SpodExpressionOperatorType('and');
+		public static const AND : SpodExpressionOperatorType = 
+															new SpodExpressionOperatorType('and');
 		
-		public static const OR : SpodExpressionOperatorType = new SpodExpressionOperatorType('or');
+		public static const OR : SpodExpressionOperatorType = 
+															new SpodExpressionOperatorType('or');
 		
-		public static const LIKE : SpodExpressionOperatorType = new SpodExpressionOperatorType('like');
+		public static const LIKE : SpodExpressionOperatorType = 
+															new SpodExpressionOperatorType('like');
 		
 		/**
 		 * @inheritDoc

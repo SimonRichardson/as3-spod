@@ -322,7 +322,6 @@ package org.osflash.spod
 		 */
 		private function handleInsertCompletedSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleInsertCompletedSignal);
 			statement.errorSignal.remove(handleInsertErrorSignal);
 			
 			const rowId : int = statement.result.lastInsertRowID;
@@ -359,7 +358,6 @@ package org.osflash.spod
 													) : void
 		{
 			statement.completedSignal.remove(handleInsertCompletedSignal);
-			statement.errorSignal.remove(handleInsertErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -369,7 +367,6 @@ package org.osflash.spod
 		 */
 		private function handleSelectCompletedSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleSelectCompletedSignal);
 			statement.errorSignal.remove(handleSelectErrorSignal);
 			
 			const result : SQLResult = statement.result;
@@ -397,7 +394,6 @@ package org.osflash.spod
 													) : void
 		{
 			statement.completedSignal.remove(handleSelectCompletedSignal);
-			statement.errorSignal.remove(handleSelectErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -409,7 +405,6 @@ package org.osflash.spod
 															prefetched : Vector.<SpodObject> = null
 															) : void
 		{
-			statement.completedSignal.remove(handleSelectWhereCompletedSignal);
 			statement.errorSignal.remove(handleSelectWhereErrorSignal);
 			
 			const result : SQLResult = statement.result;
@@ -445,7 +440,6 @@ package org.osflash.spod
 														) : void
 		{
 			statement.completedSignal.remove(handleSelectWhereCompletedSignal);
-			statement.errorSignal.remove(handleSelectWhereErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -457,7 +451,6 @@ package org.osflash.spod
 															prefetched : Vector.<SpodObject> = null
 															) : void
 		{
-			statement.completedSignal.remove(handleSelectAllCompletedSignal);
 			statement.errorSignal.remove(handleSelectAllErrorSignal);
 			
 			const result : SQLResult = statement.result;
@@ -493,7 +486,6 @@ package org.osflash.spod
 														) : void
 		{
 			statement.completedSignal.remove(handleSelectAllCompletedSignal);
-			statement.errorSignal.remove(handleSelectAllErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -503,7 +495,6 @@ package org.osflash.spod
 		 */
 		private function handleCountCompletedSignal(	statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleCountCompletedSignal);
 			statement.errorSignal.remove(handleCountErrorSignal);
 			
 			const result : SQLResult = statement.result;
@@ -534,7 +525,6 @@ package org.osflash.spod
 													) : void
 		{
 			statement.completedSignal.remove(handleCountCompletedSignal);
-			statement.errorSignal.remove(handleCountErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -544,7 +534,6 @@ package org.osflash.spod
 		 */
 		private function handleRemoveWhereCompletedSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleRemoveWhereCompletedSignal);
 			statement.errorSignal.remove(handleRemoveWhereErrorSignal);
 			
 			const result : SQLResult = statement.result;
@@ -559,7 +548,6 @@ package org.osflash.spod
 														) : void
 		{
 			statement.completedSignal.remove(handleRemoveWhereCompletedSignal);
-			statement.errorSignal.remove(handleRemoveWhereErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -569,7 +557,6 @@ package org.osflash.spod
 		 */
 		private function handleQueryCompletedSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleQueryCompletedSignal);
 			statement.errorSignal.remove(handleQueryErrorSignal);
 			
 			throw new Error('Missing Implementation');	
@@ -583,7 +570,6 @@ package org.osflash.spod
 													) : void
 		{
 			statement.completedSignal.remove(handleQueryCompletedSignal);
-			statement.errorSignal.remove(handleQueryErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}

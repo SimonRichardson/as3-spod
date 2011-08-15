@@ -129,7 +129,7 @@ package org.osflash.spod
 		{
 			if(null == type) throw new ArgumentError('Type can not be null');
 			
-			if(!active(type))
+			if(!activeTable(type))
 			{
 				const params : Array = [type, ignoreIfExists];
 				_nativeSQLErrorEventSignal.addOnceWithPriority(	handleCreateSQLErrorEventSignal, 
@@ -169,7 +169,7 @@ package org.osflash.spod
 		{
 			if(null == type) throw new ArgumentError('Type can not be null');
 			
-			if(active(type)) loadTableSignal.dispatch(getTable(type));
+			if(activeTable(type)) loadTableSignal.dispatch(getTable(type));
 			else
 			{
 				const params : Array = [type];
@@ -201,7 +201,7 @@ package org.osflash.spod
 		public function deleteTable(type : Class, ifExists : Boolean = true) : void
 		{
 			if(null == type) throw new ArgumentError('Type can not be null');
-			if(!active(type))
+			if(!activeTable(type))
 			{
 				const params : Array = [type];
 				_nativeSQLErrorEventSignal.addOnceWithPriority(	handleDeleteSQLErrorEventSignal, 
@@ -234,8 +234,8 @@ package org.osflash.spod
 				if(null == statement) 
 					throw new SpodError('SpodStatement can not be null');
 								
-				statement.completedSignal.add(handleDeleteTableCompleteSignal);
-				statement.errorSignal.add(handleDeleteTableErrorSignal);
+				statement.completedSignal.addOnce(handleDeleteTableCompleteSignal);
+				statement.errorSignal.addOnce(handleDeleteTableErrorSignal);
 				
 				if(_manager.queuing) _manager.queue.add(statement);
 				else _manager.executioner.add(new SpodStatementQueue(statement));
@@ -250,7 +250,7 @@ package org.osflash.spod
 		 * @param type of Class to work out if it's active
 		 * @return Boolean state of the table memory
 		 */
-		public function active(type : Class) : Boolean
+		public function activeTable(type : Class) : Boolean
 		{
 			return null != _tables[type];
 		}
@@ -263,7 +263,7 @@ package org.osflash.spod
 		 */
 		public function getTable(type : Class) : SpodTable
 		{
-			return active(type) ? _tables[type] : null; 
+			return activeTable(type) ? _tables[type] : null; 
 		}
 				
 		/**
@@ -284,8 +284,8 @@ package org.osflash.spod
 			
 			_tables[schema.type] = new SpodTable(schema, _manager);
 			
-			statement.completedSignal.add(handleCreateTableCompleteSignal);
-			statement.errorSignal.add(handleCreateTableErrorSignal);
+			statement.completedSignal.addOnce(handleCreateTableCompleteSignal);
+			statement.errorSignal.addOnce(handleCreateTableErrorSignal);
 			
 			if(_manager.queuing) _manager.queue.add(statement);
 			else _manager.executioner.add(new SpodStatementQueue(statement));
@@ -370,7 +370,6 @@ package org.osflash.spod
 															) : void
 		{
 			_nativeSQLErrorEventSignal.remove(handleCreateSQLErrorEventSignal);
-			_nativeSQLEventSchemaSignal.remove(handleCreateSQLEventSchemaSignal);
 			
 			// This works out if there is a need to migrate a database or not!
 			const schema : SpodTableSchema = _schemaBuilder.buildTable(type);
@@ -418,7 +417,6 @@ package org.osflash.spod
 															) : void
 		{
 			_nativeSQLErrorEventSignal.remove(handleLoadSQLErrorEventSignal);
-			_nativeSQLEventSchemaSignal.remove(handleLoadSQLEventSchemaSignal);
 			
 			// This works out if there is a need to migrate a database or not!
 			const schema : SpodTableSchema = _schemaBuilder.buildTable(type);
@@ -466,7 +464,6 @@ package org.osflash.spod
 															) : void
 		{
 			_nativeSQLErrorEventSignal.remove(handleDeleteSQLErrorEventSignal);
-			_nativeSQLEventSchemaSignal.remove(handleDeleteSQLEventSchemaSignal);
 			
 			// This works out if there is a need to migrate a database or not!
 			const schema : SpodTableSchema = _schemaBuilder.buildTable(type);
@@ -511,7 +508,6 @@ package org.osflash.spod
 		 */
 		private function handleCreateTableCompleteSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleCreateTableCompleteSignal);
 			statement.errorSignal.remove(handleCreateTableErrorSignal);
 			
 			const table : SpodTable = _tables[statement.type];
@@ -528,7 +524,6 @@ package org.osflash.spod
 													) : void
 		{
 			statement.completedSignal.remove(handleCreateTableCompleteSignal);
-			statement.errorSignal.remove(handleCreateTableErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -538,7 +533,6 @@ package org.osflash.spod
 		 */
 		private function handleDeleteTableCompleteSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleDeleteTableCompleteSignal);
 			statement.errorSignal.remove(handleDeleteTableErrorSignal);
 			
 			const table : SpodTable = _tables[statement.type];
@@ -557,7 +551,6 @@ package org.osflash.spod
 														) : void
 		{
 			statement.completedSignal.remove(handleDeleteTableCompleteSignal);
-			statement.errorSignal.remove(handleDeleteTableErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}

@@ -71,7 +71,7 @@ package org.osflash.spod
 			const builder : ISpodTriggerWhenBuilder = new SpodTriggerWhenBuilder(	type, 
 																					ignoreIfExists
 																					);
-			builder.executeSignal.add(internalBuildTrigger);
+			builder.executeSignal.addOnce(internalBuildTrigger);
 			return builder;
 		}
 		
@@ -113,8 +113,8 @@ package org.osflash.spod
 				if(null == statement) 
 					throw new SpodError('SpodStatement can not be null');
 								
-				statement.completedSignal.add(handleDeleteTriggerCompleteSignal);
-				statement.errorSignal.add(handleDeleteTriggerErrorSignal);
+				statement.completedSignal.addOnce(handleDeleteTriggerCompleteSignal);
+				statement.errorSignal.addOnce(handleDeleteTriggerErrorSignal);
 				
 				if(_manager.queuing) _manager.queue.add(statement);
 				else _manager.executioner.add(new SpodStatementQueue(statement));
@@ -143,7 +143,7 @@ package org.osflash.spod
 		 */
 		public function getTrigger(type : Class) : SpodTrigger
 		{
-			return active(type) ? _triggers[type] : null; 
+			return activeTable(type) ? _triggers[type] : null; 
 		}
 		
 		/**
@@ -189,8 +189,8 @@ package org.osflash.spod
 			
 			_triggers[schema.type] = new SpodTrigger(schema, _manager);
 			
-			statement.completedSignal.add(handleCreateTriggerCompleteSignal);
-			statement.errorSignal.add(handleCreateTriggerErrorSignal);
+			statement.completedSignal.addOnce(handleCreateTriggerCompleteSignal);
+			statement.errorSignal.addOnce(handleCreateTriggerErrorSignal);
 			
 			if(_manager.queuing) _manager.queue.add(statement);
 			else _manager.executioner.add(new SpodStatementQueue(statement));
@@ -238,7 +238,6 @@ package org.osflash.spod
 															) : void
 		{
 			nativeSQLErrorEventSignal.remove(handleTriggerSQLErrorEventSignal);
-			nativeSQLEventSchemaSignal.remove(handleTriggerSQLEventSchemaSignal);
 			
 			info('Handle trigger sql event', triggerBuilder);
 		}
@@ -248,7 +247,6 @@ package org.osflash.spod
 		 */
 		private function handleCreateTriggerCompleteSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleCreateTriggerCompleteSignal);
 			statement.errorSignal.remove(handleCreateTriggerErrorSignal);
 			
 			const trigger : SpodTrigger = _triggers[statement.type];
@@ -265,7 +263,6 @@ package org.osflash.spod
 															) : void
 		{
 			statement.completedSignal.remove(handleCreateTriggerCompleteSignal);
-			statement.errorSignal.remove(handleCreateTriggerErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}
@@ -296,7 +293,6 @@ package org.osflash.spod
 															) : void
 		{
 			nativeSQLErrorEventSignal.remove(handleDeleteSQLErrorEventSignal);
-			nativeSQLEventSchemaSignal.remove(handleDeleteSQLEventSchemaSignal);
 			
 			// This works out if there is a need to migrate a database or not!
 			const schema : SpodTriggerSchema = _schemaBuilder.buildTrigger(type);
@@ -341,7 +337,6 @@ package org.osflash.spod
 		 */
 		private function handleDeleteTriggerCompleteSignal(statement : SpodStatement) : void
 		{
-			statement.completedSignal.remove(handleDeleteTriggerCompleteSignal);
 			statement.errorSignal.remove(handleDeleteTriggerErrorSignal);
 			
 			const trigger : SpodTrigger = _triggers[statement.type];
@@ -360,7 +355,6 @@ package org.osflash.spod
 															) : void
 		{
 			statement.completedSignal.remove(handleDeleteTriggerCompleteSignal);
-			statement.errorSignal.remove(handleDeleteTriggerErrorSignal);
 			
 			_manager.errorSignal.dispatch(event);
 		}

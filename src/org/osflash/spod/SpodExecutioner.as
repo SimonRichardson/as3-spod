@@ -89,8 +89,8 @@ package org.osflash.spod
 			if(statement.executing) 
 				throw new IllegalOperationError('SpodStatement is already executing');
 			
-			statement.completedSignal.add(handleCompletedSignal);
-			statement.errorSignal.add(handleErrorSignal);
+			statement.completedSignal.addOnce(handleCompletedSignal);
+			statement.errorSignal.addOnce(handleErrorSignal);
 			statement.execute();
 		}
 		
@@ -163,6 +163,8 @@ package org.osflash.spod
 		 */
 		private function handleCompletedSignal(statement : SpodStatement) : void
 		{
+			statement.errorSignal.remove(handleCompletedSignal);
+			
 			if(!_queue.hasNext) 
 			{
 				if(_queue.length > 1)
@@ -172,8 +174,6 @@ package org.osflash.spod
 				} else handleCommitSignal();
 			}
 			else advance();
-			
-			statement;
 		}
 		
 		/**
@@ -181,6 +181,8 @@ package org.osflash.spod
 		 */
 		private function handleErrorSignal(statement : SpodStatement, event : SpodErrorEvent) : void
 		{
+			statement.completedSignal.remove(handleCompletedSignal);
+			
 			const transaction : Boolean = statement.connection.inTransaction;
 			if(transaction)
 			{
