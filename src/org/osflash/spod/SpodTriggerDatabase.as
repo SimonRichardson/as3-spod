@@ -96,6 +96,9 @@ package org.osflash.spod
 				}
 				catch(error : SQLError)
 				{
+					nativeSQLErrorEventSignal.remove(handleDeleteSQLErrorEventSignal);
+					nativeSQLEventSchemaSignal.remove(handleDeleteSQLEventSchemaSignal);
+					
 					deleteTriggerSignal.dispatch(null);
 				}
 			}
@@ -165,6 +168,9 @@ package org.osflash.spod
 			}
 			catch(error : SQLError)
 			{
+				nativeSQLErrorEventSignal.remove(handleTriggerSQLErrorEventSignal);
+				nativeSQLEventSchemaSignal.remove(handleTriggerSQLEventSchemaSignal);
+				
 				// supress the error
 				if(error.errorID == 3115 && error.detailID == 1007 && !_manager.async)
 					handleTriggerSQLError(builder);

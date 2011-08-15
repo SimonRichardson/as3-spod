@@ -1,5 +1,6 @@
 package org.osflash.spod
 {
+	import org.osflash.logger.logs.info;
 	import org.osflash.signals.IPrioritySignal;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
@@ -145,6 +146,9 @@ package org.osflash.spod
 				}
 				catch(error : SQLError)
 				{
+					_nativeSQLErrorEventSignal.remove(handleCreateSQLErrorEventSignal);
+					_nativeSQLEventSchemaSignal.remove(handleCreateSQLEventSchemaSignal);
+					
 					// supress the error
 					if(error.errorID == 3115 && error.detailID == 1007 && !_manager.async)
 						handleCreateSQLError(type, ignoreIfExists);
@@ -186,6 +190,9 @@ package org.osflash.spod
 				}
 				catch(error : SQLError)
 				{
+					_nativeSQLErrorEventSignal.remove(handleLoadSQLErrorEventSignal);
+					_nativeSQLEventSchemaSignal.remove(handleLoadSQLEventSchemaSignal);
+					
 					loadTableSignal.dispatch(null);
 				}
 			}
@@ -217,6 +224,9 @@ package org.osflash.spod
 				}
 				catch(error : SQLError)
 				{
+					_nativeSQLErrorEventSignal.remove(handleDeleteSQLErrorEventSignal);
+					_nativeSQLEventSchemaSignal.remove(handleDeleteSQLEventSchemaSignal);
+					
 					deleteTableSignal.dispatch(null);
 				}
 			}
@@ -402,6 +412,8 @@ package org.osflash.spod
 						
 						_tables[type] = table;
 						
+						info("TABLE CREATED");
+						
 						createTableSignal.dispatch(table);
 					}
 				}
@@ -512,6 +524,8 @@ package org.osflash.spod
 			
 			const table : SpodTable = _tables[statement.type];
 			if(null == table) throw new SpodError('SpodTable does not exist');
+			
+			info("HERE");
 			
 			createTableSignal.dispatch(table);
 		}
