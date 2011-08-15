@@ -1,6 +1,5 @@
 package org.osflash.spod
 {
-	import org.osflash.logger.logs.info;
 	import org.osflash.signals.IPrioritySignal;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
@@ -391,7 +390,7 @@ package org.osflash.spod
 			{
 				const tables : Array = result.tables;
 				const total : int = tables.length;
-				 
+				
 				if(total == 0) internalCreateTable(schema, ignoreIfExists);
 				else if(total == 1)
 				{
@@ -404,15 +403,13 @@ package org.osflash.spod
 					{
 						_manager.errorSignal.dispatch(new SpodErrorEvent(error.message, error));
 					}
-										
+					
 					if(null != schema)
 					{
 						// We don't need to make a new table as we've already got one!
 						const table : SpodTable = new SpodTable(schema, _manager);
 						
 						_tables[type] = table;
-						
-						info("TABLE CREATED");
 						
 						createTableSignal.dispatch(table);
 					}
@@ -524,8 +521,6 @@ package org.osflash.spod
 			
 			const table : SpodTable = _tables[statement.type];
 			if(null == table) throw new SpodError('SpodTable does not exist');
-			
-			info("HERE");
 			
 			createTableSignal.dispatch(table);
 		}

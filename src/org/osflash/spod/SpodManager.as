@@ -142,12 +142,7 @@ package org.osflash.spod
 			_async = async;
 			
 			if(async) _connection.openAsync(_resource);
-			else 
-			{	
-				_connection.open(_resource);
-			
-				opened();
-			}
+			else _connection.open(_resource);
 		}
 		
 		public function close() : void
