@@ -89,12 +89,10 @@ package org.osflash.spod
 															SQLErrorEvent.ERROR, 
 															SQLErrorEvent
 															);
-			_nativeSQLErrorEventSignal.strict = false;
 			_nativeSQLEventSchemaSignal = new NativeSignal(	_manager.connection,
 															SQLEvent.SCHEMA,
 															SQLEvent
 															);
-			_nativeSQLEventSchemaSignal.strict = false;
 			
 			_tables = new Dictionary();
 		}
