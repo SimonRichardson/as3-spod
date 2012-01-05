@@ -49,6 +49,7 @@ package org.osflash.spod.builders.schemas
 
 			var identifier : String = defaultId;
 			var identifierFound : Boolean = false;
+			var identifierAutoIncrement : Boolean = true;
 
 			for each (var variable : XML in description..variable)
 			{
@@ -64,12 +65,24 @@ package org.osflash.spod.builders.schemas
 																			&& 
 																			@value == 'true'
 																			);
+					
 					if (null != variableArg && variableArg.length() > 0)
 					{
 						identifier = variableName;
 						identifierFound = true;
 					}
 					else if (variableName == defaultId) identifierFound = true;
+					
+					// Checking if the identifier should be auto incremented.
+					const autoIncrementArg : XMLList = variableMetadata.arg.(	@key == 'autoIncrement' 
+																				&& 
+																				@value == 'false'
+																				);
+					
+					if (null != autoIncrementArg && autoIncrementArg.length() > 0)
+					{
+						identifierAutoIncrement = false;
+					}
 					
 					const variableAltNameArg : XMLList = variableMetadata.arg.(@key == 'name');
 					if(null != variableAltNameArg && variableAltNameArg.length() > 0)
@@ -153,7 +166,9 @@ package org.osflash.spod.builders.schemas
 				if (null != identifierColumn) 
 				{
 					const identifierType : int = identifierColumn.type;
-					identifierColumn.autoIncrement = SpodTypes.validIdentifier(identifierType);
+					identifierColumn.autoIncrement = SpodTypes.validIdentifier(identifierType) 
+													 && 
+													 identifierAutoIncrement;
 				}
 				else throw new SpodError('Invalid table column schema identifier');
 			}
