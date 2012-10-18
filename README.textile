@@ -1,5 +1,15 @@
 h1. AS3-Spod
 
+<hr />
+<hr />
+<hr />
+
+h2. This project is no longer under active maintenance, although I will help with support and questions at any time. If you would like to take over the project them please send me a mail and we can discuss it further.
+
+<hr />
+<hr />
+<hr />
+
 AS3/AIR Spod api for Simple Persistent Objects Database Library
 
 Open a database:
