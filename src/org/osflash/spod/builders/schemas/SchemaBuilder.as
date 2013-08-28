@@ -135,7 +135,7 @@ package org.osflash.spod.builders.schemas
 					}
 					else if (accessorName == defaultId) identifierFound = true;
 					
-					const accessorAltNameArg : XMLList = variableMetadata.arg.(@key == 'name');
+					const accessorAltNameArg : XMLList = accessorMetadata.arg.(@key == 'name');
 					if(null != accessorAltNameArg && accessorAltNameArg.length() > 0)
 					{
 						accessorAltName = accessorAltNameArg.(@key == 'name').@value;
